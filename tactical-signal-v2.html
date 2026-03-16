@@ -1556,6 +1556,25 @@ document.getElementById('hDate').textContent = new Date().toLocaleDateString('en
 document.getElementById('hDataDate').textContent = 'Data: Sep 2024 (sample)';
 recalc();
 populateHistorySelect();
+
+// Auto-load latest data if available (for GitHub Pages / hosted version)
+fetch('tacsignal-latest.json')
+  .then(r => { if(!r.ok) throw new Error('not found'); return r.json(); })
+  .then(d => {
+    if(d.assets) assets = d.assets;
+    if(d.sectors) sectors = d.sectors;
+    if(d.thOW != null) document.getElementById('thOW').value = d.thOW;
+    if(d.thUW != null) document.getElementById('thUW').value = d.thUW;
+    if(d.history) { historyData = d.history; populateHistorySelect(); }
+    if(d.date) {
+      const dt = new Date(d.date);
+      document.getElementById('hDataDate').textContent = 'Data: ' + dt.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+    }
+    recalc();
+    console.log('✓ Auto-loaded tacsignal-latest.json');
+  })
+  .catch(() => { /* no latest.json found — keep sample data, that's fine */ });
+
 window.addEventListener('resize', () => { drawAll(); if(document.getElementById('pg-history').classList.contains('active')) drawHistory(); });
 </script>
 </body>

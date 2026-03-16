@@ -1,0 +1,4866 @@
+{
+  "date": "2026-03-16T20:37:25.960268",
+  "generated_by": "tacsignal_data_pipeline.py",
+  "window_months": 24,
+  "data_sources": {
+    "prices": "Yahoo Finance",
+    "fundamentals": "FRED",
+    "w_tech": "Regime approximation (momentum-based)"
+  },
+  "thOW": 1.0,
+  "thUW": -1.0,
+  "assets": [
+    {
+      "name": "Equity CH",
+      "tech": 0.4951,
+      "funda": 0.3313,
+      "wTech": 0.0,
+      "prevTech": 1.2457,
+      "prevFunda": -1.5646
+    },
+    {
+      "name": "Equity EU ex CH",
+      "tech": 0.0476,
+      "funda": 0.1672,
+      "wTech": 100.0,
+      "prevTech": 1.2517,
+      "prevFunda": -1.3407
+    },
+    {
+      "name": "Equity U.S.",
+      "tech": -0.6722,
+      "funda": 1.7652,
+      "wTech": 100.0,
+      "prevTech": -0.5322,
+      "prevFunda": 1.7546
+    },
+    {
+      "name": "Equity Japan",
+      "tech": 1.3345,
+      "funda": -1.1373,
+      "wTech": 100.0,
+      "prevTech": 2.3447,
+      "prevFunda": -3.1461
+    },
+    {
+      "name": "Equity Asia-Pac",
+      "tech": 1.3254,
+      "funda": -0.7311,
+      "wTech": 100.0,
+      "prevTech": 2.3365,
+      "prevFunda": -2.3378
+    },
+    {
+      "name": "Equity EM",
+      "tech": 1.2842,
+      "funda": -0.6608,
+      "wTech": 100.0,
+      "prevTech": 2.42,
+      "prevFunda": -2.2747
+    },
+    {
+      "name": "Bond CH",
+      "tech": -1.3324,
+      "funda": 2.1603,
+      "wTech": 0.0,
+      "prevTech": -1.1076,
+      "prevFunda": 1.4197
+    },
+    {
+      "name": "Bond EU",
+      "tech": -0.7689,
+      "funda": 0.9221,
+      "wTech": 0.0,
+      "prevTech": -0.5311,
+      "prevFunda": 1.0023
+    },
+    {
+      "name": "Bond U.S.",
+      "tech": -0.1253,
+      "funda": 0.1233,
+      "wTech": 0.0,
+      "prevTech": 0.4062,
+      "prevFunda": -1.2715
+    },
+    {
+      "name": "Bond Japan",
+      "tech": -1.0764,
+      "funda": 1.8274,
+      "wTech": 0.0,
+      "prevTech": -0.7222,
+      "prevFunda": 2.0295
+    },
+    {
+      "name": "Gold",
+      "tech": 1.7718,
+      "funda": -1.4727,
+      "wTech": 100.0,
+      "prevTech": 2.7791,
+      "prevFunda": -2.3638
+    },
+    {
+      "name": "Oil",
+      "tech": 3.4674,
+      "funda": -3.7383,
+      "wTech": 100.0,
+      "prevTech": 1.0966,
+      "prevFunda": -0.9985
+    },
+    {
+      "name": "Euro",
+      "tech": -1.996,
+      "funda": 1.7106,
+      "wTech": 100.0,
+      "prevTech": -1.1535,
+      "prevFunda": 1.3366
+    },
+    {
+      "name": "U.S. Dollar",
+      "tech": -0.5663,
+      "funda": 0.5059,
+      "wTech": 100.0,
+      "prevTech": -1.145,
+      "prevFunda": 1.1685
+    }
+  ],
+  "sectors": [
+    {
+      "name": "Financials",
+      "tech": -2.2471,
+      "funda": 1.5947,
+      "wTech": 0.0,
+      "prevTech": -2.1556,
+      "prevFunda": 2.1417
+    },
+    {
+      "name": "Cons. Disc.",
+      "tech": -1.0593,
+      "funda": 1.9542,
+      "wTech": 0.0,
+      "prevTech": -0.8529,
+      "prevFunda": 2.0618
+    },
+    {
+      "name": "Industrials",
+      "tech": 0.9418,
+      "funda": 0.1657,
+      "wTech": 100.0,
+      "prevTech": 1.3062,
+      "prevFunda": -1.7526
+    },
+    {
+      "name": "Cons. Staples",
+      "tech": 0.7035,
+      "funda": -0.3528,
+      "wTech": 0.0,
+      "prevTech": 0.9002,
+      "prevFunda": -1.3003
+    },
+    {
+      "name": "Health Care",
+      "tech": 0.5151,
+      "funda": -0.612,
+      "wTech": 0.0,
+      "prevTech": 0.9664,
+      "prevFunda": -0.9185
+    },
+    {
+      "name": "Info Tech",
+      "tech": -0.1346,
+      "funda": 0.3297,
+      "wTech": 100.0,
+      "prevTech": -0.2792,
+      "prevFunda": 1.0912
+    },
+    {
+      "name": "Energy",
+      "tech": 2.5961,
+      "funda": -2.9309,
+      "wTech": 100.0,
+      "prevTech": 2.6458,
+      "prevFunda": -3.2629
+    },
+    {
+      "name": "Materials",
+      "tech": 1.4367,
+      "funda": -1.2615,
+      "wTech": 100.0,
+      "prevTech": 1.8131,
+      "prevFunda": -1.8513
+    },
+    {
+      "name": "Telecom",
+      "tech": -1.6925,
+      "funda": 1.5869,
+      "wTech": 0.0,
+      "prevTech": -1.5357,
+      "prevFunda": 1.9389
+    },
+    {
+      "name": "Utilities",
+      "tech": 0.224,
+      "funda": -0.1779,
+      "wTech": 100.0,
+      "prevTech": -0.0489,
+      "prevFunda": -0.1865
+    }
+  ],
+  "history": {
+    "Equity CH": [
+      {
+        "date": "2024-04",
+        "tech": 0.978,
+        "funda": -2.095,
+        "wTech": 0.0,
+        "composite": -2.095,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.431,
+        "funda": -2.749,
+        "wTech": 100.0,
+        "composite": 1.431,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.609,
+        "funda": -2.02,
+        "wTech": 100.0,
+        "composite": 1.609,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.645,
+        "funda": -2.114,
+        "wTech": 100.0,
+        "composite": 1.645,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.704,
+        "funda": -1.666,
+        "wTech": 100.0,
+        "composite": 1.704,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.371,
+        "funda": -1.24,
+        "wTech": 100.0,
+        "composite": 1.371,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.048,
+        "funda": -1.238,
+        "wTech": 100.0,
+        "composite": 1.048,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.159,
+        "funda": -0.134,
+        "wTech": 100.0,
+        "composite": 0.159,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.545,
+        "funda": -0.215,
+        "wTech": 0.0,
+        "composite": -0.215,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.367,
+        "funda": -1.161,
+        "wTech": 100.0,
+        "composite": 0.367,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 1.556,
+        "funda": -1.602,
+        "wTech": 100.0,
+        "composite": 1.556,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-03",
+        "tech": 1.033,
+        "funda": -1.146,
+        "wTech": 100.0,
+        "composite": 1.033,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-04",
+        "tech": 0.323,
+        "funda": -0.559,
+        "wTech": 100.0,
+        "composite": 0.323,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -0.767,
+        "funda": 0.038,
+        "wTech": 0.0,
+        "composite": 0.038,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": -1.001,
+        "funda": 0.75,
+        "wTech": 0.0,
+        "composite": 0.75,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -1.492,
+        "funda": 0.982,
+        "wTech": 0.0,
+        "composite": 0.982,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -1.209,
+        "funda": 0.813,
+        "wTech": 0.0,
+        "composite": 0.813,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.855,
+        "funda": 1.012,
+        "wTech": 0.0,
+        "composite": 1.012,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.589,
+        "funda": 1.093,
+        "wTech": 0.0,
+        "composite": 1.093,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.335,
+        "funda": 0.319,
+        "wTech": 100.0,
+        "composite": 0.335,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": 1.605,
+        "funda": -0.128,
+        "wTech": 100.0,
+        "composite": 1.605,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 0.775,
+        "funda": 0.042,
+        "wTech": 0.0,
+        "composite": 0.042,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 1.246,
+        "funda": -1.565,
+        "wTech": 100.0,
+        "composite": 1.246,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 0.495,
+        "funda": 0.331,
+        "wTech": 0.0,
+        "composite": 0.331,
+        "signal": "N"
+      }
+    ],
+    "Equity EU ex CH": [
+      {
+        "date": "2024-04",
+        "tech": 0.575,
+        "funda": -1.321,
+        "wTech": 0.0,
+        "composite": -1.321,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.764,
+        "funda": -1.247,
+        "wTech": 100.0,
+        "composite": 0.764,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.363,
+        "funda": -0.575,
+        "wTech": 0.0,
+        "composite": -0.575,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": -0.003,
+        "funda": -0.869,
+        "wTech": 0.0,
+        "composite": -0.869,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.188,
+        "funda": -0.844,
+        "wTech": 100.0,
+        "composite": 0.188,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 0.561,
+        "funda": -1.087,
+        "wTech": 100.0,
+        "composite": 0.561,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": 0.111,
+        "funda": -0.955,
+        "wTech": 100.0,
+        "composite": 0.111,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": -1.715,
+        "funda": 2.33,
+        "wTech": 0.0,
+        "composite": 2.33,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": -2.412,
+        "funda": 2.012,
+        "wTech": 0.0,
+        "composite": 2.012,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-01",
+        "tech": -1.49,
+        "funda": 0.601,
+        "wTech": 0.0,
+        "composite": 0.601,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.731,
+        "funda": -0.795,
+        "wTech": 0.0,
+        "composite": -0.795,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.437,
+        "funda": -1.301,
+        "wTech": 0.0,
+        "composite": -1.301,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-04",
+        "tech": 0.544,
+        "funda": -2.06,
+        "wTech": 100.0,
+        "composite": 0.544,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.989,
+        "funda": -1.674,
+        "wTech": 100.0,
+        "composite": 0.989,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 1.991,
+        "funda": -1.356,
+        "wTech": 100.0,
+        "composite": 1.991,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": 1.478,
+        "funda": -0.435,
+        "wTech": 100.0,
+        "composite": 1.478,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-08",
+        "tech": 1.055,
+        "funda": -0.356,
+        "wTech": 100.0,
+        "composite": 1.055,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 1.11,
+        "funda": -0.729,
+        "wTech": 100.0,
+        "composite": 1.11,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": 1.31,
+        "funda": -0.47,
+        "wTech": 100.0,
+        "composite": 1.31,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 1.308,
+        "funda": 0.089,
+        "wTech": 100.0,
+        "composite": 1.308,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 1.463,
+        "funda": -0.006,
+        "wTech": 100.0,
+        "composite": 1.463,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 1.207,
+        "funda": -0.87,
+        "wTech": 100.0,
+        "composite": 1.207,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": 1.252,
+        "funda": -1.341,
+        "wTech": 100.0,
+        "composite": 1.252,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 0.048,
+        "funda": 0.167,
+        "wTech": 100.0,
+        "composite": 0.048,
+        "signal": "N"
+      }
+    ],
+    "Equity U.S.": [
+      {
+        "date": "2024-04",
+        "tech": 1.225,
+        "funda": -1.646,
+        "wTech": 100.0,
+        "composite": 1.225,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.155,
+        "funda": -1.52,
+        "wTech": 100.0,
+        "composite": 1.155,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.082,
+        "funda": -1.383,
+        "wTech": 100.0,
+        "composite": 1.082,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.903,
+        "funda": -1.405,
+        "wTech": 100.0,
+        "composite": 0.903,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.921,
+        "funda": -1.157,
+        "wTech": 100.0,
+        "composite": 0.921,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.161,
+        "funda": -1.184,
+        "wTech": 100.0,
+        "composite": 1.161,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.108,
+        "funda": -1.509,
+        "wTech": 100.0,
+        "composite": 1.108,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.898,
+        "funda": -0.598,
+        "wTech": 100.0,
+        "composite": 0.898,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.466,
+        "funda": -0.617,
+        "wTech": 100.0,
+        "composite": 0.466,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.252,
+        "funda": -0.483,
+        "wTech": 100.0,
+        "composite": 0.252,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.436,
+        "funda": -0.537,
+        "wTech": 0.0,
+        "composite": -0.537,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -1.806,
+        "funda": 0.155,
+        "wTech": 0.0,
+        "composite": 0.155,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -2.091,
+        "funda": 0.497,
+        "wTech": 0.0,
+        "composite": 0.497,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.832,
+        "funda": 0.9,
+        "wTech": 0.0,
+        "composite": 0.9,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.962,
+        "funda": 0.747,
+        "wTech": 0.0,
+        "composite": 0.747,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.396,
+        "funda": 0.738,
+        "wTech": 0.0,
+        "composite": 0.738,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.19,
+        "funda": 1.058,
+        "wTech": 0.0,
+        "composite": 1.058,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.158,
+        "funda": 0.714,
+        "wTech": 0.0,
+        "composite": 0.714,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.566,
+        "funda": 0.655,
+        "wTech": 0.0,
+        "composite": 0.655,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.106,
+        "funda": 1.666,
+        "wTech": 0.0,
+        "composite": 1.666,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.026,
+        "funda": 2.314,
+        "wTech": 0.0,
+        "composite": 2.314,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -0.395,
+        "funda": 1.711,
+        "wTech": 0.0,
+        "composite": 1.711,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -0.532,
+        "funda": 1.755,
+        "wTech": 0.0,
+        "composite": 1.755,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -0.672,
+        "funda": 1.765,
+        "wTech": 100.0,
+        "composite": -0.672,
+        "signal": "N"
+      }
+    ],
+    "Equity Japan": [
+      {
+        "date": "2024-04",
+        "tech": 0.989,
+        "funda": -1.134,
+        "wTech": 100.0,
+        "composite": 0.989,
+        "signal": "N"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.735,
+        "funda": -0.894,
+        "wTech": 100.0,
+        "composite": 0.735,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.457,
+        "funda": -0.605,
+        "wTech": 0.0,
+        "composite": -0.605,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.405,
+        "funda": -1.047,
+        "wTech": 0.0,
+        "composite": -1.047,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.575,
+        "funda": -0.789,
+        "wTech": 100.0,
+        "composite": 0.575,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 0.521,
+        "funda": -0.728,
+        "wTech": 100.0,
+        "composite": 0.521,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": 0.016,
+        "funda": -0.943,
+        "wTech": 100.0,
+        "composite": 0.016,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": -0.729,
+        "funda": 0.816,
+        "wTech": 0.0,
+        "composite": 0.816,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -1.434,
+        "funda": 0.811,
+        "wTech": 0.0,
+        "composite": 0.811,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": -1.667,
+        "funda": 0.94,
+        "wTech": 0.0,
+        "composite": 0.94,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -1.875,
+        "funda": 0.571,
+        "wTech": 0.0,
+        "composite": 0.571,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -1.945,
+        "funda": 0.45,
+        "wTech": 0.0,
+        "composite": 0.45,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -0.881,
+        "funda": -0.482,
+        "wTech": 0.0,
+        "composite": -0.482,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -0.331,
+        "funda": 0.312,
+        "wTech": 0.0,
+        "composite": 0.312,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 0.371,
+        "funda": 0.578,
+        "wTech": 0.0,
+        "composite": 0.578,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.099,
+        "funda": 1.635,
+        "wTech": 0.0,
+        "composite": 1.635,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-08",
+        "tech": 0.367,
+        "funda": 0.161,
+        "wTech": 0.0,
+        "composite": 0.161,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": 1.098,
+        "funda": -0.367,
+        "wTech": 100.0,
+        "composite": 1.098,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": 1.799,
+        "funda": -1.458,
+        "wTech": 100.0,
+        "composite": 1.799,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 1.374,
+        "funda": -0.123,
+        "wTech": 100.0,
+        "composite": 1.374,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 1.261,
+        "funda": 0.488,
+        "wTech": 100.0,
+        "composite": 1.261,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 1.493,
+        "funda": -1.883,
+        "wTech": 100.0,
+        "composite": 1.493,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": 2.345,
+        "funda": -3.146,
+        "wTech": 100.0,
+        "composite": 2.345,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 1.334,
+        "funda": -1.137,
+        "wTech": 100.0,
+        "composite": 1.334,
+        "signal": "OW"
+      }
+    ],
+    "Equity Asia-Pac": [
+      {
+        "date": "2024-04",
+        "tech": 1.183,
+        "funda": -1.893,
+        "wTech": 0.0,
+        "composite": -1.893,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.398,
+        "funda": -1.616,
+        "wTech": 100.0,
+        "composite": 1.398,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.434,
+        "funda": -1.497,
+        "wTech": 100.0,
+        "composite": 1.434,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.101,
+        "funda": -1.568,
+        "wTech": 0.0,
+        "composite": -1.568,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.273,
+        "funda": -1.261,
+        "wTech": 100.0,
+        "composite": 1.273,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.804,
+        "funda": -1.756,
+        "wTech": 100.0,
+        "composite": 1.804,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.989,
+        "funda": -2.119,
+        "wTech": 100.0,
+        "composite": 1.989,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 1.098,
+        "funda": -0.312,
+        "wTech": 100.0,
+        "composite": 1.098,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.259,
+        "funda": -0.587,
+        "wTech": 100.0,
+        "composite": 0.259,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.389,
+        "funda": -0.379,
+        "wTech": 100.0,
+        "composite": 0.389,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.141,
+        "funda": -0.93,
+        "wTech": 100.0,
+        "composite": 0.141,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": 0.006,
+        "funda": -1.113,
+        "wTech": 100.0,
+        "composite": 0.006,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -0.101,
+        "funda": -0.979,
+        "wTech": 0.0,
+        "composite": -0.979,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.08,
+        "funda": -0.506,
+        "wTech": 100.0,
+        "composite": 0.08,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 1.077,
+        "funda": -1.048,
+        "wTech": 100.0,
+        "composite": 1.077,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": 1.625,
+        "funda": -0.787,
+        "wTech": 100.0,
+        "composite": 1.625,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-08",
+        "tech": 1.668,
+        "funda": -0.489,
+        "wTech": 100.0,
+        "composite": 1.668,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 1.648,
+        "funda": -1.309,
+        "wTech": 100.0,
+        "composite": 1.648,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": 2.118,
+        "funda": -1.805,
+        "wTech": 100.0,
+        "composite": 2.118,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 1.798,
+        "funda": -0.176,
+        "wTech": 100.0,
+        "composite": 1.798,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 1.497,
+        "funda": 0.532,
+        "wTech": 100.0,
+        "composite": 1.497,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 1.883,
+        "funda": -1.48,
+        "wTech": 100.0,
+        "composite": 1.883,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": 2.337,
+        "funda": -2.338,
+        "wTech": 100.0,
+        "composite": 2.337,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 1.325,
+        "funda": -0.731,
+        "wTech": 100.0,
+        "composite": 1.325,
+        "signal": "OW"
+      }
+    ],
+    "Equity EM": [
+      {
+        "date": "2024-04",
+        "tech": 1.21,
+        "funda": -1.813,
+        "wTech": 0.0,
+        "composite": -1.813,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.29,
+        "funda": -1.479,
+        "wTech": 100.0,
+        "composite": 1.29,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.217,
+        "funda": -1.362,
+        "wTech": 100.0,
+        "composite": 1.217,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.919,
+        "funda": -1.481,
+        "wTech": 0.0,
+        "composite": -1.481,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.122,
+        "funda": -1.186,
+        "wTech": 100.0,
+        "composite": 1.122,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.592,
+        "funda": -1.58,
+        "wTech": 100.0,
+        "composite": 1.592,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.76,
+        "funda": -1.911,
+        "wTech": 100.0,
+        "composite": 1.76,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.687,
+        "funda": -0.115,
+        "wTech": 100.0,
+        "composite": 0.687,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.277,
+        "funda": -0.336,
+        "wTech": 0.0,
+        "composite": -0.336,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.006,
+        "funda": -0.317,
+        "wTech": 100.0,
+        "composite": 0.006,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.137,
+        "funda": -0.841,
+        "wTech": 100.0,
+        "composite": -0.137,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.196,
+        "funda": -1.123,
+        "wTech": 100.0,
+        "composite": -0.196,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -0.141,
+        "funda": -1.034,
+        "wTech": 100.0,
+        "composite": -0.141,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.106,
+        "funda": -0.466,
+        "wTech": 100.0,
+        "composite": 0.106,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 1.295,
+        "funda": -1.149,
+        "wTech": 100.0,
+        "composite": 1.295,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": 1.778,
+        "funda": -0.77,
+        "wTech": 100.0,
+        "composite": 1.778,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-08",
+        "tech": 1.796,
+        "funda": -0.558,
+        "wTech": 100.0,
+        "composite": 1.796,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 1.991,
+        "funda": -1.756,
+        "wTech": 100.0,
+        "composite": 1.991,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": 2.47,
+        "funda": -2.222,
+        "wTech": 100.0,
+        "composite": 2.47,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 2.117,
+        "funda": -0.545,
+        "wTech": 100.0,
+        "composite": 2.117,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 1.828,
+        "funda": 0.051,
+        "wTech": 100.0,
+        "composite": 1.828,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 2.091,
+        "funda": -1.808,
+        "wTech": 100.0,
+        "composite": 2.091,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": 2.42,
+        "funda": -2.275,
+        "wTech": 100.0,
+        "composite": 2.42,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 1.284,
+        "funda": -0.661,
+        "wTech": 100.0,
+        "composite": 1.284,
+        "signal": "OW"
+      }
+    ],
+    "Bond CH": [
+      {
+        "date": "2024-04",
+        "tech": 1.083,
+        "funda": -1.355,
+        "wTech": 0.0,
+        "composite": -1.355,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.435,
+        "funda": -0.916,
+        "wTech": 0.0,
+        "composite": -0.916,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.686,
+        "funda": -1.382,
+        "wTech": 0.0,
+        "composite": -1.382,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.042,
+        "funda": -1.519,
+        "wTech": 100.0,
+        "composite": 1.042,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.945,
+        "funda": -1.373,
+        "wTech": 100.0,
+        "composite": 0.945,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.109,
+        "funda": -1.28,
+        "wTech": 100.0,
+        "composite": 1.109,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 0.977,
+        "funda": -1.104,
+        "wTech": 100.0,
+        "composite": 0.977,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.741,
+        "funda": -1.209,
+        "wTech": 100.0,
+        "composite": 0.741,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.467,
+        "funda": -0.871,
+        "wTech": 0.0,
+        "composite": -0.871,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.209,
+        "funda": -0.685,
+        "wTech": 100.0,
+        "composite": 0.209,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.309,
+        "funda": -0.419,
+        "wTech": 0.0,
+        "composite": -0.419,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -1.548,
+        "funda": 0.192,
+        "wTech": 0.0,
+        "composite": 0.192,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -0.942,
+        "funda": -0.414,
+        "wTech": 100.0,
+        "composite": -0.942,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.294,
+        "funda": -0.43,
+        "wTech": 100.0,
+        "composite": 0.294,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.992,
+        "funda": 0.526,
+        "wTech": 0.0,
+        "composite": 0.526,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -1.328,
+        "funda": 0.123,
+        "wTech": 0.0,
+        "composite": 0.123,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -1.012,
+        "funda": 0.25,
+        "wTech": 0.0,
+        "composite": 0.25,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.558,
+        "funda": 0.035,
+        "wTech": 0.0,
+        "composite": 0.035,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.192,
+        "funda": 0.073,
+        "wTech": 0.0,
+        "composite": 0.073,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": -0.667,
+        "funda": 0.668,
+        "wTech": 0.0,
+        "composite": 0.668,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": -1.262,
+        "funda": 1.673,
+        "wTech": 0.0,
+        "composite": 1.673,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -1.315,
+        "funda": 1.244,
+        "wTech": 0.0,
+        "composite": 1.244,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -1.108,
+        "funda": 1.42,
+        "wTech": 0.0,
+        "composite": 1.42,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -1.332,
+        "funda": 2.16,
+        "wTech": 0.0,
+        "composite": 2.16,
+        "signal": "OW"
+      }
+    ],
+    "Bond EU": [
+      {
+        "date": "2024-04",
+        "tech": 1.201,
+        "funda": 0.205,
+        "wTech": 0.0,
+        "composite": 0.205,
+        "signal": "N"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.938,
+        "funda": 0.229,
+        "wTech": 0.0,
+        "composite": 0.229,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.848,
+        "funda": 0.277,
+        "wTech": 0.0,
+        "composite": 0.277,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.928,
+        "funda": 0.025,
+        "wTech": 0.0,
+        "composite": 0.025,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.958,
+        "funda": -1.1,
+        "wTech": 100.0,
+        "composite": 0.958,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.207,
+        "funda": -1.449,
+        "wTech": 100.0,
+        "composite": 1.207,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.085,
+        "funda": -1.197,
+        "wTech": 100.0,
+        "composite": 1.085,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.962,
+        "funda": -0.906,
+        "wTech": 100.0,
+        "composite": 0.962,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.584,
+        "funda": -1.353,
+        "wTech": 0.0,
+        "composite": -1.353,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.355,
+        "funda": -0.15,
+        "wTech": 0.0,
+        "composite": -0.15,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.403,
+        "funda": -0.544,
+        "wTech": 100.0,
+        "composite": 0.403,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.216,
+        "funda": 0.861,
+        "wTech": 0.0,
+        "composite": 0.861,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -0.037,
+        "funda": -0.063,
+        "wTech": 100.0,
+        "composite": -0.037,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.19,
+        "funda": -0.154,
+        "wTech": 100.0,
+        "composite": 0.19,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 0.039,
+        "funda": -0.079,
+        "wTech": 100.0,
+        "composite": 0.039,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.576,
+        "funda": 0.33,
+        "wTech": 0.0,
+        "composite": 0.33,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.883,
+        "funda": 0.505,
+        "wTech": 0.0,
+        "composite": 0.505,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": -1.165,
+        "funda": 0.734,
+        "wTech": 0.0,
+        "composite": 0.734,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.801,
+        "funda": 0.432,
+        "wTech": 0.0,
+        "composite": 0.432,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": -1.316,
+        "funda": 0.67,
+        "wTech": 0.0,
+        "composite": 0.67,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": -1.302,
+        "funda": 1.351,
+        "wTech": 0.0,
+        "composite": 1.351,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -1.098,
+        "funda": 1.083,
+        "wTech": 0.0,
+        "composite": 1.083,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -0.531,
+        "funda": 1.002,
+        "wTech": 0.0,
+        "composite": 1.002,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -0.769,
+        "funda": 0.922,
+        "wTech": 0.0,
+        "composite": 0.922,
+        "signal": "N"
+      }
+    ],
+    "Bond U.S.": [
+      {
+        "date": "2024-04",
+        "tech": 0.763,
+        "funda": 1.548,
+        "wTech": 0.0,
+        "composite": 1.548,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.742,
+        "funda": 1.15,
+        "wTech": 0.0,
+        "composite": 1.15,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.912,
+        "funda": 0.806,
+        "wTech": 0.0,
+        "composite": 0.806,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.139,
+        "funda": 0.181,
+        "wTech": 100.0,
+        "composite": 1.139,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.401,
+        "funda": -0.353,
+        "wTech": 100.0,
+        "composite": 1.401,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.809,
+        "funda": -0.612,
+        "wTech": 100.0,
+        "composite": 1.809,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.59,
+        "funda": 0.592,
+        "wTech": 100.0,
+        "composite": 1.59,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.894,
+        "funda": 0.284,
+        "wTech": 100.0,
+        "composite": 0.894,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.027,
+        "funda": 1.228,
+        "wTech": 0.0,
+        "composite": 1.228,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-01",
+        "tech": -0.268,
+        "funda": 1.141,
+        "wTech": 0.0,
+        "composite": 1.141,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.319,
+        "funda": 0.214,
+        "wTech": 100.0,
+        "composite": 0.319,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": 0.388,
+        "funda": 0.113,
+        "wTech": 100.0,
+        "composite": 0.388,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": 0.784,
+        "funda": -0.164,
+        "wTech": 100.0,
+        "composite": 0.784,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.34,
+        "funda": 0.547,
+        "wTech": 100.0,
+        "composite": 0.34,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 0.467,
+        "funda": -0.114,
+        "wTech": 100.0,
+        "composite": 0.467,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": 0.197,
+        "funda": 0.312,
+        "wTech": 100.0,
+        "composite": 0.197,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": 0.122,
+        "funda": -0.243,
+        "wTech": 0.0,
+        "composite": -0.243,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.26,
+        "funda": -0.453,
+        "wTech": 0.0,
+        "composite": -0.453,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.874,
+        "funda": -0.602,
+        "wTech": 100.0,
+        "composite": 0.874,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.719,
+        "funda": -0.931,
+        "wTech": 100.0,
+        "composite": 0.719,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.859,
+        "funda": -0.289,
+        "wTech": 100.0,
+        "composite": 0.859,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": 0.501,
+        "funda": 0.037,
+        "wTech": 100.0,
+        "composite": 0.501,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 0.406,
+        "funda": -1.271,
+        "wTech": 100.0,
+        "composite": 0.406,
+        "signal": "N"
+      },
+      {
+        "date": "2026-03",
+        "tech": -0.125,
+        "funda": 0.123,
+        "wTech": 0.0,
+        "composite": 0.123,
+        "signal": "N"
+      }
+    ],
+    "Bond Japan": [
+      {
+        "date": "2024-04",
+        "tech": 1.035,
+        "funda": 1.648,
+        "wTech": 0.0,
+        "composite": 1.648,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.793,
+        "funda": 2.162,
+        "wTech": 0.0,
+        "composite": 2.162,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.745,
+        "funda": 1.85,
+        "wTech": 0.0,
+        "composite": 1.85,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.903,
+        "funda": 1.664,
+        "wTech": 100.0,
+        "composite": 0.903,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.97,
+        "funda": 1.008,
+        "wTech": 100.0,
+        "composite": 0.97,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.268,
+        "funda": 0.807,
+        "wTech": 100.0,
+        "composite": 1.268,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.186,
+        "funda": 1.045,
+        "wTech": 100.0,
+        "composite": 1.186,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.904,
+        "funda": 1.416,
+        "wTech": 100.0,
+        "composite": 0.904,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.406,
+        "funda": 1.447,
+        "wTech": 0.0,
+        "composite": 1.447,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.25,
+        "funda": 1.846,
+        "wTech": 100.0,
+        "composite": 0.25,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.353,
+        "funda": 2.029,
+        "wTech": 100.0,
+        "composite": 0.353,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.319,
+        "funda": 2.171,
+        "wTech": 0.0,
+        "composite": 2.171,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-04",
+        "tech": 0.061,
+        "funda": 1.453,
+        "wTech": 100.0,
+        "composite": 0.061,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.215,
+        "funda": 1.911,
+        "wTech": 100.0,
+        "composite": 0.215,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 0.116,
+        "funda": 1.536,
+        "wTech": 100.0,
+        "composite": 0.116,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.503,
+        "funda": 1.776,
+        "wTech": 0.0,
+        "composite": 1.776,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.774,
+        "funda": 1.762,
+        "wTech": 0.0,
+        "composite": 1.762,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.965,
+        "funda": 1.704,
+        "wTech": 0.0,
+        "composite": 1.704,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.515,
+        "funda": 1.558,
+        "wTech": 0.0,
+        "composite": 1.558,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": -1.043,
+        "funda": 1.799,
+        "wTech": 0.0,
+        "composite": 1.799,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": -1.269,
+        "funda": 2.209,
+        "wTech": 0.0,
+        "composite": 2.209,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -1.363,
+        "funda": 2.298,
+        "wTech": 0.0,
+        "composite": 2.298,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -0.722,
+        "funda": 2.03,
+        "wTech": 0.0,
+        "composite": 2.03,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -1.076,
+        "funda": 1.827,
+        "wTech": 0.0,
+        "composite": 1.827,
+        "signal": "OW"
+      }
+    ],
+    "Gold": [
+      {
+        "date": "2024-04",
+        "tech": 1.716,
+        "funda": -2.011,
+        "wTech": 100.0,
+        "composite": 1.716,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.767,
+        "funda": -1.819,
+        "wTech": 100.0,
+        "composite": 1.767,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.577,
+        "funda": -1.537,
+        "wTech": 100.0,
+        "composite": 1.577,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.412,
+        "funda": -1.704,
+        "wTech": 100.0,
+        "composite": 1.412,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.65,
+        "funda": -1.686,
+        "wTech": 100.0,
+        "composite": 1.65,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 2.257,
+        "funda": -1.958,
+        "wTech": 100.0,
+        "composite": 2.257,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 2.106,
+        "funda": -2.031,
+        "wTech": 100.0,
+        "composite": 2.106,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 1.437,
+        "funda": -1.34,
+        "wTech": 100.0,
+        "composite": 1.437,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.691,
+        "funda": -0.93,
+        "wTech": 100.0,
+        "composite": 0.691,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 1.158,
+        "funda": -1.454,
+        "wTech": 100.0,
+        "composite": 1.158,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-02",
+        "tech": 1.377,
+        "funda": -1.234,
+        "wTech": 100.0,
+        "composite": 1.377,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-03",
+        "tech": 1.625,
+        "funda": -1.933,
+        "wTech": 100.0,
+        "composite": 1.625,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-04",
+        "tech": 2.041,
+        "funda": -2.03,
+        "wTech": 100.0,
+        "composite": 2.041,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-05",
+        "tech": 1.693,
+        "funda": -1.571,
+        "wTech": 100.0,
+        "composite": 1.693,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-06",
+        "tech": 1.289,
+        "funda": -1.248,
+        "wTech": 100.0,
+        "composite": 1.289,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": 0.68,
+        "funda": -0.941,
+        "wTech": 100.0,
+        "composite": 0.68,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": 0.703,
+        "funda": -1.156,
+        "wTech": 100.0,
+        "composite": 0.703,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": 1.302,
+        "funda": -1.799,
+        "wTech": 100.0,
+        "composite": 1.302,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": 1.523,
+        "funda": -1.72,
+        "wTech": 100.0,
+        "composite": 1.523,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 2.069,
+        "funda": -1.826,
+        "wTech": 100.0,
+        "composite": 2.069,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 2.052,
+        "funda": -1.62,
+        "wTech": 100.0,
+        "composite": 2.052,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 2.119,
+        "funda": -1.975,
+        "wTech": 100.0,
+        "composite": 2.119,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": 2.779,
+        "funda": -2.364,
+        "wTech": 100.0,
+        "composite": 2.779,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 1.772,
+        "funda": -1.473,
+        "wTech": 100.0,
+        "composite": 1.772,
+        "signal": "OW"
+      }
+    ],
+    "Oil": [
+      {
+        "date": "2024-04",
+        "tech": 0.345,
+        "funda": 0.194,
+        "wTech": 0.0,
+        "composite": 0.194,
+        "signal": "N"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.588,
+        "funda": 0.363,
+        "wTech": 100.0,
+        "composite": 0.588,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.808,
+        "funda": -0.239,
+        "wTech": 100.0,
+        "composite": 0.808,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.444,
+        "funda": -0.099,
+        "wTech": 0.0,
+        "composite": -0.099,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": -0.042,
+        "funda": 0.346,
+        "wTech": 100.0,
+        "composite": -0.042,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": -0.972,
+        "funda": 1.135,
+        "wTech": 100.0,
+        "composite": -0.972,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": -0.864,
+        "funda": 0.77,
+        "wTech": 100.0,
+        "composite": -0.864,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": -0.603,
+        "funda": 0.862,
+        "wTech": 0.0,
+        "composite": 0.862,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.115,
+        "funda": -0.052,
+        "wTech": 0.0,
+        "composite": -0.052,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.091,
+        "funda": -0.297,
+        "wTech": 0.0,
+        "composite": -0.297,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.133,
+        "funda": 0.226,
+        "wTech": 100.0,
+        "composite": -0.133,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.359,
+        "funda": -0.171,
+        "wTech": 100.0,
+        "composite": -0.359,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -1.25,
+        "funda": 2.358,
+        "wTech": 100.0,
+        "composite": -1.25,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.569,
+        "funda": 1.706,
+        "wTech": 100.0,
+        "composite": -1.569,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -1.216,
+        "funda": 0.772,
+        "wTech": 100.0,
+        "composite": -1.216,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.207,
+        "funda": -0.191,
+        "wTech": 100.0,
+        "composite": -0.207,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.16,
+        "funda": 0.679,
+        "wTech": 100.0,
+        "composite": -0.16,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.251,
+        "funda": 0.772,
+        "wTech": 0.0,
+        "composite": 0.772,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.392,
+        "funda": 0.863,
+        "wTech": 100.0,
+        "composite": -0.392,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": -0.539,
+        "funda": 1.234,
+        "wTech": 100.0,
+        "composite": -0.539,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": -0.946,
+        "funda": 1.351,
+        "wTech": 100.0,
+        "composite": -0.946,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": -0.065,
+        "funda": -0.556,
+        "wTech": 0.0,
+        "composite": -0.556,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 1.097,
+        "funda": -0.999,
+        "wTech": 0.0,
+        "composite": -0.999,
+        "signal": "N"
+      },
+      {
+        "date": "2026-03",
+        "tech": 3.467,
+        "funda": -3.738,
+        "wTech": 100.0,
+        "composite": 3.467,
+        "signal": "OW"
+      }
+    ],
+    "Euro": [
+      {
+        "date": "2024-04",
+        "tech": 1.707,
+        "funda": -2.11,
+        "wTech": 0.0,
+        "composite": -2.11,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.816,
+        "funda": -2.037,
+        "wTech": 0.0,
+        "composite": -2.037,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.183,
+        "funda": -1.288,
+        "wTech": 0.0,
+        "composite": -1.288,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.85,
+        "funda": -0.915,
+        "wTech": 0.0,
+        "composite": -0.915,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.16,
+        "funda": -0.21,
+        "wTech": 0.0,
+        "composite": -0.21,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": -0.51,
+        "funda": -0.22,
+        "wTech": 0.0,
+        "composite": -0.22,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": -0.487,
+        "funda": -0.359,
+        "wTech": 0.0,
+        "composite": -0.359,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": -0.865,
+        "funda": 0.117,
+        "wTech": 100.0,
+        "composite": -0.865,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.017,
+        "funda": -0.45,
+        "wTech": 0.0,
+        "composite": -0.45,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.647,
+        "funda": -0.921,
+        "wTech": 0.0,
+        "composite": -0.921,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.203,
+        "funda": -0.367,
+        "wTech": 0.0,
+        "composite": -0.367,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": 0.44,
+        "funda": -1.498,
+        "wTech": 0.0,
+        "composite": -1.498,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-04",
+        "tech": 0.323,
+        "funda": -0.599,
+        "wTech": 100.0,
+        "composite": 0.323,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -0.288,
+        "funda": -0.476,
+        "wTech": 100.0,
+        "composite": -0.288,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 0.074,
+        "funda": -0.589,
+        "wTech": 100.0,
+        "composite": 0.074,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": 0.033,
+        "funda": -0.167,
+        "wTech": 100.0,
+        "composite": 0.033,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": 0.532,
+        "funda": -0.643,
+        "wTech": 0.0,
+        "composite": -0.643,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.605,
+        "funda": -0.609,
+        "wTech": 0.0,
+        "composite": -0.609,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.165,
+        "funda": -0.09,
+        "wTech": 0.0,
+        "composite": -0.09,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.455,
+        "funda": -0.53,
+        "wTech": 0.0,
+        "composite": -0.53,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.32,
+        "funda": -0.218,
+        "wTech": 0.0,
+        "composite": -0.218,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": -0.779,
+        "funda": 1.327,
+        "wTech": 100.0,
+        "composite": -0.779,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": -1.154,
+        "funda": 1.337,
+        "wTech": 100.0,
+        "composite": -1.154,
+        "signal": "UW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -1.996,
+        "funda": 1.711,
+        "wTech": 100.0,
+        "composite": -1.996,
+        "signal": "UW"
+      }
+    ],
+    "U.S. Dollar": [
+      {
+        "date": "2024-04",
+        "tech": 0.929,
+        "funda": -0.169,
+        "wTech": 0.0,
+        "composite": -0.169,
+        "signal": "N"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.847,
+        "funda": -0.092,
+        "wTech": 0.0,
+        "composite": -0.092,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.758,
+        "funda": -0.079,
+        "wTech": 0.0,
+        "composite": -0.079,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.763,
+        "funda": 0.236,
+        "wTech": 0.0,
+        "composite": 0.236,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": -0.142,
+        "funda": 1.054,
+        "wTech": 0.0,
+        "composite": 1.054,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": -1.108,
+        "funda": 1.042,
+        "wTech": 100.0,
+        "composite": -1.108,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-10",
+        "tech": -0.543,
+        "funda": -0.16,
+        "wTech": 0.0,
+        "composite": -0.16,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.825,
+        "funda": -1.096,
+        "wTech": 0.0,
+        "composite": -1.096,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 1.983,
+        "funda": -1.892,
+        "wTech": 100.0,
+        "composite": 1.983,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-01",
+        "tech": 1.974,
+        "funda": -1.96,
+        "wTech": 0.0,
+        "composite": -1.96,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-02",
+        "tech": 1.539,
+        "funda": -1.58,
+        "wTech": 0.0,
+        "composite": -1.58,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-03",
+        "tech": 0.702,
+        "funda": -0.87,
+        "wTech": 0.0,
+        "composite": -0.87,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -0.835,
+        "funda": 1.181,
+        "wTech": 100.0,
+        "composite": -0.835,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.499,
+        "funda": 1.034,
+        "wTech": 100.0,
+        "composite": -1.499,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -1.788,
+        "funda": 1.623,
+        "wTech": 100.0,
+        "composite": -1.788,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-07",
+        "tech": -1.517,
+        "funda": 0.993,
+        "wTech": 100.0,
+        "composite": -1.517,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-08",
+        "tech": -1.067,
+        "funda": 1.244,
+        "wTech": 0.0,
+        "composite": 1.244,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.932,
+        "funda": 1.136,
+        "wTech": 0.0,
+        "composite": 1.136,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.836,
+        "funda": 0.788,
+        "wTech": 100.0,
+        "composite": -0.836,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": -0.595,
+        "funda": 0.586,
+        "wTech": 100.0,
+        "composite": -0.595,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": -0.717,
+        "funda": 1.001,
+        "wTech": 100.0,
+        "composite": -0.717,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": -1.196,
+        "funda": 1.704,
+        "wTech": 100.0,
+        "composite": -1.196,
+        "signal": "UW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -1.145,
+        "funda": 1.169,
+        "wTech": 100.0,
+        "composite": -1.145,
+        "signal": "UW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -0.566,
+        "funda": 0.506,
+        "wTech": 100.0,
+        "composite": -0.566,
+        "signal": "N"
+      }
+    ],
+    "Financials": [
+      {
+        "date": "2024-04",
+        "tech": 1.805,
+        "funda": -1.961,
+        "wTech": 100.0,
+        "composite": 1.805,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.703,
+        "funda": -1.699,
+        "wTech": 100.0,
+        "composite": 1.703,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.207,
+        "funda": -1.255,
+        "wTech": 100.0,
+        "composite": 1.207,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.103,
+        "funda": -1.634,
+        "wTech": 100.0,
+        "composite": 1.103,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.475,
+        "funda": -1.461,
+        "wTech": 100.0,
+        "composite": 1.475,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.507,
+        "funda": -1.254,
+        "wTech": 100.0,
+        "composite": 1.507,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.58,
+        "funda": -1.687,
+        "wTech": 100.0,
+        "composite": 1.58,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 1.633,
+        "funda": -1.04,
+        "wTech": 100.0,
+        "composite": 1.633,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 1.069,
+        "funda": -0.872,
+        "wTech": 100.0,
+        "composite": 1.069,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.959,
+        "funda": -0.886,
+        "wTech": 100.0,
+        "composite": 0.959,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.854,
+        "funda": -1.058,
+        "wTech": 100.0,
+        "composite": 0.854,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": 0.157,
+        "funda": -0.822,
+        "wTech": 0.0,
+        "composite": -0.822,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -0.238,
+        "funda": -0.566,
+        "wTech": 0.0,
+        "composite": -0.566,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -0.404,
+        "funda": 0.009,
+        "wTech": 100.0,
+        "composite": -0.404,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.028,
+        "funda": 0.281,
+        "wTech": 100.0,
+        "composite": -0.028,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.407,
+        "funda": 0.622,
+        "wTech": 0.0,
+        "composite": 0.622,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.502,
+        "funda": 0.91,
+        "wTech": 0.0,
+        "composite": 0.91,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.441,
+        "funda": 1.309,
+        "wTech": 0.0,
+        "composite": 1.309,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": -1.22,
+        "funda": 2.42,
+        "wTech": 0.0,
+        "composite": 2.42,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": -2.069,
+        "funda": 2.576,
+        "wTech": 0.0,
+        "composite": 2.576,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": -1.292,
+        "funda": 2.281,
+        "wTech": 0.0,
+        "composite": 2.281,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -1.809,
+        "funda": 2.284,
+        "wTech": 0.0,
+        "composite": 2.284,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -2.156,
+        "funda": 2.142,
+        "wTech": 0.0,
+        "composite": 2.142,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -2.247,
+        "funda": 1.595,
+        "wTech": 0.0,
+        "composite": 1.595,
+        "signal": "OW"
+      }
+    ],
+    "Cons. Disc.": [
+      {
+        "date": "2024-04",
+        "tech": 0.875,
+        "funda": -1.531,
+        "wTech": 100.0,
+        "composite": 0.875,
+        "signal": "N"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.577,
+        "funda": -1.127,
+        "wTech": 0.0,
+        "composite": -1.127,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.325,
+        "funda": -1.139,
+        "wTech": 0.0,
+        "composite": -1.139,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.361,
+        "funda": -1.426,
+        "wTech": 0.0,
+        "composite": -1.426,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.359,
+        "funda": -1.059,
+        "wTech": 0.0,
+        "composite": -1.059,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 0.83,
+        "funda": -1.455,
+        "wTech": 100.0,
+        "composite": 0.83,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.078,
+        "funda": -1.779,
+        "wTech": 100.0,
+        "composite": 1.078,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 1.303,
+        "funda": -1.118,
+        "wTech": 100.0,
+        "composite": 1.303,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 1.482,
+        "funda": -1.454,
+        "wTech": 100.0,
+        "composite": 1.482,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-01",
+        "tech": 1.82,
+        "funda": -1.238,
+        "wTech": 100.0,
+        "composite": 1.82,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.545,
+        "funda": -0.855,
+        "wTech": 100.0,
+        "composite": 0.545,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -1.009,
+        "funda": -0.039,
+        "wTech": 0.0,
+        "composite": -0.039,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -1.573,
+        "funda": 0.241,
+        "wTech": 0.0,
+        "composite": 0.241,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.032,
+        "funda": 0.479,
+        "wTech": 100.0,
+        "composite": -1.032,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.588,
+        "funda": 0.832,
+        "wTech": 100.0,
+        "composite": -0.588,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.46,
+        "funda": 0.834,
+        "wTech": 100.0,
+        "composite": -0.46,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": 0.148,
+        "funda": 0.645,
+        "wTech": 100.0,
+        "composite": 0.148,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.37,
+        "funda": 0.239,
+        "wTech": 100.0,
+        "composite": 0.37,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.654,
+        "funda": 0.673,
+        "wTech": 100.0,
+        "composite": 0.654,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": -0.412,
+        "funda": 2.007,
+        "wTech": 0.0,
+        "composite": 2.007,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": -0.621,
+        "funda": 2.103,
+        "wTech": 0.0,
+        "composite": 2.103,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -0.876,
+        "funda": 1.535,
+        "wTech": 0.0,
+        "composite": 1.535,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -0.853,
+        "funda": 2.062,
+        "wTech": 0.0,
+        "composite": 2.062,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -1.059,
+        "funda": 1.954,
+        "wTech": 0.0,
+        "composite": 1.954,
+        "signal": "OW"
+      }
+    ],
+    "Industrials": [
+      {
+        "date": "2024-04",
+        "tech": 1.478,
+        "funda": -1.666,
+        "wTech": 100.0,
+        "composite": 1.478,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.361,
+        "funda": -1.285,
+        "wTech": 100.0,
+        "composite": 1.361,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.606,
+        "funda": -0.837,
+        "wTech": 100.0,
+        "composite": 0.606,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.505,
+        "funda": -1.35,
+        "wTech": 100.0,
+        "composite": 0.505,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.806,
+        "funda": -1.173,
+        "wTech": 100.0,
+        "composite": 0.806,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.492,
+        "funda": -1.404,
+        "wTech": 100.0,
+        "composite": 1.492,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.611,
+        "funda": -1.657,
+        "wTech": 100.0,
+        "composite": 1.611,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 1.483,
+        "funda": -0.918,
+        "wTech": 100.0,
+        "composite": 1.483,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.114,
+        "funda": -0.197,
+        "wTech": 0.0,
+        "composite": -0.197,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.033,
+        "funda": -0.407,
+        "wTech": 100.0,
+        "composite": 0.033,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.573,
+        "funda": -0.436,
+        "wTech": 0.0,
+        "composite": -0.436,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -1.503,
+        "funda": 0.049,
+        "wTech": 0.0,
+        "composite": 0.049,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -1.596,
+        "funda": 0.277,
+        "wTech": 0.0,
+        "composite": 0.277,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -0.928,
+        "funda": 0.187,
+        "wTech": 0.0,
+        "composite": 0.187,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 0.151,
+        "funda": 0.18,
+        "wTech": 100.0,
+        "composite": 0.151,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": 0.382,
+        "funda": -0.028,
+        "wTech": 100.0,
+        "composite": 0.382,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": 0.289,
+        "funda": 0.738,
+        "wTech": 0.0,
+        "composite": 0.738,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.14,
+        "funda": 0.793,
+        "wTech": 0.0,
+        "composite": 0.793,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.103,
+        "funda": 1.547,
+        "wTech": 0.0,
+        "composite": 1.547,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": -0.831,
+        "funda": 2.842,
+        "wTech": 0.0,
+        "composite": 2.842,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": -0.315,
+        "funda": 2.569,
+        "wTech": 100.0,
+        "composite": -0.315,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": -0.084,
+        "funda": 0.353,
+        "wTech": 100.0,
+        "composite": -0.084,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 1.306,
+        "funda": -1.753,
+        "wTech": 100.0,
+        "composite": 1.306,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 0.942,
+        "funda": 0.166,
+        "wTech": 100.0,
+        "composite": 0.942,
+        "signal": "N"
+      }
+    ],
+    "Cons. Staples": [
+      {
+        "date": "2024-04",
+        "tech": 1.143,
+        "funda": -2.237,
+        "wTech": 0.0,
+        "composite": -2.237,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 2.003,
+        "funda": -2.32,
+        "wTech": 100.0,
+        "composite": 2.003,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.594,
+        "funda": -1.81,
+        "wTech": 100.0,
+        "composite": 1.594,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.181,
+        "funda": -2.187,
+        "wTech": 100.0,
+        "composite": 1.181,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 2.121,
+        "funda": -2.493,
+        "wTech": 100.0,
+        "composite": 2.121,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 2.548,
+        "funda": -2.154,
+        "wTech": 100.0,
+        "composite": 2.548,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.796,
+        "funda": -1.847,
+        "wTech": 100.0,
+        "composite": 1.796,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 1.368,
+        "funda": -1.252,
+        "wTech": 100.0,
+        "composite": 1.368,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.547,
+        "funda": -0.811,
+        "wTech": 100.0,
+        "composite": 0.547,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.008,
+        "funda": -0.649,
+        "wTech": 100.0,
+        "composite": 0.008,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.331,
+        "funda": -1.419,
+        "wTech": 100.0,
+        "composite": 0.331,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": 0.208,
+        "funda": -1.237,
+        "wTech": 100.0,
+        "composite": 0.208,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": 0.16,
+        "funda": -1.164,
+        "wTech": 100.0,
+        "composite": 0.16,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.044,
+        "funda": -0.606,
+        "wTech": 100.0,
+        "composite": 0.044,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.038,
+        "funda": -0.074,
+        "wTech": 100.0,
+        "composite": -0.038,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.456,
+        "funda": 0.247,
+        "wTech": 0.0,
+        "composite": 0.247,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.859,
+        "funda": 0.404,
+        "wTech": 0.0,
+        "composite": 0.404,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": -1.118,
+        "funda": 1.012,
+        "wTech": 0.0,
+        "composite": 1.012,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": -1.551,
+        "funda": 1.807,
+        "wTech": 0.0,
+        "composite": 1.807,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": -1.712,
+        "funda": 1.453,
+        "wTech": 0.0,
+        "composite": 1.453,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": -1.192,
+        "funda": 2.004,
+        "wTech": 0.0,
+        "composite": 2.004,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -0.341,
+        "funda": 0.303,
+        "wTech": 100.0,
+        "composite": -0.341,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 0.9,
+        "funda": -1.3,
+        "wTech": 100.0,
+        "composite": 0.9,
+        "signal": "N"
+      },
+      {
+        "date": "2026-03",
+        "tech": 0.703,
+        "funda": -0.353,
+        "wTech": 0.0,
+        "composite": -0.353,
+        "signal": "N"
+      }
+    ],
+    "Health Care": [
+      {
+        "date": "2024-04",
+        "tech": 1.277,
+        "funda": -1.554,
+        "wTech": 100.0,
+        "composite": 1.277,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.288,
+        "funda": -1.67,
+        "wTech": 100.0,
+        "composite": 1.288,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.119,
+        "funda": -1.654,
+        "wTech": 100.0,
+        "composite": 1.119,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.21,
+        "funda": -2.02,
+        "wTech": 100.0,
+        "composite": 1.21,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.723,
+        "funda": -2.058,
+        "wTech": 100.0,
+        "composite": 1.723,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.753,
+        "funda": -1.52,
+        "wTech": 100.0,
+        "composite": 1.753,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.009,
+        "funda": -1.277,
+        "wTech": 100.0,
+        "composite": 1.009,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.106,
+        "funda": -0.298,
+        "wTech": 100.0,
+        "composite": 0.106,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -1.066,
+        "funda": 0.221,
+        "wTech": 0.0,
+        "composite": 0.221,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": -0.981,
+        "funda": -0.513,
+        "wTech": 0.0,
+        "composite": -0.513,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.595,
+        "funda": -0.886,
+        "wTech": 0.0,
+        "composite": -0.886,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.839,
+        "funda": -0.677,
+        "wTech": 0.0,
+        "composite": -0.677,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -1.023,
+        "funda": -0.042,
+        "wTech": 0.0,
+        "composite": -0.042,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.899,
+        "funda": 1.516,
+        "wTech": 0.0,
+        "composite": 1.516,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -1.831,
+        "funda": 1.323,
+        "wTech": 0.0,
+        "composite": 1.323,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": -1.766,
+        "funda": 1.58,
+        "wTech": 100.0,
+        "composite": -1.766,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-08",
+        "tech": -1.491,
+        "funda": 1.021,
+        "wTech": 100.0,
+        "composite": -1.491,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.855,
+        "funda": 0.789,
+        "wTech": 100.0,
+        "composite": -0.855,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.188,
+        "funda": 0.389,
+        "wTech": 0.0,
+        "composite": 0.389,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.848,
+        "funda": -0.578,
+        "wTech": 100.0,
+        "composite": 0.848,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": 1.471,
+        "funda": -0.009,
+        "wTech": 100.0,
+        "composite": 1.471,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 0.897,
+        "funda": -0.21,
+        "wTech": 0.0,
+        "composite": -0.21,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 0.966,
+        "funda": -0.918,
+        "wTech": 100.0,
+        "composite": 0.966,
+        "signal": "N"
+      },
+      {
+        "date": "2026-03",
+        "tech": 0.515,
+        "funda": -0.612,
+        "wTech": 0.0,
+        "composite": -0.612,
+        "signal": "N"
+      }
+    ],
+    "Info Tech": [
+      {
+        "date": "2024-04",
+        "tech": 0.631,
+        "funda": -1.172,
+        "wTech": 100.0,
+        "composite": 0.631,
+        "signal": "N"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.406,
+        "funda": -1.136,
+        "wTech": 100.0,
+        "composite": 0.406,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.575,
+        "funda": -1.229,
+        "wTech": 100.0,
+        "composite": 0.575,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.335,
+        "funda": -1.059,
+        "wTech": 0.0,
+        "composite": -1.059,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.14,
+        "funda": -0.726,
+        "wTech": 0.0,
+        "composite": -0.726,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 0.301,
+        "funda": -0.83,
+        "wTech": 100.0,
+        "composite": 0.301,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": 0.128,
+        "funda": -1.316,
+        "wTech": 100.0,
+        "composite": 0.128,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": -0.235,
+        "funda": 0.001,
+        "wTech": 0.0,
+        "composite": 0.001,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.511,
+        "funda": -0.22,
+        "wTech": 0.0,
+        "composite": -0.22,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": -1.078,
+        "funda": 0.568,
+        "wTech": 0.0,
+        "composite": 0.568,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -1.882,
+        "funda": 0.95,
+        "wTech": 0.0,
+        "composite": 0.95,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -2.595,
+        "funda": 2.268,
+        "wTech": 0.0,
+        "composite": 2.268,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-04",
+        "tech": -2.279,
+        "funda": 2.012,
+        "wTech": 0.0,
+        "composite": 2.012,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.691,
+        "funda": 1.55,
+        "wTech": 0.0,
+        "composite": 1.55,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.82,
+        "funda": 0.544,
+        "wTech": 0.0,
+        "composite": 0.544,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": 0.096,
+        "funda": 0.242,
+        "wTech": 0.0,
+        "composite": 0.242,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": 0.218,
+        "funda": 0.839,
+        "wTech": 0.0,
+        "composite": 0.839,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.626,
+        "funda": -0.102,
+        "wTech": 0.0,
+        "composite": -0.102,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 1.347,
+        "funda": -0.874,
+        "wTech": 100.0,
+        "composite": 1.347,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.729,
+        "funda": 0.637,
+        "wTech": 0.0,
+        "composite": 0.637,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.385,
+        "funda": 0.997,
+        "wTech": 0.0,
+        "composite": 0.997,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": 0.105,
+        "funda": 0.749,
+        "wTech": 100.0,
+        "composite": 0.105,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": -0.279,
+        "funda": 1.091,
+        "wTech": 0.0,
+        "composite": 1.091,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -0.135,
+        "funda": 0.33,
+        "wTech": 100.0,
+        "composite": -0.135,
+        "signal": "N"
+      }
+    ],
+    "Energy": [
+      {
+        "date": "2024-04",
+        "tech": -0.257,
+        "funda": 0.057,
+        "wTech": 0.0,
+        "composite": 0.057,
+        "signal": "N"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.103,
+        "funda": 0.133,
+        "wTech": 100.0,
+        "composite": 0.103,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": -0.218,
+        "funda": 0.198,
+        "wTech": 0.0,
+        "composite": 0.198,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": -0.385,
+        "funda": -0.402,
+        "wTech": 0.0,
+        "composite": -0.402,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": -0.49,
+        "funda": -0.222,
+        "wTech": 0.0,
+        "composite": -0.222,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": -0.838,
+        "funda": -0.273,
+        "wTech": 0.0,
+        "composite": -0.273,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": -0.699,
+        "funda": -1.79,
+        "wTech": 0.0,
+        "composite": -1.79,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-11",
+        "tech": -0.105,
+        "funda": -1.143,
+        "wTech": 100.0,
+        "composite": -0.105,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.597,
+        "funda": -0.389,
+        "wTech": 0.0,
+        "composite": -0.389,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": -0.843,
+        "funda": -0.658,
+        "wTech": 0.0,
+        "composite": -0.658,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.417,
+        "funda": -2.172,
+        "wTech": 0.0,
+        "composite": -2.172,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.42,
+        "funda": -2.706,
+        "wTech": 0.0,
+        "composite": -2.706,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-04",
+        "tech": -1.673,
+        "funda": 0.129,
+        "wTech": 100.0,
+        "composite": -1.673,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-05",
+        "tech": -2.29,
+        "funda": 0.616,
+        "wTech": 100.0,
+        "composite": -2.29,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -1.547,
+        "funda": -0.041,
+        "wTech": 0.0,
+        "composite": -0.041,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.938,
+        "funda": -0.585,
+        "wTech": 0.0,
+        "composite": -0.585,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.171,
+        "funda": -1.057,
+        "wTech": 0.0,
+        "composite": -1.057,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.357,
+        "funda": -1.112,
+        "wTech": 0.0,
+        "composite": -1.112,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.15,
+        "funda": -0.866,
+        "wTech": 0.0,
+        "composite": -0.866,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": -0.154,
+        "funda": -1.157,
+        "wTech": 0.0,
+        "composite": -1.157,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.589,
+        "funda": -0.582,
+        "wTech": 100.0,
+        "composite": 0.589,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": 1.717,
+        "funda": -3.263,
+        "wTech": 100.0,
+        "composite": 1.717,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": 2.646,
+        "funda": -3.263,
+        "wTech": 100.0,
+        "composite": 2.646,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 2.596,
+        "funda": -2.931,
+        "wTech": 100.0,
+        "composite": 2.596,
+        "signal": "OW"
+      }
+    ],
+    "Materials": [
+      {
+        "date": "2024-04",
+        "tech": 1.492,
+        "funda": -2.114,
+        "wTech": 100.0,
+        "composite": 1.492,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.671,
+        "funda": -2.021,
+        "wTech": 100.0,
+        "composite": 1.671,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.768,
+        "funda": -1.227,
+        "wTech": 0.0,
+        "composite": -1.227,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.541,
+        "funda": -1.767,
+        "wTech": 0.0,
+        "composite": -1.767,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.891,
+        "funda": -1.547,
+        "wTech": 100.0,
+        "composite": 0.891,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.444,
+        "funda": -1.695,
+        "wTech": 100.0,
+        "composite": 1.444,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.388,
+        "funda": -1.662,
+        "wTech": 100.0,
+        "composite": 1.388,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.493,
+        "funda": -0.525,
+        "wTech": 100.0,
+        "composite": 0.493,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -1.369,
+        "funda": 0.69,
+        "wTech": 0.0,
+        "composite": 0.69,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": -1.233,
+        "funda": 0.083,
+        "wTech": 0.0,
+        "composite": 0.083,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -1.254,
+        "funda": -0.258,
+        "wTech": 0.0,
+        "composite": -0.258,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -1.736,
+        "funda": -0.017,
+        "wTech": 0.0,
+        "composite": -0.017,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -1.743,
+        "funda": 0.337,
+        "wTech": 0.0,
+        "composite": 0.337,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.728,
+        "funda": 0.971,
+        "wTech": 0.0,
+        "composite": 0.971,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.962,
+        "funda": 0.922,
+        "wTech": 0.0,
+        "composite": 0.922,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.824,
+        "funda": 0.957,
+        "wTech": 0.0,
+        "composite": 0.957,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.352,
+        "funda": 0.414,
+        "wTech": 0.0,
+        "composite": 0.414,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.404,
+        "funda": 0.967,
+        "wTech": 0.0,
+        "composite": 0.967,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.865,
+        "funda": 1.838,
+        "wTech": 0.0,
+        "composite": 1.838,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": -0.86,
+        "funda": 1.211,
+        "wTech": 0.0,
+        "composite": 1.211,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.188,
+        "funda": 1.031,
+        "wTech": 100.0,
+        "composite": 0.188,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": 0.704,
+        "funda": -0.614,
+        "wTech": 100.0,
+        "composite": 0.704,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 1.813,
+        "funda": -1.851,
+        "wTech": 100.0,
+        "composite": 1.813,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 1.437,
+        "funda": -1.262,
+        "wTech": 100.0,
+        "composite": 1.437,
+        "signal": "OW"
+      }
+    ],
+    "Telecom": [
+      {
+        "date": "2024-04",
+        "tech": 0.82,
+        "funda": -1.238,
+        "wTech": 0.0,
+        "composite": -1.238,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.74,
+        "funda": -1.076,
+        "wTech": 100.0,
+        "composite": 0.74,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.714,
+        "funda": -0.913,
+        "wTech": 0.0,
+        "composite": -0.913,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.491,
+        "funda": -1.004,
+        "wTech": 0.0,
+        "composite": -1.004,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.43,
+        "funda": -0.74,
+        "wTech": 0.0,
+        "composite": -0.74,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 0.538,
+        "funda": -0.884,
+        "wTech": 100.0,
+        "composite": 0.538,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": 0.609,
+        "funda": -1.594,
+        "wTech": 100.0,
+        "composite": 0.609,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.656,
+        "funda": -0.302,
+        "wTech": 100.0,
+        "composite": 0.656,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.448,
+        "funda": -0.605,
+        "wTech": 100.0,
+        "composite": 0.448,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.423,
+        "funda": -0.565,
+        "wTech": 100.0,
+        "composite": 0.423,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.003,
+        "funda": -0.908,
+        "wTech": 0.0,
+        "composite": -0.908,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -1.722,
+        "funda": -0.225,
+        "wTech": 0.0,
+        "composite": -0.225,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -2.335,
+        "funda": 0.474,
+        "wTech": 0.0,
+        "composite": 0.474,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -2.319,
+        "funda": 1.593,
+        "wTech": 0.0,
+        "composite": 1.593,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -1.045,
+        "funda": 1.228,
+        "wTech": 0.0,
+        "composite": 1.228,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.765,
+        "funda": 2.251,
+        "wTech": 0.0,
+        "composite": 2.251,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.554,
+        "funda": 2.177,
+        "wTech": 0.0,
+        "composite": 2.177,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.285,
+        "funda": 0.743,
+        "wTech": 0.0,
+        "composite": 0.743,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.173,
+        "funda": 2.504,
+        "wTech": 0.0,
+        "composite": 2.504,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": -1.149,
+        "funda": 2.889,
+        "wTech": 0.0,
+        "composite": 2.889,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": -0.909,
+        "funda": 2.552,
+        "wTech": 0.0,
+        "composite": 2.552,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -1.241,
+        "funda": 1.844,
+        "wTech": 0.0,
+        "composite": 1.844,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -1.536,
+        "funda": 1.939,
+        "wTech": 0.0,
+        "composite": 1.939,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -1.693,
+        "funda": 1.587,
+        "wTech": 0.0,
+        "composite": 1.587,
+        "signal": "OW"
+      }
+    ],
+    "Utilities": [
+      {
+        "date": "2024-04",
+        "tech": 0.995,
+        "funda": -1.164,
+        "wTech": 0.0,
+        "composite": -1.164,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 2.449,
+        "funda": -2.205,
+        "wTech": 100.0,
+        "composite": 2.449,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 2.019,
+        "funda": -1.413,
+        "wTech": 100.0,
+        "composite": 2.019,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.856,
+        "funda": -2.394,
+        "wTech": 100.0,
+        "composite": 1.856,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 2.528,
+        "funda": -2.458,
+        "wTech": 100.0,
+        "composite": 2.528,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 2.845,
+        "funda": -2.322,
+        "wTech": 100.0,
+        "composite": 2.845,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 2.281,
+        "funda": -2.171,
+        "wTech": 100.0,
+        "composite": 2.281,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 1.822,
+        "funda": -1.33,
+        "wTech": 100.0,
+        "composite": 1.822,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.983,
+        "funda": -1.034,
+        "wTech": 100.0,
+        "composite": 0.983,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.801,
+        "funda": -0.959,
+        "wTech": 100.0,
+        "composite": 0.801,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.786,
+        "funda": -1.127,
+        "wTech": 100.0,
+        "composite": 0.786,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": 0.475,
+        "funda": -1.119,
+        "wTech": 100.0,
+        "composite": 0.475,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": 0.281,
+        "funda": -1.02,
+        "wTech": 100.0,
+        "composite": 0.281,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.076,
+        "funda": -0.624,
+        "wTech": 100.0,
+        "composite": 0.076,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 0.376,
+        "funda": -0.349,
+        "wTech": 100.0,
+        "composite": 0.376,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": 0.377,
+        "funda": -0.412,
+        "wTech": 100.0,
+        "composite": 0.377,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": 0.165,
+        "funda": -0.026,
+        "wTech": 0.0,
+        "composite": -0.026,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.008,
+        "funda": -0.115,
+        "wTech": 0.0,
+        "composite": -0.115,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.155,
+        "funda": -0.123,
+        "wTech": 0.0,
+        "composite": -0.123,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.038,
+        "funda": 0.148,
+        "wTech": 0.0,
+        "composite": 0.148,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": -0.188,
+        "funda": 1.189,
+        "wTech": 0.0,
+        "composite": 1.189,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -0.815,
+        "funda": 1.228,
+        "wTech": 0.0,
+        "composite": 1.228,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -0.049,
+        "funda": -0.187,
+        "wTech": 100.0,
+        "composite": -0.049,
+        "signal": "N"
+      },
+      {
+        "date": "2026-03",
+        "tech": 0.224,
+        "funda": -0.178,
+        "wTech": 100.0,
+        "composite": 0.224,
+        "signal": "N"
+      }
+    ]
+  }
+}

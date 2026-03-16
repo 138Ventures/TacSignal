@@ -521,7 +521,13 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
     with open(output_path, 'w') as f:
         json.dump(output, f, indent=2)
 
+    # Also save as tacsignal-latest.json (for auto-load on GitHub Pages)
+    latest_path = Path(output_path).parent / "tacsignal-latest.json"
+    with open(latest_path, 'w') as f:
+        json.dump(output, f, indent=2)
+
     print(f"\n✅ Saved to {output_path}")
+    print(f"   Also saved to {latest_path} (for GitHub Pages auto-load)")
     print(f"   {len(asset_results)} assets + {len(sector_results)} sectors")
     print(f"   Open the TacSignal dashboard → Import JSON → select this file")
 
