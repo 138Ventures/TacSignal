@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TacSignal — Tactical Asset Allocation Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.2.1/math.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap');
+
+  :root {
+    --bg-0: #06090f;
+    --bg-1: #0c1220;
+    --bg-2: #111a2e;
+    --bg-3: #172035;
+    --bg-hover: #1c2842;
+    --border-1: #1a2744;
+    --border-2: #243354;
+    --text-0: #f1f5f9;
+    --text-1: #cbd5e1;
+    --text-2: #8b9dc3;
+    --text-3: #5a6f94;
+    --green: #34d399;
+    --green-dim: rgba(52,211,153,0.12);
+    --green-glow: rgba(52,211,153,0.35);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.12);
+    --red-glow: rgba(248,113,113,0.35);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251,191,36,0.10);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.12);
+    --purple: #a78bfa;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Instrument Sans', sans-serif;
+    --serif: 'Newsreader', serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { font-size: 15px; }
+  body { font-family: var(--sans); background: var(--bg-0); color: var(--text-1); min-height:100vh; }
+
+  /* ═══ SCROLLBAR ═══ */
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border-1); border-radius:3px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--border-2); }
+
+  /* ═══ HEADER ═══ */
+  header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 32px; border-bottom:1px solid var(--border-1);
+    background:linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%);
+    position:sticky; top:0; z-index:100; backdrop-filter:blur(16px);
+  }
+  .logo { display:flex; align-items:baseline; gap:10px; }
+  .logo h1 { font-family:var(--mono); font-size:18px; font-weight:700; color:var(--text-0); letter-spacing:-0.5px; }
+  .logo h1 em { font-style:normal; color:var(--blue); }
+  .logo .sub { font-family:var(--mono); font-size:10px; color:var(--text-3); letter-spacing:0.5px; text-transform:uppercase; }
+  .header-right { display:flex; gap:8px; align-items:center; }
+  .header-date { font-family:var(--mono); font-size:10px; color:var(--text-3); margin-right:8px; }
+
+  /* ═══ BUTTONS ═══ */
+  .btn {
+    font-family:var(--mono); font-size:10px; font-weight:500;
+    padding:6px 12px; border-radius:5px; border:1px solid var(--border-1);
+    background:var(--bg-2); color:var(--text-2); cursor:pointer; transition:all 0.12s;
+    white-space:nowrap;
+  }
+  .btn:hover { background:var(--bg-3); color:var(--text-0); border-color:var(--border-2); }
+  .btn-accent { background:var(--blue-dim); color:var(--blue); border-color:rgba(96,165,250,0.3); }
+  .btn-accent:hover { background:rgba(96,165,250,0.2); }
+
+  /* ═══ NAV TABS ═══ */
+  nav {
+    display:flex; gap:0; border-bottom:1px solid var(--border-1); background:var(--bg-1);
+    padding:0 32px; position:sticky; top:55px; z-index:99;
+  }
+  nav .nav-tab {
+    font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:0.3px;
+    padding:12px 20px; color:var(--text-3); cursor:pointer; border-bottom:2px solid transparent;
+    transition:all 0.12s; user-select:none;
+  }
+  nav .nav-tab:hover { color:var(--text-2); }
+  nav .nav-tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+
+  /* ═══ MAIN ═══ */
+  main { max-width:1520px; margin:0 auto; padding:24px 32px 80px; }
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ═══ PANELS ═══ */
+  .panel {
+    background:var(--bg-2); border:1px solid var(--border-1); border-radius:10px;
+    overflow:hidden; transition:border-color 0.2s;
+  }
+  .panel:hover { border-color:var(--border-2); }
+  .panel-head {
+    padding:12px 18px; border-bottom:1px solid var(--border-1);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .panel-title {
+    font-family:var(--mono); font-size:10px; font-weight:600;
+    text-transform:uppercase; letter-spacing:1px; color:var(--text-3);
+  }
+  .panel-body { padding:18px; }
+
+  /* ═══ GRID ═══ */
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+  .g4 { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:16px; }
+  .full { margin-bottom:16px; }
+
+  @media (max-width:1200px) { .g2,.g3,.g4 { grid-template-columns:1fr; } main { padding:16px; } }
+
+  /* ═══ SIGNAL STRIP ═══ */
+  .section-label {
+    font-family:var(--mono); font-size:10px; font-weight:600;
+    text-transform:uppercase; letter-spacing:1.5px; color:var(--text-3);
+    margin-bottom:10px; margin-top:4px;
+  }
+  .signal-strip { display:flex; gap:6px; margin-bottom:18px; overflow-x:auto; padding-bottom:4px; }
+  .sig-card {
+    flex:0 0 auto; min-width:122px; padding:10px 14px;
+    background:var(--bg-2); border:1px solid var(--border-1); border-radius:8px;
+    cursor:pointer; transition:all 0.15s; position:relative;
+  }
+  .sig-card:hover { background:var(--bg-hover); transform:translateY(-1px); }
+  .sig-card.selected { border-color:var(--blue); box-shadow:0 0 12px var(--blue-dim); }
+  .sig-card .sc-name { font-family:var(--mono); font-size:9px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; }
+  .sig-card .sc-signal { display:flex; align-items:center; gap:5px; margin-bottom:3px; }
+  .sig-card .sc-dot { width:7px; height:7px; border-radius:50%; }
+  .sig-card .sc-label { font-family:var(--mono); font-size:10px; font-weight:600; }
+  .sig-card .sc-val { font-family:var(--mono); font-size:16px; font-weight:700; margin-top:2px; }
+  .sig-card .sc-delta { font-family:var(--mono); font-size:9px; position:absolute; top:8px; right:10px; }
+
+  .sig-ow .sc-dot { background:var(--green); box-shadow:0 0 6px var(--green-glow); }
+  .sig-ow .sc-label { color:var(--green); }
+  .sig-ow .sc-val { color:var(--green); }
+  .sig-uw .sc-dot { background:var(--red); box-shadow:0 0 6px var(--red-glow); }
+  .sig-uw .sc-label { color:var(--red); }
+  .sig-uw .sc-val { color:var(--red); }
+  .sig-n .sc-dot { background:var(--amber); }
+  .sig-n .sc-label { color:var(--amber); }
+  .sig-n .sc-val { color:var(--text-2); }
+
+  /* ═══ STAT BOXES ═══ */
+  .stats { display:flex; gap:20px; margin-bottom:18px; }
+  .stat { display:flex; flex-direction:column; gap:1px; }
+  .stat-label { font-family:var(--mono); font-size:9px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.5px; }
+  .stat-val { font-family:var(--mono); font-size:22px; font-weight:700; }
+
+  /* ═══ FORMULA BAR ═══ */
+  .formula-bar {
+    background:var(--bg-1); border:1px solid var(--border-1); border-radius:8px;
+    padding:12px 18px; margin-bottom:18px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  }
+  .formula-bar .formula { font-family:var(--mono); font-size:12px; color:var(--text-2); }
+  .formula-bar .formula em { color:var(--blue); font-style:normal; font-weight:600; }
+  .formula-bar .formula .op { color:var(--text-3); }
+  .fb-group { display:flex; align-items:center; gap:6px; }
+  .fb-group label { font-family:var(--mono); font-size:9px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.4px; }
+  .fb-group input[type="number"] {
+    font-family:var(--mono); font-size:11px; background:var(--bg-2); border:1px solid var(--border-1);
+    color:var(--text-0); width:52px; padding:4px 6px; border-radius:4px; text-align:center;
+  }
+  .fb-group input:focus { outline:none; border-color:var(--blue); }
+
+  /* ═══ CANVAS ═══ */
+  .scatter-wrap { position:relative; width:100%; height:0; padding-bottom:76%; overflow:hidden; }
+  .scatter-wrap canvas { position:absolute; top:0; left:0; width:100%; height:100%; }
+
+  /* ═══ TABLE ═══ */
+  .tbl-scroll { max-height:520px; overflow-y:auto; }
+  .dtable { width:100%; border-collapse:collapse; }
+  .dtable th {
+    font-family:var(--mono); font-size:9px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.6px; color:var(--text-3); padding:7px 10px; text-align:left;
+    border-bottom:1px solid var(--border-1); position:sticky; top:0; background:var(--bg-2); z-index:2;
+  }
+  .dtable th.r, .dtable td.r { text-align:right; }
+  .dtable td {
+    font-family:var(--mono); font-size:11px; padding:8px 10px;
+    border-bottom:1px solid rgba(26,39,68,0.5); color:var(--text-2); transition:background 0.08s;
+  }
+  .dtable tr:hover td { background:rgba(96,165,250,0.03); }
+  .dtable td.name { color:var(--text-0); font-weight:500; }
+  .dtable input {
+    font-family:var(--mono); font-size:11px; background:transparent; border:1px solid transparent;
+    color:var(--text-2); width:56px; padding:2px 4px; border-radius:3px; text-align:right;
+  }
+  .dtable input:focus { outline:none; border-color:var(--blue); color:var(--text-0); background:rgba(96,165,250,0.05); }
+  .pos { color:var(--green) !important; }
+  .neg { color:var(--red) !important; }
+
+  .badge {
+    display:inline-flex; align-items:center; gap:4px; font-family:var(--mono);
+    font-size:9px; font-weight:600; padding:2px 7px; border-radius:3px;
+    text-transform:uppercase; letter-spacing:0.3px;
+  }
+  .badge.ow { background:var(--green-dim); color:var(--green); }
+  .badge.uw { background:var(--red-dim); color:var(--red); }
+  .badge.ne { background:var(--amber-dim); color:var(--amber); }
+
+  /* ═══ TOOLTIP ═══ */
+  #tt {
+    position:fixed; background:var(--bg-1); border:1px solid var(--border-2);
+    border-radius:8px; padding:10px 14px; pointer-events:none;
+    font-family:var(--mono); font-size:10px; z-index:1000;
+    box-shadow:0 12px 40px rgba(0,0,0,0.6); display:none; min-width:180px;
+  }
+  #tt .ttn { font-weight:700; color:var(--text-0); margin-bottom:6px; font-size:11px; }
+  #tt .ttr { display:flex; justify-content:space-between; gap:14px; margin-bottom:2px; }
+  #tt .ttl { color:var(--text-3); }
+  #tt .ttv { color:var(--text-1); font-weight:500; }
+
+  /* ═══ DETAIL PANEL ═══ */
+  .detail-panel {
+    background:var(--bg-2); border:1px solid var(--border-1); border-radius:10px;
+    padding:20px; display:none;
+  }
+  .detail-panel.visible { display:block; }
+  .detail-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .detail-name { font-family:var(--mono); font-size:16px; font-weight:700; color:var(--text-0); }
+  .detail-close { cursor:pointer; font-family:var(--mono); font-size:12px; color:var(--text-3); padding:4px 8px; border-radius:4px; border:1px solid var(--border-1); background:var(--bg-3); }
+  .detail-close:hover { color:var(--text-0); }
+  .detail-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; }
+  .detail-metric { padding:10px 12px; background:var(--bg-1); border-radius:6px; border:1px solid var(--border-1); }
+  .detail-metric .dm-label { font-family:var(--mono); font-size:9px; color:var(--text-3); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:4px; }
+  .detail-metric .dm-val { font-family:var(--mono); font-size:18px; font-weight:700; }
+  .detail-metric .dm-sub { font-family:var(--mono); font-size:9px; color:var(--text-3); margin-top:2px; }
+
+  /* ═══ SENSITIVITY SLIDER ═══ */
+  .sensitivity-row { display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .slider-group { display:flex; align-items:center; gap:8px; }
+  .slider-group label { font-family:var(--mono); font-size:10px; color:var(--text-3); min-width:60px; }
+  .slider-group input[type="range"] { width:140px; accent-color:var(--blue); }
+  .slider-group .sv { font-family:var(--mono); font-size:11px; color:var(--text-1); font-weight:600; min-width:36px; }
+
+  /* ═══ METHODOLOGY PAGE ═══ */
+  .method-content { max-width:820px; }
+  .method-content h2 {
+    font-family:var(--serif); font-size:26px; font-weight:600; color:var(--text-0);
+    margin-bottom:16px; margin-top:36px; letter-spacing:-0.3px;
+  }
+  .method-content h2:first-child { margin-top:0; }
+  .method-content h3 {
+    font-family:var(--serif); font-size:18px; font-weight:600; color:var(--text-0);
+    margin-bottom:10px; margin-top:24px;
+  }
+  .method-content p {
+    font-family:var(--sans); font-size:14px; color:var(--text-1); line-height:1.7;
+    margin-bottom:14px;
+  }
+  .method-content .eq-block {
+    background:var(--bg-1); border:1px solid var(--border-1); border-radius:8px;
+    padding:16px 22px; margin:16px 0; font-family:var(--mono); font-size:14px;
+    color:var(--blue); line-height:2;
+  }
+  .method-content .eq-block .note {
+    font-size:11px; color:var(--text-3); margin-top:8px; font-style:italic;
+    font-family:var(--sans);
+  }
+  .method-content ul { margin:10px 0 14px 24px; }
+  .method-content li {
+    font-family:var(--sans); font-size:14px; color:var(--text-1); line-height:1.7;
+    margin-bottom:6px;
+  }
+  .method-content li strong { color:var(--text-0); font-weight:600; }
+  .method-content code {
+    font-family:var(--mono); font-size:12px; background:var(--bg-1); color:var(--purple);
+    padding:1px 5px; border-radius:3px;
+  }
+  .method-content .callout {
+    background:var(--blue-dim); border:1px solid rgba(96,165,250,0.2); border-radius:8px;
+    padding:14px 18px; margin:16px 0;
+  }
+  .method-content .callout p { margin-bottom:0; color:var(--text-1); }
+  .method-content .callout strong { color:var(--blue); }
+  .method-content .warn-callout {
+    background:var(--amber-dim); border:1px solid rgba(251,191,36,0.2); border-radius:8px;
+    padding:14px 18px; margin:16px 0;
+  }
+  .method-content .warn-callout p { margin-bottom:0; }
+  .method-content .warn-callout strong { color:var(--amber); }
+
+  /* ═══ DATA SOURCES TABLE ═══ */
+  .ds-table { width:100%; border-collapse:collapse; margin:14px 0; }
+  .ds-table th {
+    font-family:var(--mono); font-size:10px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.5px; color:var(--text-3); padding:8px 12px; text-align:left;
+    border-bottom:1px solid var(--border-1); background:var(--bg-2);
+  }
+  .ds-table td {
+    font-family:var(--sans); font-size:13px; padding:8px 12px;
+    border-bottom:1px solid rgba(26,39,68,0.4); color:var(--text-2);
+  }
+  .ds-table td:first-child { font-weight:600; color:var(--text-0); font-family:var(--mono); font-size:12px; }
+  .ds-table tr:hover td { background:rgba(96,165,250,0.03); }
+
+  /* ═══ CSV IMPORT AREA ═══ */
+  .csv-area {
+    width:100%; min-height:120px; background:var(--bg-1); border:1px dashed var(--border-2);
+    border-radius:8px; padding:12px; font-family:var(--mono); font-size:11px;
+    color:var(--text-2); resize:vertical;
+  }
+  .csv-area:focus { outline:none; border-color:var(--blue); border-style:solid; }
+  .csv-hint { font-family:var(--mono); font-size:10px; color:var(--text-3); margin-top:6px; }
+
+  /* ═══ SCENARIO ═══ */
+  .scenario-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .scenario-result {
+    padding:14px; background:var(--bg-1); border:1px solid var(--border-1); border-radius:8px;
+  }
+  .scenario-result .sr-title { font-family:var(--mono); font-size:10px; color:var(--text-3); text-transform:uppercase; margin-bottom:6px; }
+  .scenario-result .sr-val { font-family:var(--mono); font-size:28px; font-weight:700; }
+
+  /* ═══ WATERFALL ═══ */
+  .waterfall-row {
+    display:flex; align-items:center; gap:10px; margin-bottom:6px;
+    font-family:var(--mono); font-size:11px;
+  }
+  .waterfall-label { width:120px; color:var(--text-3); text-align:right; flex-shrink:0; }
+  .waterfall-bar-wrap { flex:1; height:20px; position:relative; background:var(--bg-1); border-radius:3px; overflow:hidden; }
+  .waterfall-bar { height:100%; border-radius:3px; position:absolute; transition:width 0.3s; }
+  .waterfall-val { width:60px; text-align:right; font-weight:600; flex-shrink:0; }
+
+  /* ═══ HIDDEN FILE INPUT ═══ */
+  #importFile, #csvFile { display:none; }
+
+  /* anim */
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .fade-in { animation: fadeIn 0.3s ease-out; }
+</style>
+</head>
+<body>
+
+<div id="tt"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <div class="logo">
+    <h1><em>TAC</em>SIGNAL</h1>
+    <span class="sub">Tactical Asset Allocation</span>
+  </div>
+  <div class="header-right">
+    <span class="header-date" id="hDate"></span>
+    <button class="btn" onclick="resetSample()">Sample Data</button>
+    <button class="btn" onclick="document.getElementById('csvFile').click()">Import CSV</button>
+    <button class="btn" onclick="exportJSON()">Export JSON</button>
+    <button class="btn" onclick="importJSON()">Import JSON</button>
+    <input type="file" id="importFile" accept=".json">
+    <input type="file" id="csvFile" accept=".csv,.tsv,.txt">
+  </div>
+</header>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nav-tab active" data-page="dashboard" onclick="goPage('dashboard',this)">Dashboard</div>
+  <div class="nav-tab" data-page="data" onclick="goPage('data',this)">Data Grid</div>
+  <div class="nav-tab" data-page="history" onclick="goPage('history',this)">History</div>
+  <div class="nav-tab" data-page="scenario" onclick="goPage('scenario',this)">What-If Scenario</div>
+  <div class="nav-tab" data-page="method" onclick="goPage('method',this)">Methodology</div>
+  <div class="nav-tab" data-page="sources" onclick="goPage('sources',this)">Data Sources</div>
+</nav>
+
+<main>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- DASHBOARD PAGE -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page active" id="pg-dashboard">
+
+  <div class="formula-bar">
+    <div class="formula">
+      <em>S</em> <span class="op">=</span> <em>w</em><sub>tech</sub> <span class="op">&times;</span> <em>Z</em><sub>tech</sub> <span class="op">+</span> <span class="op">(</span>1 <span class="op">&minus;</span> <em>w</em><sub>tech</sub><span class="op">)</span> <span class="op">&times;</span> <em>Z</em><sub>funda</sub>
+    </div>
+    <div class="fb-group">
+      <label>OW &gt;</label>
+      <input type="number" id="thOW" value="1" step="0.1" min="0" max="4" onchange="recalc()">
+    </div>
+    <div class="fb-group">
+      <label>UW &lt;</label>
+      <input type="number" id="thUW" value="-1" step="0.1" min="-4" max="0" onchange="recalc()">
+    </div>
+  </div>
+
+  <div class="stats" id="statsRow"></div>
+
+  <div class="section-label">Asset Classes</div>
+  <div class="signal-strip" id="stripAssets"></div>
+
+  <div class="section-label">U.S. Equity Sectors</div>
+  <div class="signal-strip" id="stripSectors"></div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel full" id="detailPanel">
+    <div class="detail-header">
+      <span class="detail-name" id="detailName"></span>
+      <button class="detail-close" onclick="closeDetail()">Close</button>
+    </div>
+    <div class="detail-grid" id="detailGrid"></div>
+    <div style="margin-top:16px">
+      <div class="section-label">Signal Decomposition</div>
+      <div id="detailWaterfall"></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Asset Classes — Signal Map</span>
+        <div style="display:flex; gap:12px; align-items:center">
+          <span style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text-3)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green)"></span>OW</span>
+          <span style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text-3)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red)"></span>UW</span>
+          <span style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text-3)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber)"></span>N</span>
+        </div>
+      </div>
+      <div class="panel-body"><div class="scatter-wrap"><canvas id="cvAssets"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">U.S. Sectors — Signal Map</span>
+        <div style="display:flex; gap:12px; align-items:center">
+          <span style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text-3)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green)"></span>OW</span>
+          <span style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text-3)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red)"></span>UW</span>
+          <span style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--text-3)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber)"></span>N</span>
+        </div>
+      </div>
+      <div class="panel-body"><div class="scatter-wrap"><canvas id="cvSectors"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- DATA GRID PAGE -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="pg-data">
+  <div class="section-label">Asset Classes — Editable</div>
+  <div class="panel full">
+    <div class="tbl-scroll"><table class="dtable" id="tblAssets"></table></div>
+  </div>
+  <div class="section-label" style="margin-top:20px">U.S. Equity Sectors — Editable</div>
+  <div class="panel full">
+    <div class="tbl-scroll"><table class="dtable" id="tblSectors"></table></div>
+  </div>
+  <div style="margin-top:16px">
+    <div class="section-label">Quick Import — Paste CSV</div>
+    <textarea class="csv-area" id="csvPaste" placeholder="name,tech,funda,wTech&#10;Equity CH,1.19,-0.44,0&#10;Equity U.S.,0.42,-1.03,100&#10;..."></textarea>
+    <div class="csv-hint">Format: name, tech_score, funda_score, w_tech_pct &nbsp;(optional: prev_tech, prev_funda)</div>
+    <button class="btn btn-accent" style="margin-top:8px" onclick="parseCSVPaste()">Parse &amp; Load</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- HISTORY PAGE -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="pg-history">
+  <div class="method-content" style="max-width:100%">
+    <h2 style="margin-top:0">Signal History</h2>
+    <p id="historyInfo">Showing sample history data (Oct 2022 – Sep 2024). Import a JSON from the Python pipeline to replace with live data.</p>
+  </div>
+
+  <div class="full" style="margin-top:12px">
+    <div class="fb-group" style="margin-bottom:14px">
+      <label>Select Asset</label>
+      <select id="histAssetSelect" onchange="drawHistory()" style="font-family:var(--mono);font-size:11px;background:var(--bg-2);border:1px solid var(--border-1);color:var(--text-0);padding:5px 10px;border-radius:4px;min-width:200px">
+        <option value="">— no history data —</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Composite Signal Over Time</span></div>
+      <div class="panel-body"><div class="scatter-wrap" style="padding-bottom:55%"><canvas id="cvHistComposite"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Technical vs Fundamental Z-Scores</span></div>
+      <div class="panel-body"><div class="scatter-wrap" style="padding-bottom:55%"><canvas id="cvHistScores"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Phase Diagram (Tech × Funda Trajectory)</span></div>
+      <div class="panel-body"><div class="scatter-wrap"><canvas id="cvHistPhase"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Signal Timeline</span></div>
+      <div class="panel-body">
+        <div id="histSignalTimeline" style="font-family:var(--mono);font-size:11px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- WHAT-IF SCENARIO PAGE -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="pg-scenario">
+  <div class="method-content">
+    <h2>What-If Scenario Analysis</h2>
+    <p>Adjust technical and fundamental shocks to see how signals shift across the entire universe. This simulates uniform or targeted z-score shifts — useful for stress-testing a macro view (e.g. "what if technicals deteriorate across the board by 1σ?").</p>
+  </div>
+
+  <div class="full panel" style="margin-top:16px">
+    <div class="panel-head"><span class="panel-title">Global Shocks</span></div>
+    <div class="panel-body">
+      <div class="sensitivity-row">
+        <div class="slider-group">
+          <label>Tech Shock</label>
+          <input type="range" id="shockTech" min="-3" max="3" step="0.1" value="0" oninput="runScenario()">
+          <span class="sv" id="shockTechVal">0.0</span>
+        </div>
+        <div class="slider-group">
+          <label>Funda Shock</label>
+          <input type="range" id="shockFunda" min="-3" max="3" step="0.1" value="0" oninput="runScenario()">
+          <span class="sv" id="shockFundaVal">0.0</span>
+        </div>
+        <div class="slider-group">
+          <label>w_tech Override</label>
+          <input type="range" id="shockW" min="-1" max="100" step="1" value="-1" oninput="runScenario()">
+          <span class="sv" id="shockWVal">Off</span>
+        </div>
+        <button class="btn" onclick="document.getElementById('shockTech').value=0;document.getElementById('shockFunda').value=0;document.getElementById('shockW').value=-1;runScenario()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="g4" id="scenarioStats"></div>
+
+  <div class="g2">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Scenario — Assets</span></div>
+      <div class="panel-body"><div class="scatter-wrap"><canvas id="cvScenAssets"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Scenario — Sectors</span></div>
+      <div class="panel-body"><div class="scatter-wrap"><canvas id="cvScenSectors"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="panel full" style="margin-top:16px">
+    <div class="panel-head"><span class="panel-title">Signal Changes from Base</span></div>
+    <div class="tbl-scroll">
+      <table class="dtable" id="tblScenario"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- METHODOLOGY PAGE -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="pg-method">
+  <div class="method-content fade-in">
+
+    <h2>Signal Framework — The Mathematics</h2>
+    <p>This dashboard implements a tactical asset allocation (TAA) signal framework inspired by the BhFS Behavioural Finance Solutions methodology. It combines two orthogonal information sources — technical momentum and fundamental valuation — into a single composite signal using a behaviorally-determined weighting function.</p>
+
+    <h3>1. Z-Score Normalization</h3>
+    <p>Both technical and fundamental indicators are converted into z-scores by measuring how many standard deviations the current value deviates from its historical mean, using a rolling 2-year (24-month) window:</p>
+
+    <div class="eq-block">
+      Z<sub>tech</sub>(t) = ( X<sub>tech</sub>(t) − μ<sub>tech</sub> ) / σ<sub>tech</sub>
+      <br>
+      Z<sub>funda</sub>(t) = ( X<sub>funda</sub>(t) − μ<sub>funda</sub> ) / σ<sub>funda</sub>
+      <div class="note">Where μ and σ are computed over a trailing 24-month window. Scores range from approximately −4 to +4.</div>
+    </div>
+
+    <p>The z-score normalization is critical: it puts all asset classes on a common scale regardless of whether the underlying indicator is a P/E ratio, a moving average crossover, or a yield spread. A score of +2 means "2 standard deviations above the 2-year mean" for any asset class.</p>
+
+    <h3>2. Technical Indicators (Z<sub>tech</sub>)</h3>
+    <p>Technical scores capture price momentum and trend-following signals. Common components include:</p>
+    <ul>
+      <li><strong>Moving Average Crossovers:</strong> Ratios of short-term (e.g. 50-day) to long-term (e.g. 200-day) moving averages. When the short MA is above the long MA, the signal is positive.</li>
+      <li><strong>Price Momentum:</strong> Trailing 6-month and 12-month returns, often with the most recent month excluded to avoid short-term reversal effects (the "12-1 momentum" factor).</li>
+      <li><strong>Trend Strength:</strong> Measures like the slope of a regression line through recent prices, or the fraction of time the price was above its moving average.</li>
+    </ul>
+    <p>These components are typically combined into a single composite technical indicator, then z-scored.</p>
+
+    <h3>3. Fundamental Indicators (Z<sub>funda</sub>)</h3>
+    <p>Fundamental scores capture valuation and macro signals. Common components include:</p>
+    <ul>
+      <li><strong>Valuation Ratios:</strong> Earnings yield (inverse P/E), book-to-price, dividend yield — all measured relative to their own history.</li>
+      <li><strong>Macro Indicators:</strong> PMI, yield curve slope, credit spreads, relative GDP growth, current account balances.</li>
+      <li><strong>Earnings Momentum:</strong> Revisions in consensus earnings estimates — the direction and magnitude of analyst forecast changes.</li>
+    </ul>
+
+    <h3>4. Behavioral Weighting Function (w<sub>tech</sub>)</h3>
+    <p>This is the distinctive element of the BhFS approach. Rather than using a fixed weighting between technical and fundamental signals, the weight <code>w_tech</code> is determined by a <em>behavioural objective function</em> that adapts based on market conditions.</p>
+
+    <div class="eq-block">
+      w<sub>tech</sub> ∈ [0, 1]
+      <div class="note">The weight on the technical score, computed via a behavioral objective function. The remaining weight (1 − w_tech) goes to fundamentals.</div>
+    </div>
+
+    <p>The intuition is that in trend-following regimes (strong momentum, low volatility), technicals should dominate — markets are "following the herd." In mean-reverting regimes (high volatility, value dislocations), fundamentals should dominate — markets are "coming to their senses." The BhFS approach uses insights from behavioral finance to determine this allocation automatically.</p>
+
+    <div class="callout">
+      <p><strong>Key insight:</strong> In the sample data, notice how w_tech is often 0% or 100% — this is binary regime detection. Either the technical signal is deemed reliable (w=100%, fundamentals ignored) or unreliable (w=0%, pure fundamental signal). This reflects the academic finding that regime switches tend to be sharp, not gradual.</p>
+    </div>
+
+    <h3>5. Composite Signal</h3>
+    <p>The final composite signal is the weighted average of the two z-scores:</p>
+
+    <div class="eq-block">
+      S = w<sub>tech</sub> × Z<sub>tech</sub> + (1 − w<sub>tech</sub>) × Z<sub>funda</sub>
+    </div>
+
+    <h3>6. Signal Classification</h3>
+    <p>The composite score S is converted into a discrete signal using symmetric thresholds:</p>
+
+    <div class="eq-block">
+      Signal = OVERWEIGHT &nbsp;if S &gt; τ<sub>OW</sub> &nbsp;(default: +1.0)
+      <br>
+      Signal = UNDERWEIGHT if S &lt; τ<sub>UW</sub> &nbsp;(default: −1.0)
+      <br>
+      Signal = NEUTRAL &nbsp;&nbsp;&nbsp;&nbsp;otherwise
+      <div class="note">The default thresholds of ±1 correspond to ±1 standard deviation — roughly the top/bottom 16% of the historical distribution. Adjustable in the formula bar.</div>
+    </div>
+
+    <p>This means the system only generates active positions when conviction is high — the composite score must exceed a full standard deviation. The neutral zone (between −1 and +1) acts as a dead band that prevents whipsawing on marginal signals.</p>
+
+    <h3>7. Signal Map Interpretation</h3>
+    <p>The scatter plots show each asset positioned by its technical score (x-axis) and fundamental score (y-axis). Key quadrants:</p>
+    <ul>
+      <li><strong>Top-right (+/+):</strong> Both momentum and value are favorable — highest conviction overweight.</li>
+      <li><strong>Bottom-left (−/−):</strong> Both unfavorable — highest conviction underweight.</li>
+      <li><strong>Top-left (−/+):</strong> Cheap but falling — potential value trap or contrarian opportunity.</li>
+      <li><strong>Bottom-right (+/−):</strong> Expensive but rising — momentum play, potentially vulnerable to reversal.</li>
+    </ul>
+    <p>The arrows show the direction of travel since the previous month, revealing whether an asset is improving or deteriorating on each dimension.</p>
+
+    <h3>8. Limitations &amp; Caveats</h3>
+    <div class="warn-callout">
+      <p><strong>This framework is a decision-support tool, not a trading system.</strong> Important limitations:</p>
+    </div>
+    <ul>
+      <li>Z-scores assume a stationary distribution over the 2-year window — structural breaks (COVID, rate regime changes) can distort normalization.</li>
+      <li>The ±1σ thresholds are arbitrary and not optimized — they represent a reasonable prior, not a calibrated model.</li>
+      <li>The behavioral weighting function <code>w_tech</code> is a black box from BhFS — this dashboard lets you override it, but the proprietary logic is not replicated.</li>
+      <li>No transaction costs, implementation lag, or capacity constraints are considered.</li>
+      <li>Past z-score patterns do not guarantee future signal quality.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- DATA SOURCES PAGE -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="pg-sources">
+  <div class="method-content fade-in">
+
+    <h2>Data Sources &amp; Required Inputs</h2>
+    <p>To run this signal framework with live data, you need two categories of inputs for each asset class: a technical indicator composite and a fundamental indicator composite. Below are specific, actionable data sources.</p>
+
+    <h3>Asset Class Universe &amp; Bloomberg Tickers</h3>
+    <table class="ds-table">
+      <thead>
+        <tr><th>Asset</th><th>Benchmark Index</th><th>Bloomberg Ticker</th><th>Yahoo Finance Proxy</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Equity CH</td><td>SPI Total Return</td><td>SPI Index</td><td>^SSMI</td></tr>
+        <tr><td>Equity EU ex CH</td><td>MSCI Europe ex CH</td><td>MXEUC Index</td><td>EZU (ETF)</td></tr>
+        <tr><td>Equity U.S.</td><td>S&P 500</td><td>SPX Index</td><td>^GSPC</td></tr>
+        <tr><td>Equity Japan</td><td>MSCI Japan</td><td>MXJP Index</td><td>EWJ (ETF)</td></tr>
+        <tr><td>Equity Asia-Pac</td><td>MSCI AC Asia-Pac ex JP</td><td>MXAPJ Index</td><td>AAXJ (ETF)</td></tr>
+        <tr><td>Equity EM</td><td>MSCI Emerging Markets</td><td>MXEF Index</td><td>EEM (ETF)</td></tr>
+        <tr><td>Bond CH</td><td>SBI Domestic AAA-BBB</td><td>SBR14T Index</td><td>—</td></tr>
+        <tr><td>Bond EU</td><td>Euro Aggregate</td><td>LEGATRUU Index</td><td>AGG (US proxy)</td></tr>
+        <tr><td>Bond U.S.</td><td>Bloomberg US Agg</td><td>LBUSTRUU Index</td><td>AGG</td></tr>
+        <tr><td>Bond Japan</td><td>Japan Govt Bond</td><td>JNBIG Index</td><td>BNDX (global ex-US)</td></tr>
+        <tr><td>Gold</td><td>Gold Spot USD/oz</td><td>XAU Curncy</td><td>GC=F</td></tr>
+        <tr><td>Oil</td><td>WTI Crude</td><td>CL1 Comdty</td><td>CL=F</td></tr>
+        <tr><td>Euro</td><td>EUR/CHF</td><td>EURCHF Curncy</td><td>EURCHF=X</td></tr>
+        <tr><td>U.S. Dollar</td><td>USD/CHF</td><td>USDCHF Curncy</td><td>CHF=X</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Technical Score — How to Compute</h3>
+    <p>For each asset, you need price history to compute momentum signals. Here's a practical recipe:</p>
+    <div class="eq-block">
+      raw_tech = 0.5 × (P / SMA_200 − 1) + 0.3 × mom_12_1 + 0.2 × (SMA_50 / SMA_200 − 1)
+      <br><br>
+      Z_tech = (raw_tech − mean(raw_tech, 24m)) / std(raw_tech, 24m)
+      <div class="note">
+        SMA_200 = 200-day simple moving average<br>
+        mom_12_1 = 12-month return excluding most recent month<br>
+        SMA_50 = 50-day simple moving average<br>
+        All z-scored over a trailing 24-month window of monthly observations.
+      </div>
+    </div>
+
+    <h3>Fundamental Score — How to Compute</h3>
+    <p>Fundamental inputs vary by asset class:</p>
+
+    <table class="ds-table">
+      <thead>
+        <tr><th>Asset Type</th><th>Indicators</th><th>Free Data Source</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Equities</td><td>Earnings yield, book-to-price, dividend yield, earnings revision ratio</td><td>Yahoo Finance (trailing P/E, P/B); FRED (Shiller CAPE); IBES via Refinitiv</td></tr>
+        <tr><td>Bonds</td><td>Real yield, term spread, credit spread</td><td>FRED (DGS10, T10YIE, BAMLC0A4CBBB)</td></tr>
+        <tr><td>Commodities</td><td>Roll yield, inventory levels, real price vs. trend</td><td>EIA (oil inventories); FRED; COMEX (gold)</td></tr>
+        <tr><td>Currencies</td><td>Real effective exchange rate, interest rate differential, current account</td><td>BIS REER data; FRED (interest rates); IMF (current account)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="eq-block">
+      raw_funda = weighted average of normalized valuation/macro indicators
+      <br><br>
+      Z_funda = (raw_funda − mean(raw_funda, 24m)) / std(raw_funda, 24m)
+    </div>
+
+    <h3>w_tech — Behavioral Weight</h3>
+    <p>The behavioral weighting is the proprietary BhFS component. For a practical approximation, you can use:</p>
+    <ul>
+      <li><strong>Simple regime rule:</strong> Set w_tech = 100% when the 12-month trend is strong (|mom_12| > median), and w_tech = 0% otherwise. This captures the basic idea that technicals matter more in trending markets.</li>
+      <li><strong>Volatility-based:</strong> w_tech = max(0, 1 − realized_vol / threshold). High volatility → low weight on technicals.</li>
+      <li><strong>Manual override:</strong> Use the What-If Scenario tab to test different w_tech assumptions across the board.</li>
+    </ul>
+
+    <h3>Free Data Pipeline — Practical Steps</h3>
+    <div class="callout">
+      <p><strong>Monthly workflow to update this dashboard:</strong></p>
+    </div>
+    <ul>
+      <li><strong>Step 1:</strong> Download 3 years of monthly prices from Yahoo Finance for each asset (the ETF proxies in the table above).</li>
+      <li><strong>Step 2:</strong> Compute SMA_50, SMA_200, and 12-1 momentum for each asset → technical composite → z-score.</li>
+      <li><strong>Step 3:</strong> Pull valuation data from FRED (yields, spreads) and Yahoo Finance (P/E, P/B) → fundamental composite → z-score.</li>
+      <li><strong>Step 4:</strong> Apply your w_tech rule (or use 50/50 as a neutral starting point).</li>
+      <li><strong>Step 5:</strong> Paste the resulting CSV into this dashboard's Data Grid tab, or import as JSON.</li>
+    </ul>
+
+    <div class="warn-callout">
+      <p><strong>What you can't replicate for free:</strong> The BhFS behavioral weighting function (w_tech) is proprietary. The z-score framework and signal logic are standard, but the specific behavioral regime detection that determines whether to trust technicals or fundamentals is their IP. The approximations above are reasonable but will not match their outputs exactly.</p>
+    </div>
+
+    <h3>U.S. Sector Tickers</h3>
+    <table class="ds-table">
+      <thead>
+        <tr><th>Sector</th><th>S&P 500 Sector Index</th><th>SPDR ETF (Yahoo)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Financials</td><td>S5FINL Index</td><td>XLF</td></tr>
+        <tr><td>Cons. Disc.</td><td>S5COND Index</td><td>XLY</td></tr>
+        <tr><td>Industrials</td><td>S5INDU Index</td><td>XLI</td></tr>
+        <tr><td>Cons. Staples</td><td>S5CONS Index</td><td>XLP</td></tr>
+        <tr><td>Health Care</td><td>S5HLTH Index</td><td>XLV</td></tr>
+        <tr><td>Info Tech</td><td>S5INFT Index</td><td>XLKT</td></tr>
+        <tr><td>Energy</td><td>S5ENRS Index</td><td>XLE</td></tr>
+        <tr><td>Materials</td><td>S5MATR Index</td><td>XLB</td></tr>
+        <tr><td>Telecom</td><td>S5TELS Index</td><td>XLC</td></tr>
+        <tr><td>Utilities</td><td>S5UTIL Index</td><td>XLU</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+</main>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+
+const SAMPLE_ASSETS = [
+  { name:"Equity CH", tech:1.19, prevTech:2.43, funda:-0.44, prevFunda:-0.03, wTech:0 },
+  { name:"Equity EU ex CH", tech:-0.09, prevTech:1.58, funda:-1.06, prevFunda:-0.35, wTech:100 },
+  { name:"Equity U.S.", tech:0.42, prevTech:1.69, funda:-1.03, prevFunda:-0.92, wTech:100 },
+  { name:"Equity Japan", tech:-0.41, prevTech:1.39, funda:1.34, prevFunda:1.66, wTech:100 },
+  { name:"Equity Asia-Pac", tech:1.46, prevTech:2.24, funda:-0.95, prevFunda:0.53, wTech:0 },
+  { name:"Equity EM", tech:1.30, prevTech:2.03, funda:-0.96, prevFunda:0.75, wTech:0 },
+  { name:"Bond CH", tech:0.38, prevTech:0.95, funda:1.08, prevFunda:1.44, wTech:100 },
+  { name:"Bond EU", tech:0.53, prevTech:1.23, funda:-0.55, prevFunda:-0.65, wTech:100 },
+  { name:"Bond U.S.", tech:0.99, prevTech:1.80, funda:-0.91, prevFunda:-1.07, wTech:100 },
+  { name:"Bond Japan", tech:0.34, prevTech:1.62, funda:-0.63, prevFunda:-0.97, wTech:100 },
+  { name:"Gold", tech:1.53, prevTech:1.28, funda:1.84, prevFunda:1.51, wTech:0 },
+  { name:"Oil", tech:1.02, prevTech:0.57, funda:-4.48, prevFunda:-4.49, wTech:0 },
+  { name:"Euro", tech:0.90, prevTech:0.99, funda:0.53, prevFunda:0.18, wTech:100 },
+  { name:"U.S. Dollar", tech:0.59, prevTech:0.13, funda:-1.78, prevFunda:-1.62, wTech:0 },
+];
+
+const SAMPLE_SECTORS = [
+  { name:"Financials", tech:0.62, prevTech:1.95, funda:-1.27, prevFunda:-0.76, wTech:100 },
+  { name:"Cons. Disc.", tech:-0.31, prevTech:1.13, funda:0.78, prevFunda:1.84, wTech:100 },
+  { name:"Industrials", tech:0.10, prevTech:1.81, funda:-1.12, prevFunda:-0.86, wTech:100 },
+  { name:"Cons. Staples", tech:1.55, prevTech:2.23, funda:-1.49, prevFunda:-0.60, wTech:0 },
+  { name:"Health Care", tech:1.07, prevTech:2.24, funda:-1.42, prevFunda:-1.25, wTech:0 },
+  { name:"Info Tech", tech:0.05, prevTech:1.23, funda:-0.65, prevFunda:-0.55, wTech:100 },
+  { name:"Energy", tech:0.60, prevTech:0.06, funda:0.36, prevFunda:0.34, wTech:34.8 },
+  { name:"Materials", tech:0.24, prevTech:1.80, funda:-1.06, prevFunda:-0.79, wTech:0 },
+  { name:"Telecom", tech:0.19, prevTech:0.76, funda:-0.53, prevFunda:-0.44, wTech:100 },
+  { name:"Utilities", tech:1.55, prevTech:1.86, funda:-1.70, prevFunda:-1.25, wTech:0 },
+];
+
+let assets = structuredClone(SAMPLE_ASSETS);
+let sectors = structuredClone(SAMPLE_SECTORS);
+let selectedItem = null;
+const SAMPLE_HISTORY = {"Equity CH":[{"date":"2022-10","tech":0.97,"funda":0.87,"wTech":0.0,"composite":0.87,"signal":"N"},{"date":"2022-11","tech":0.93,"funda":0.78,"wTech":0.0,"composite":0.78,"signal":"N"},{"date":"2022-12","tech":0.9,"funda":0.84,"wTech":0.0,"composite":0.84,"signal":"N"},{"date":"2023-01","tech":1.12,"funda":0.86,"wTech":0.0,"composite":0.86,"signal":"N"},{"date":"2023-02","tech":1.08,"funda":1.02,"wTech":0.0,"composite":1.02,"signal":"OW"},{"date":"2023-03","tech":0.64,"funda":0.69,"wTech":0.0,"composite":0.69,"signal":"N"},{"date":"2023-04","tech":0.76,"funda":0.8,"wTech":0.0,"composite":0.8,"signal":"N"},{"date":"2023-05","tech":0.69,"funda":0.38,"wTech":100.0,"composite":0.69,"signal":"N"},{"date":"2023-06","tech":0.64,"funda":-0.31,"wTech":100.0,"composite":0.64,"signal":"N"},{"date":"2023-07","tech":0.7,"funda":-0.47,"wTech":100.0,"composite":0.7,"signal":"N"},{"date":"2023-08","tech":0.79,"funda":-0.69,"wTech":100.0,"composite":0.79,"signal":"N"},{"date":"2023-09","tech":1.16,"funda":-0.46,"wTech":100.0,"composite":1.16,"signal":"OW"},{"date":"2023-10","tech":1.36,"funda":-0.3,"wTech":100.0,"composite":1.36,"signal":"OW"},{"date":"2023-11","tech":1.38,"funda":-0.61,"wTech":0.0,"composite":-0.61,"signal":"N"},{"date":"2023-12","tech":1.15,"funda":-0.39,"wTech":0.0,"composite":-0.39,"signal":"N"},{"date":"2024-01","tech":0.85,"funda":-0.64,"wTech":0.0,"composite":-0.64,"signal":"N"},{"date":"2024-02","tech":0.95,"funda":-0.65,"wTech":0.0,"composite":-0.65,"signal":"N"},{"date":"2024-03","tech":1.36,"funda":-0.7,"wTech":0.0,"composite":-0.7,"signal":"N"},{"date":"2024-04","tech":1.36,"funda":-0.65,"wTech":0.0,"composite":-0.65,"signal":"N"},{"date":"2024-05","tech":1.3,"funda":-0.42,"wTech":0.0,"composite":-0.42,"signal":"N"},{"date":"2024-06","tech":1.45,"funda":-0.26,"wTech":0.0,"composite":-0.26,"signal":"N"},{"date":"2024-07","tech":0.96,"funda":-0.21,"wTech":0.0,"composite":-0.21,"signal":"N"},{"date":"2024-08","tech":0.93,"funda":-0.12,"wTech":100.0,"composite":0.93,"signal":"N"},{"date":"2024-09","tech":1.19,"funda":-0.44,"wTech":0,"composite":-0.44,"signal":"N"}],"Equity EU ex CH":[{"date":"2022-10","tech":-1.21,"funda":0.55,"wTech":100.0,"composite":-1.21,"signal":"UW"},{"date":"2022-11","tech":-1.59,"funda":0.27,"wTech":100.0,"composite":-1.59,"signal":"UW"},{"date":"2022-12","tech":-1.6,"funda":0.32,"wTech":100.0,"composite":-1.6,"signal":"UW"},{"date":"2023-01","tech":-1.66,"funda":0.39,"wTech":100.0,"composite":-1.66,"signal":"UW"},{"date":"2023-02","tech":-1.86,"funda":0.34,"wTech":100.0,"composite":-1.86,"signal":"UW"},{"date":"2023-03","tech":-2.08,"funda":-0.02,"wTech":0.0,"composite":-0.02,"signal":"N"},{"date":"2023-04","tech":-2.0,"funda":-0.06,"wTech":0.0,"composite":-0.06,"signal":"N"},{"date":"2023-05","tech":-1.6,"funda":-0.36,"wTech":0.0,"composite":-0.36,"signal":"N"},{"date":"2023-06","tech":-1.63,"funda":-0.59,"wTech":0.0,"composite":-0.59,"signal":"N"},{"date":"2023-07","tech":-0.89,"funda":-0.73,"wTech":0.0,"composite":-0.73,"signal":"N"},{"date":"2023-08","tech":-0.94,"funda":-0.61,"wTech":0.0,"composite":-0.61,"signal":"N"},{"date":"2023-09","tech":-1.09,"funda":-0.63,"wTech":0.0,"composite":-0.63,"signal":"N"},{"date":"2023-10","tech":-1.27,"funda":-1.07,"wTech":0.0,"composite":-1.07,"signal":"UW"},{"date":"2023-11","tech":-0.75,"funda":-1.05,"wTech":0.0,"composite":-1.05,"signal":"UW"},{"date":"2023-12","tech":-0.19,"funda":-0.96,"wTech":0.0,"composite":-0.96,"signal":"N"},{"date":"2024-01","tech":0.01,"funda":-1.08,"wTech":0.0,"composite":-1.08,"signal":"UW"},{"date":"2024-02","tech":0.11,"funda":-0.87,"wTech":0.0,"composite":-0.87,"signal":"N"},{"date":"2024-03","tech":-0.2,"funda":-0.57,"wTech":0.0,"composite":-0.57,"signal":"N"},{"date":"2024-04","tech":0.42,"funda":-0.82,"wTech":0.0,"composite":-0.82,"signal":"N"},{"date":"2024-05","tech":0.63,"funda":-0.99,"wTech":0.0,"composite":-0.99,"signal":"N"},{"date":"2024-06","tech":0.08,"funda":-1.23,"wTech":0.0,"composite":-1.23,"signal":"UW"},{"date":"2024-07","tech":-0.15,"funda":-1.36,"wTech":0.0,"composite":-1.36,"signal":"UW"},{"date":"2024-08","tech":-0.05,"funda":-1.27,"wTech":0.0,"composite":-1.27,"signal":"UW"},{"date":"2024-09","tech":-0.09,"funda":-1.06,"wTech":100.0,"composite":-0.09,"signal":"N"}],"Equity U.S.":[{"date":"2022-10","tech":-0.73,"funda":1.75,"wTech":0.0,"composite":1.75,"signal":"OW"},{"date":"2022-11","tech":-0.75,"funda":1.46,"wTech":0.0,"composite":1.46,"signal":"OW"},{"date":"2022-12","tech":-0.81,"funda":1.49,"wTech":0.0,"composite":1.49,"signal":"OW"},{"date":"2023-01","tech":-0.89,"funda":1.24,"wTech":0.0,"composite":1.24,"signal":"OW"},{"date":"2023-02","tech":-1.16,"funda":1.65,"wTech":0.0,"composite":1.65,"signal":"OW"},{"date":"2023-03","tech":-0.97,"funda":1.74,"wTech":0.0,"composite":1.74,"signal":"OW"},{"date":"2023-04","tech":-0.34,"funda":1.75,"wTech":0.0,"composite":1.75,"signal":"OW"},{"date":"2023-05","tech":-0.49,"funda":1.62,"wTech":0.0,"composite":1.62,"signal":"OW"},{"date":"2023-06","tech":-0.48,"funda":1.43,"wTech":0.0,"composite":1.43,"signal":"OW"},{"date":"2023-07","tech":-0.1,"funda":1.34,"wTech":0.0,"composite":1.34,"signal":"OW"},{"date":"2023-08","tech":0.21,"funda":1.26,"wTech":0.0,"composite":1.26,"signal":"OW"},{"date":"2023-09","tech":0.82,"funda":0.73,"wTech":0.0,"composite":0.73,"signal":"N"},{"date":"2023-10","tech":0.97,"funda":0.84,"wTech":0.0,"composite":0.84,"signal":"N"},{"date":"2023-11","tech":0.76,"funda":0.94,"wTech":100.0,"composite":0.76,"signal":"N"},{"date":"2023-12","tech":0.47,"funda":0.64,"wTech":100.0,"composite":0.47,"signal":"N"},{"date":"2024-01","tech":0.16,"funda":0.47,"wTech":100.0,"composite":0.16,"signal":"N"},{"date":"2024-02","tech":0.47,"funda":0.54,"wTech":0.0,"composite":0.54,"signal":"N"},{"date":"2024-03","tech":0.88,"funda":0.21,"wTech":0.0,"composite":0.21,"signal":"N"},{"date":"2024-04","tech":0.33,"funda":0.16,"wTech":100.0,"composite":0.33,"signal":"N"},{"date":"2024-05","tech":0.21,"funda":0.32,"wTech":100.0,"composite":0.21,"signal":"N"},{"date":"2024-06","tech":0.23,"funda":0.1,"wTech":100.0,"composite":0.23,"signal":"N"},{"date":"2024-07","tech":0.27,"funda":-0.29,"wTech":100.0,"composite":0.27,"signal":"N"},{"date":"2024-08","tech":0.29,"funda":-0.82,"wTech":100.0,"composite":0.29,"signal":"N"},{"date":"2024-09","tech":0.42,"funda":-1.03,"wTech":100.0,"composite":0.42,"signal":"N"}],"Equity Japan":[{"date":"2022-10","tech":-0.4,"funda":-1.2,"wTech":0.0,"composite":-1.2,"signal":"UW"},{"date":"2022-11","tech":-0.29,"funda":-0.87,"wTech":0.0,"composite":-0.87,"signal":"N"},{"date":"2022-12","tech":0.08,"funda":-0.47,"wTech":0.0,"composite":-0.47,"signal":"N"},{"date":"2023-01","tech":0.12,"funda":-0.29,"wTech":0.0,"composite":-0.29,"signal":"N"},{"date":"2023-02","tech":0.07,"funda":-0.3,"wTech":0.0,"composite":-0.3,"signal":"N"},{"date":"2023-03","tech":0.04,"funda":-0.32,"wTech":0.0,"composite":-0.32,"signal":"N"},{"date":"2023-04","tech":-0.01,"funda":-0.32,"wTech":0.0,"composite":-0.32,"signal":"N"},{"date":"2023-05","tech":-0.12,"funda":-0.71,"wTech":100.0,"composite":-0.12,"signal":"N"},{"date":"2023-06","tech":-0.06,"funda":-0.51,"wTech":100.0,"composite":-0.06,"signal":"N"},{"date":"2023-07","tech":-0.05,"funda":-0.33,"wTech":100.0,"composite":-0.05,"signal":"N"},{"date":"2023-08","tech":-0.24,"funda":-0.39,"wTech":100.0,"composite":-0.24,"signal":"N"},{"date":"2023-09","tech":0.07,"funda":-0.34,"wTech":100.0,"composite":0.07,"signal":"N"},{"date":"2023-10","tech":-0.01,"funda":-0.14,"wTech":100.0,"composite":-0.01,"signal":"N"},{"date":"2023-11","tech":0.3,"funda":0.19,"wTech":100.0,"composite":0.3,"signal":"N"},{"date":"2023-12","tech":-0.2,"funda":0.33,"wTech":100.0,"composite":-0.2,"signal":"N"},{"date":"2024-01","tech":-0.34,"funda":0.33,"wTech":100.0,"composite":-0.34,"signal":"N"},{"date":"2024-02","tech":-0.05,"funda":0.58,"wTech":100.0,"composite":-0.05,"signal":"N"},{"date":"2024-03","tech":-0.35,"funda":0.18,"wTech":100.0,"composite":-0.35,"signal":"N"},{"date":"2024-04","tech":-0.34,"funda":0.6,"wTech":100.0,"composite":-0.34,"signal":"N"},{"date":"2024-05","tech":-0.01,"funda":0.9,"wTech":100.0,"composite":-0.01,"signal":"N"},{"date":"2024-06","tech":-0.18,"funda":0.92,"wTech":100.0,"composite":-0.18,"signal":"N"},{"date":"2024-07","tech":-0.15,"funda":0.99,"wTech":100.0,"composite":-0.15,"signal":"N"},{"date":"2024-08","tech":-0.38,"funda":1.45,"wTech":100.0,"composite":-0.38,"signal":"N"},{"date":"2024-09","tech":-0.41,"funda":1.34,"wTech":100.0,"composite":-0.41,"signal":"N"}],"Equity Asia-Pac":[{"date":"2022-10","tech":-1.52,"funda":0.72,"wTech":100.0,"composite":-1.52,"signal":"UW"},{"date":"2022-11","tech":-1.37,"funda":0.78,"wTech":100.0,"composite":-1.37,"signal":"UW"},{"date":"2022-12","tech":-1.15,"funda":0.79,"wTech":100.0,"composite":-1.15,"signal":"UW"},{"date":"2023-01","tech":-1.18,"funda":0.67,"wTech":100.0,"composite":-1.18,"signal":"UW"},{"date":"2023-02","tech":-0.8,"funda":1.07,"wTech":100.0,"composite":-0.8,"signal":"N"},{"date":"2023-03","tech":-0.72,"funda":1.21,"wTech":100.0,"composite":-0.72,"signal":"N"},{"date":"2023-04","tech":-0.18,"funda":0.65,"wTech":100.0,"composite":-0.18,"signal":"N"},{"date":"2023-05","tech":-0.36,"funda":0.93,"wTech":100.0,"composite":-0.36,"signal":"N"},{"date":"2023-06","tech":-0.39,"funda":0.56,"wTech":100.0,"composite":-0.39,"signal":"N"},{"date":"2023-07","tech":0.14,"funda":0.36,"wTech":100.0,"composite":0.14,"signal":"N"},{"date":"2023-08","tech":0.13,"funda":0.41,"wTech":100.0,"composite":0.13,"signal":"N"},{"date":"2023-09","tech":-0.33,"funda":0.37,"wTech":100.0,"composite":-0.33,"signal":"N"},{"date":"2023-10","tech":-0.42,"funda":0.13,"wTech":100.0,"composite":-0.42,"signal":"N"},{"date":"2023-11","tech":-0.61,"funda":-0.2,"wTech":100.0,"composite":-0.61,"signal":"N"},{"date":"2023-12","tech":-0.41,"funda":-0.32,"wTech":100.0,"composite":-0.41,"signal":"N"},{"date":"2024-01","tech":-0.09,"funda":-0.19,"wTech":100.0,"composite":-0.09,"signal":"N"},{"date":"2024-02","tech":0.48,"funda":-0.35,"wTech":0.0,"composite":-0.35,"signal":"N"},{"date":"2024-03","tech":0.74,"funda":-0.59,"wTech":0.0,"composite":-0.59,"signal":"N"},{"date":"2024-04","tech":1.05,"funda":-0.64,"wTech":0.0,"composite":-0.64,"signal":"N"},{"date":"2024-05","tech":1.2,"funda":-0.55,"wTech":0.0,"composite":-0.55,"signal":"N"},{"date":"2024-06","tech":1.56,"funda":-0.78,"wTech":0.0,"composite":-0.78,"signal":"N"},{"date":"2024-07","tech":1.65,"funda":-1.03,"wTech":0.0,"composite":-1.03,"signal":"UW"},{"date":"2024-08","tech":1.91,"funda":-0.48,"wTech":0.0,"composite":-0.48,"signal":"N"},{"date":"2024-09","tech":1.46,"funda":-0.95,"wTech":0,"composite":-0.95,"signal":"N"}],"Equity EM":[{"date":"2022-10","tech":0.66,"funda":-1.16,"wTech":0.0,"composite":-1.16,"signal":"UW"},{"date":"2022-11","tech":0.63,"funda":-0.99,"wTech":0.0,"composite":-0.99,"signal":"N"},{"date":"2022-12","tech":0.3,"funda":-1.2,"wTech":0.0,"composite":-1.2,"signal":"UW"},{"date":"2023-01","tech":0.25,"funda":-0.87,"wTech":0.0,"composite":-0.87,"signal":"N"},{"date":"2023-02","tech":0.46,"funda":-0.7,"wTech":0.0,"composite":-0.7,"signal":"N"},{"date":"2023-03","tech":0.7,"funda":-0.94,"wTech":0.0,"composite":-0.94,"signal":"N"},{"date":"2023-04","tech":0.92,"funda":-0.95,"wTech":0.0,"composite":-0.95,"signal":"N"},{"date":"2023-05","tech":1.03,"funda":-0.4,"wTech":0.0,"composite":-0.4,"signal":"N"},{"date":"2023-06","tech":0.97,"funda":-0.09,"wTech":0.0,"composite":-0.09,"signal":"N"},{"date":"2023-07","tech":1.3,"funda":-0.01,"wTech":0.0,"composite":-0.01,"signal":"N"},{"date":"2023-08","tech":1.05,"funda":-0.01,"wTech":0.0,"composite":-0.01,"signal":"N"},{"date":"2023-09","tech":0.99,"funda":-0.12,"wTech":0.0,"composite":-0.12,"signal":"N"},{"date":"2023-10","tech":1.55,"funda":-0.23,"wTech":0.0,"composite":-0.23,"signal":"N"},{"date":"2023-11","tech":1.48,"funda":-0.16,"wTech":0.0,"composite":-0.16,"signal":"N"},{"date":"2023-12","tech":1.03,"funda":-0.06,"wTech":0.0,"composite":-0.06,"signal":"N"},{"date":"2024-01","tech":0.97,"funda":-0.14,"wTech":0.0,"composite":-0.14,"signal":"N"},{"date":"2024-02","tech":0.34,"funda":-0.56,"wTech":0.0,"composite":-0.56,"signal":"N"},{"date":"2024-03","tech":0.19,"funda":-0.46,"wTech":0.0,"composite":-0.46,"signal":"N"},{"date":"2024-04","tech":0.79,"funda":-0.62,"wTech":0.0,"composite":-0.62,"signal":"N"},{"date":"2024-05","tech":1.22,"funda":-0.71,"wTech":100.0,"composite":1.22,"signal":"OW"},{"date":"2024-06","tech":1.18,"funda":-0.39,"wTech":0.0,"composite":-0.39,"signal":"N"},{"date":"2024-07","tech":1.83,"funda":-0.63,"wTech":0.0,"composite":-0.63,"signal":"N"},{"date":"2024-08","tech":1.66,"funda":-0.69,"wTech":0.0,"composite":-0.69,"signal":"N"},{"date":"2024-09","tech":1.3,"funda":-0.96,"wTech":0,"composite":-0.96,"signal":"N"}],"Bond CH":[{"date":"2022-10","tech":1.28,"funda":2.88,"wTech":0.0,"composite":2.88,"signal":"OW"},{"date":"2022-11","tech":1.44,"funda":2.49,"wTech":0.0,"composite":2.49,"signal":"OW"},{"date":"2022-12","tech":1.84,"funda":2.4,"wTech":0.0,"composite":2.4,"signal":"OW"},{"date":"2023-01","tech":1.48,"funda":2.8,"wTech":0.0,"composite":2.8,"signal":"OW"},{"date":"2023-02","tech":1.86,"funda":3.14,"wTech":0.0,"composite":3.14,"signal":"OW"},{"date":"2023-03","tech":1.32,"funda":3.4,"wTech":0.0,"composite":3.4,"signal":"OW"},{"date":"2023-04","tech":1.34,"funda":3.43,"wTech":0.0,"composite":3.43,"signal":"OW"},{"date":"2023-05","tech":1.53,"funda":3.21,"wTech":0.0,"composite":3.21,"signal":"OW"},{"date":"2023-06","tech":1.9,"funda":3.24,"wTech":0.0,"composite":3.24,"signal":"OW"},{"date":"2023-07","tech":2.16,"funda":2.9,"wTech":0.0,"composite":2.9,"signal":"OW"},{"date":"2023-08","tech":2.31,"funda":2.68,"wTech":100.0,"composite":2.31,"signal":"OW"},{"date":"2023-09","tech":2.02,"funda":3.02,"wTech":100.0,"composite":2.02,"signal":"OW"},{"date":"2023-10","tech":1.81,"funda":2.93,"wTech":100.0,"composite":1.81,"signal":"OW"},{"date":"2023-11","tech":1.61,"funda":2.88,"wTech":100.0,"composite":1.61,"signal":"OW"},{"date":"2023-12","tech":2.08,"funda":2.85,"wTech":100.0,"composite":2.08,"signal":"OW"},{"date":"2024-01","tech":1.71,"funda":2.94,"wTech":100.0,"composite":1.71,"signal":"OW"},{"date":"2024-02","tech":2.15,"funda":3.23,"wTech":100.0,"composite":2.15,"signal":"OW"},{"date":"2024-03","tech":1.92,"funda":2.56,"wTech":100.0,"composite":1.92,"signal":"OW"},{"date":"2024-04","tech":1.81,"funda":2.35,"wTech":100.0,"composite":1.81,"signal":"OW"},{"date":"2024-05","tech":1.6,"funda":2.55,"wTech":100.0,"composite":1.6,"signal":"OW"},{"date":"2024-06","tech":1.39,"funda":1.76,"wTech":100.0,"composite":1.39,"signal":"OW"},{"date":"2024-07","tech":0.92,"funda":2.04,"wTech":100.0,"composite":0.92,"signal":"N"},{"date":"2024-08","tech":1.25,"funda":1.17,"wTech":100.0,"composite":1.25,"signal":"OW"},{"date":"2024-09","tech":0.38,"funda":1.08,"wTech":100.0,"composite":0.38,"signal":"N"}],"Bond EU":[{"date":"2022-10","tech":1.68,"funda":-0.79,"wTech":100.0,"composite":1.68,"signal":"OW"},{"date":"2022-11","tech":1.59,"funda":-0.99,"wTech":100.0,"composite":1.59,"signal":"OW"},{"date":"2022-12","tech":1.81,"funda":-1.07,"wTech":100.0,"composite":1.81,"signal":"OW"},{"date":"2023-01","tech":1.98,"funda":-0.82,"wTech":100.0,"composite":1.98,"signal":"OW"},{"date":"2023-02","tech":1.9,"funda":-0.98,"wTech":0.0,"composite":-0.98,"signal":"N"},{"date":"2023-03","tech":1.6,"funda":-0.85,"wTech":0.0,"composite":-0.85,"signal":"N"},{"date":"2023-04","tech":1.28,"funda":-0.66,"wTech":0.0,"composite":-0.66,"signal":"N"},{"date":"2023-05","tech":1.03,"funda":-0.46,"wTech":100.0,"composite":1.03,"signal":"OW"},{"date":"2023-06","tech":0.72,"funda":-0.12,"wTech":100.0,"composite":0.72,"signal":"N"},{"date":"2023-07","tech":0.97,"funda":-0.27,"wTech":100.0,"composite":0.97,"signal":"N"},{"date":"2023-08","tech":0.94,"funda":-0.0,"wTech":100.0,"composite":0.94,"signal":"N"},{"date":"2023-09","tech":1.39,"funda":-0.22,"wTech":0.0,"composite":-0.22,"signal":"N"},{"date":"2023-10","tech":2.03,"funda":-0.34,"wTech":0.0,"composite":-0.34,"signal":"N"},{"date":"2023-11","tech":1.95,"funda":-0.05,"wTech":0.0,"composite":-0.05,"signal":"N"},{"date":"2023-12","tech":1.4,"funda":0.12,"wTech":0.0,"composite":0.12,"signal":"N"},{"date":"2024-01","tech":1.23,"funda":0.08,"wTech":0.0,"composite":0.08,"signal":"N"},{"date":"2024-02","tech":1.16,"funda":-0.27,"wTech":0.0,"composite":-0.27,"signal":"N"},{"date":"2024-03","tech":0.66,"funda":-0.15,"wTech":0.0,"composite":-0.15,"signal":"N"},{"date":"2024-04","tech":0.57,"funda":-0.35,"wTech":0.0,"composite":-0.35,"signal":"N"},{"date":"2024-05","tech":0.65,"funda":-0.6,"wTech":0.0,"composite":-0.6,"signal":"N"},{"date":"2024-06","tech":0.49,"funda":-0.76,"wTech":0.0,"composite":-0.76,"signal":"N"},{"date":"2024-07","tech":0.27,"funda":-0.65,"wTech":0.0,"composite":-0.65,"signal":"N"},{"date":"2024-08","tech":0.12,"funda":-1.15,"wTech":0.0,"composite":-1.15,"signal":"UW"},{"date":"2024-09","tech":0.53,"funda":-0.55,"wTech":100.0,"composite":0.53,"signal":"N"}],"Bond U.S.":[{"date":"2022-10","tech":0.08,"funda":0.79,"wTech":0.0,"composite":0.79,"signal":"N"},{"date":"2022-11","tech":-0.1,"funda":1.3,"wTech":0.0,"composite":1.3,"signal":"OW"},{"date":"2022-12","tech":0.14,"funda":1.16,"wTech":0.0,"composite":1.16,"signal":"OW"},{"date":"2023-01","tech":-0.29,"funda":1.1,"wTech":0.0,"composite":1.1,"signal":"OW"},{"date":"2023-02","tech":-0.35,"funda":1.04,"wTech":0.0,"composite":1.04,"signal":"OW"},{"date":"2023-03","tech":-0.5,"funda":1.46,"wTech":0.0,"composite":1.46,"signal":"OW"},{"date":"2023-04","tech":-0.43,"funda":0.95,"wTech":0.0,"composite":0.95,"signal":"N"},{"date":"2023-05","tech":-0.31,"funda":1.01,"wTech":0.0,"composite":1.01,"signal":"OW"},{"date":"2023-06","tech":-0.25,"funda":0.57,"wTech":0.0,"composite":0.57,"signal":"N"},{"date":"2023-07","tech":0.14,"funda":-0.14,"wTech":100.0,"composite":0.14,"signal":"N"},{"date":"2023-08","tech":0.24,"funda":-0.68,"wTech":0.0,"composite":-0.68,"signal":"N"},{"date":"2023-09","tech":0.18,"funda":-1.03,"wTech":0.0,"composite":-1.03,"signal":"UW"},{"date":"2023-10","tech":-0.14,"funda":-0.76,"wTech":0.0,"composite":-0.76,"signal":"N"},{"date":"2023-11","tech":0.14,"funda":-0.98,"wTech":0.0,"composite":-0.98,"signal":"N"},{"date":"2023-12","tech":0.35,"funda":-1.04,"wTech":0.0,"composite":-1.04,"signal":"UW"},{"date":"2024-01","tech":0.82,"funda":-1.32,"wTech":0.0,"composite":-1.32,"signal":"UW"},{"date":"2024-02","tech":0.61,"funda":-1.14,"wTech":0.0,"composite":-1.14,"signal":"UW"},{"date":"2024-03","tech":0.65,"funda":-1.39,"wTech":100.0,"composite":0.65,"signal":"N"},{"date":"2024-04","tech":0.67,"funda":-1.01,"wTech":100.0,"composite":0.67,"signal":"N"},{"date":"2024-05","tech":0.68,"funda":-1.25,"wTech":100.0,"composite":0.68,"signal":"N"},{"date":"2024-06","tech":0.73,"funda":-1.39,"wTech":100.0,"composite":0.73,"signal":"N"},{"date":"2024-07","tech":0.27,"funda":-1.26,"wTech":100.0,"composite":0.27,"signal":"N"},{"date":"2024-08","tech":0.73,"funda":-1.15,"wTech":100.0,"composite":0.73,"signal":"N"},{"date":"2024-09","tech":0.99,"funda":-0.91,"wTech":100.0,"composite":0.99,"signal":"N"}],"Bond Japan":[{"date":"2022-10","tech":0.09,"funda":1.59,"wTech":0.0,"composite":1.59,"signal":"OW"},{"date":"2022-11","tech":-0.12,"funda":1.23,"wTech":0.0,"composite":1.23,"signal":"OW"},{"date":"2022-12","tech":-0.43,"funda":0.78,"wTech":0.0,"composite":0.78,"signal":"N"},{"date":"2023-01","tech":0.14,"funda":0.65,"wTech":0.0,"composite":0.65,"signal":"N"},{"date":"2023-02","tech":0.29,"funda":0.77,"wTech":0.0,"composite":0.77,"signal":"N"},{"date":"2023-03","tech":0.38,"funda":0.22,"wTech":0.0,"composite":0.22,"signal":"N"},{"date":"2023-04","tech":0.25,"funda":-0.01,"wTech":0.0,"composite":-0.01,"signal":"N"},{"date":"2023-05","tech":0.37,"funda":-0.02,"wTech":0.0,"composite":-0.02,"signal":"N"},{"date":"2023-06","tech":0.44,"funda":-0.29,"wTech":0.0,"composite":-0.29,"signal":"N"},{"date":"2023-07","tech":0.73,"funda":-0.28,"wTech":0.0,"composite":-0.28,"signal":"N"},{"date":"2023-08","tech":0.55,"funda":-0.51,"wTech":0.0,"composite":-0.51,"signal":"N"},{"date":"2023-09","tech":0.84,"funda":-0.91,"wTech":0.0,"composite":-0.91,"signal":"N"},{"date":"2023-10","tech":1.34,"funda":-0.97,"wTech":100.0,"composite":1.34,"signal":"OW"},{"date":"2023-11","tech":1.5,"funda":-1.42,"wTech":100.0,"composite":1.5,"signal":"OW"},{"date":"2023-12","tech":1.04,"funda":-0.76,"wTech":0.0,"composite":-0.76,"signal":"N"},{"date":"2024-01","tech":1.32,"funda":-1.09,"wTech":0.0,"composite":-1.09,"signal":"UW"},{"date":"2024-02","tech":1.3,"funda":-1.59,"wTech":0.0,"composite":-1.59,"signal":"UW"},{"date":"2024-03","tech":1.2,"funda":-1.62,"wTech":0.0,"composite":-1.62,"signal":"UW"},{"date":"2024-04","tech":1.4,"funda":-1.83,"wTech":0.0,"composite":-1.83,"signal":"UW"},{"date":"2024-05","tech":1.01,"funda":-1.89,"wTech":0.0,"composite":-1.89,"signal":"UW"},{"date":"2024-06","tech":0.2,"funda":-1.47,"wTech":0.0,"composite":-1.47,"signal":"UW"},{"date":"2024-07","tech":0.33,"funda":-1.17,"wTech":0.0,"composite":-1.17,"signal":"UW"},{"date":"2024-08","tech":0.24,"funda":-0.9,"wTech":0.0,"composite":-0.9,"signal":"N"},{"date":"2024-09","tech":0.34,"funda":-0.63,"wTech":100.0,"composite":0.34,"signal":"N"}],"Gold":[{"date":"2022-10","tech":0.35,"funda":1.94,"wTech":100.0,"composite":0.35,"signal":"N"},{"date":"2022-11","tech":0.83,"funda":1.78,"wTech":100.0,"composite":0.83,"signal":"N"},{"date":"2022-12","tech":0.49,"funda":1.46,"wTech":100.0,"composite":0.49,"signal":"N"},{"date":"2023-01","tech":0.86,"funda":1.21,"wTech":100.0,"composite":0.86,"signal":"N"},{"date":"2023-02","tech":0.99,"funda":1.58,"wTech":100.0,"composite":0.99,"signal":"N"},{"date":"2023-03","tech":0.81,"funda":1.89,"wTech":100.0,"composite":0.81,"signal":"N"},{"date":"2023-04","tech":0.89,"funda":2.01,"wTech":100.0,"composite":0.89,"signal":"N"},{"date":"2023-05","tech":0.94,"funda":1.97,"wTech":100.0,"composite":0.94,"signal":"N"},{"date":"2023-06","tech":-0.29,"funda":2.18,"wTech":100.0,"composite":-0.29,"signal":"N"},{"date":"2023-07","tech":-0.54,"funda":2.2,"wTech":100.0,"composite":-0.54,"signal":"N"},{"date":"2023-08","tech":-0.7,"funda":1.91,"wTech":100.0,"composite":-0.7,"signal":"N"},{"date":"2023-09","tech":-0.25,"funda":1.34,"wTech":100.0,"composite":-0.25,"signal":"N"},{"date":"2023-10","tech":-0.07,"funda":1.05,"wTech":100.0,"composite":-0.07,"signal":"N"},{"date":"2023-11","tech":-0.41,"funda":1.33,"wTech":100.0,"composite":-0.41,"signal":"N"},{"date":"2023-12","tech":-0.28,"funda":1.7,"wTech":100.0,"composite":-0.28,"signal":"N"},{"date":"2024-01","tech":-0.89,"funda":1.89,"wTech":0.0,"composite":1.89,"signal":"OW"},{"date":"2024-02","tech":-0.69,"funda":1.8,"wTech":0.0,"composite":1.8,"signal":"OW"},{"date":"2024-03","tech":-0.44,"funda":1.72,"wTech":0.0,"composite":1.72,"signal":"OW"},{"date":"2024-04","tech":-0.15,"funda":1.8,"wTech":0.0,"composite":1.8,"signal":"OW"},{"date":"2024-05","tech":0.17,"funda":1.33,"wTech":100.0,"composite":0.17,"signal":"N"},{"date":"2024-06","tech":0.19,"funda":1.3,"wTech":100.0,"composite":0.19,"signal":"N"},{"date":"2024-07","tech":0.12,"funda":1.33,"wTech":100.0,"composite":0.12,"signal":"N"},{"date":"2024-08","tech":0.64,"funda":1.92,"wTech":100.0,"composite":0.64,"signal":"N"},{"date":"2024-09","tech":1.53,"funda":1.84,"wTech":0,"composite":1.84,"signal":"OW"}],"Oil":[{"date":"2022-10","tech":2.99,"funda":-3.5,"wTech":100.0,"composite":2.99,"signal":"OW"},{"date":"2022-11","tech":3.12,"funda":-3.85,"wTech":100.0,"composite":3.12,"signal":"OW"},{"date":"2022-12","tech":3.37,"funda":-3.98,"wTech":100.0,"composite":3.37,"signal":"OW"},{"date":"2023-01","tech":3.33,"funda":-4,"wTech":100.0,"composite":3.33,"signal":"OW"},{"date":"2023-02","tech":2.94,"funda":-4,"wTech":100.0,"composite":2.94,"signal":"OW"},{"date":"2023-03","tech":2.9,"funda":-4,"wTech":100.0,"composite":2.9,"signal":"OW"},{"date":"2023-04","tech":2.43,"funda":-4,"wTech":100.0,"composite":2.43,"signal":"OW"},{"date":"2023-05","tech":2.86,"funda":-4.0,"wTech":100.0,"composite":2.86,"signal":"OW"},{"date":"2023-06","tech":2.62,"funda":-4,"wTech":100.0,"composite":2.62,"signal":"OW"},{"date":"2023-07","tech":2.6,"funda":-3.82,"wTech":0.0,"composite":-3.82,"signal":"UW"},{"date":"2023-08","tech":2.7,"funda":-4,"wTech":0.0,"composite":-4.0,"signal":"UW"},{"date":"2023-09","tech":2.95,"funda":-4,"wTech":100.0,"composite":2.95,"signal":"OW"},{"date":"2023-10","tech":2.61,"funda":-4,"wTech":100.0,"composite":2.61,"signal":"OW"},{"date":"2023-11","tech":2.18,"funda":-4,"wTech":100.0,"composite":2.18,"signal":"OW"},{"date":"2023-12","tech":2.57,"funda":-3.96,"wTech":100.0,"composite":2.57,"signal":"OW"},{"date":"2024-01","tech":2.21,"funda":-3.82,"wTech":100.0,"composite":2.21,"signal":"OW"},{"date":"2024-02","tech":1.58,"funda":-4,"wTech":100.0,"composite":1.58,"signal":"OW"},{"date":"2024-03","tech":1.65,"funda":-3.86,"wTech":100.0,"composite":1.65,"signal":"OW"},{"date":"2024-04","tech":1.37,"funda":-3.91,"wTech":100.0,"composite":1.37,"signal":"OW"},{"date":"2024-05","tech":1.18,"funda":-3.69,"wTech":100.0,"composite":1.18,"signal":"OW"},{"date":"2024-06","tech":1.18,"funda":-3.88,"wTech":100.0,"composite":1.18,"signal":"OW"},{"date":"2024-07","tech":1.85,"funda":-4,"wTech":100.0,"composite":1.85,"signal":"OW"},{"date":"2024-08","tech":1.54,"funda":-3.94,"wTech":100.0,"composite":1.54,"signal":"OW"},{"date":"2024-09","tech":1.02,"funda":-4,"wTech":0,"composite":-4.0,"signal":"UW"}],"Euro":[{"date":"2022-10","tech":-0.4,"funda":-0.23,"wTech":0.0,"composite":-0.23,"signal":"N"},{"date":"2022-11","tech":-0.08,"funda":0.16,"wTech":0.0,"composite":0.16,"signal":"N"},{"date":"2022-12","tech":-0.62,"funda":0.23,"wTech":0.0,"composite":0.23,"signal":"N"},{"date":"2023-01","tech":0.27,"funda":0.29,"wTech":0.0,"composite":0.29,"signal":"N"},{"date":"2023-02","tech":0.02,"funda":0.49,"wTech":100.0,"composite":0.02,"signal":"N"},{"date":"2023-03","tech":-0.04,"funda":0.56,"wTech":100.0,"composite":-0.04,"signal":"N"},{"date":"2023-04","tech":-0.25,"funda":0.9,"wTech":100.0,"composite":-0.25,"signal":"N"},{"date":"2023-05","tech":-0.14,"funda":0.76,"wTech":100.0,"composite":-0.14,"signal":"N"},{"date":"2023-06","tech":-0.04,"funda":0.75,"wTech":100.0,"composite":-0.04,"signal":"N"},{"date":"2023-07","tech":0.47,"funda":0.63,"wTech":0.0,"composite":0.63,"signal":"N"},{"date":"2023-08","tech":0.29,"funda":0.83,"wTech":0.0,"composite":0.83,"signal":"N"},{"date":"2023-09","tech":0.77,"funda":0.83,"wTech":0.0,"composite":0.83,"signal":"N"},{"date":"2023-10","tech":1.22,"funda":0.59,"wTech":0.0,"composite":0.59,"signal":"N"},{"date":"2023-11","tech":1.06,"funda":0.62,"wTech":0.0,"composite":0.62,"signal":"N"},{"date":"2023-12","tech":1.23,"funda":0.8,"wTech":0.0,"composite":0.8,"signal":"N"},{"date":"2024-01","tech":1.66,"funda":0.74,"wTech":0.0,"composite":0.74,"signal":"N"},{"date":"2024-02","tech":1.54,"funda":0.8,"wTech":0.0,"composite":0.8,"signal":"N"},{"date":"2024-03","tech":1.88,"funda":0.69,"wTech":0.0,"composite":0.69,"signal":"N"},{"date":"2024-04","tech":1.81,"funda":0.94,"wTech":0.0,"composite":0.94,"signal":"N"},{"date":"2024-05","tech":1.3,"funda":1.0,"wTech":0.0,"composite":1.0,"signal":"N"},{"date":"2024-06","tech":1.8,"funda":0.6,"wTech":0.0,"composite":0.6,"signal":"N"},{"date":"2024-07","tech":1.55,"funda":0.41,"wTech":0.0,"composite":0.41,"signal":"N"},{"date":"2024-08","tech":1.27,"funda":0.71,"wTech":0.0,"composite":0.71,"signal":"N"},{"date":"2024-09","tech":0.9,"funda":0.53,"wTech":100.0,"composite":0.9,"signal":"N"}],"U.S. Dollar":[{"date":"2022-10","tech":0.78,"funda":-1.51,"wTech":0.0,"composite":-1.51,"signal":"UW"},{"date":"2022-11","tech":0.36,"funda":-1.13,"wTech":0.0,"composite":-1.13,"signal":"UW"},{"date":"2022-12","tech":0.42,"funda":-1.22,"wTech":0.0,"composite":-1.22,"signal":"UW"},{"date":"2023-01","tech":0.22,"funda":-1.5,"wTech":0.0,"composite":-1.5,"signal":"UW"},{"date":"2023-02","tech":-0.09,"funda":-1.73,"wTech":0.0,"composite":-1.73,"signal":"UW"},{"date":"2023-03","tech":-0.12,"funda":-2.25,"wTech":0.0,"composite":-2.25,"signal":"UW"},{"date":"2023-04","tech":-0.65,"funda":-2.16,"wTech":0.0,"composite":-2.16,"signal":"UW"},{"date":"2023-05","tech":-0.4,"funda":-2.48,"wTech":0.0,"composite":-2.48,"signal":"UW"},{"date":"2023-06","tech":-0.11,"funda":-2.76,"wTech":0.0,"composite":-2.76,"signal":"UW"},{"date":"2023-07","tech":-0.09,"funda":-3.22,"wTech":0.0,"composite":-3.22,"signal":"UW"},{"date":"2023-08","tech":-0.36,"funda":-3.44,"wTech":0.0,"composite":-3.44,"signal":"UW"},{"date":"2023-09","tech":-0.6,"funda":-3.22,"wTech":0.0,"composite":-3.22,"signal":"UW"},{"date":"2023-10","tech":-0.59,"funda":-3.47,"wTech":0.0,"composite":-3.47,"signal":"UW"},{"date":"2023-11","tech":-1.25,"funda":-3.82,"wTech":0.0,"composite":-3.82,"signal":"UW"},{"date":"2023-12","tech":-1.09,"funda":-3.65,"wTech":0.0,"composite":-3.65,"signal":"UW"},{"date":"2024-01","tech":-0.78,"funda":-3.61,"wTech":0.0,"composite":-3.61,"signal":"UW"},{"date":"2024-02","tech":-0.77,"funda":-3.37,"wTech":0.0,"composite":-3.37,"signal":"UW"},{"date":"2024-03","tech":-0.8,"funda":-3.05,"wTech":0.0,"composite":-3.05,"signal":"UW"},{"date":"2024-04","tech":-0.6,"funda":-2.92,"wTech":100.0,"composite":-0.6,"signal":"N"},{"date":"2024-05","tech":-0.36,"funda":-3.11,"wTech":0.0,"composite":-3.11,"signal":"UW"},{"date":"2024-06","tech":0.11,"funda":-2.94,"wTech":0.0,"composite":-2.94,"signal":"UW"},{"date":"2024-07","tech":0.21,"funda":-2.58,"wTech":0.0,"composite":-2.58,"signal":"UW"},{"date":"2024-08","tech":0.12,"funda":-2.49,"wTech":0.0,"composite":-2.49,"signal":"UW"},{"date":"2024-09","tech":0.59,"funda":-1.78,"wTech":0,"composite":-1.78,"signal":"UW"}],"Financials":[{"date":"2022-10","tech":0.99,"funda":-2.39,"wTech":100.0,"composite":0.99,"signal":"N"},{"date":"2022-11","tech":1.03,"funda":-2.04,"wTech":100.0,"composite":1.03,"signal":"OW"},{"date":"2022-12","tech":0.77,"funda":-1.87,"wTech":100.0,"composite":0.77,"signal":"N"},{"date":"2023-01","tech":0.88,"funda":-2.03,"wTech":100.0,"composite":0.88,"signal":"N"},{"date":"2023-02","tech":0.87,"funda":-2.08,"wTech":100.0,"composite":0.87,"signal":"N"},{"date":"2023-03","tech":0.99,"funda":-2.25,"wTech":100.0,"composite":0.99,"signal":"N"},{"date":"2023-04","tech":1.54,"funda":-1.78,"wTech":100.0,"composite":1.54,"signal":"OW"},{"date":"2023-05","tech":1.37,"funda":-1.92,"wTech":100.0,"composite":1.37,"signal":"OW"},{"date":"2023-06","tech":0.69,"funda":-2.16,"wTech":100.0,"composite":0.69,"signal":"N"},{"date":"2023-07","tech":0.35,"funda":-2.21,"wTech":100.0,"composite":0.35,"signal":"N"},{"date":"2023-08","tech":0.81,"funda":-2.25,"wTech":0.0,"composite":-2.25,"signal":"UW"},{"date":"2023-09","tech":0.8,"funda":-2.01,"wTech":0.0,"composite":-2.01,"signal":"UW"},{"date":"2023-10","tech":0.78,"funda":-1.72,"wTech":0.0,"composite":-1.72,"signal":"UW"},{"date":"2023-11","tech":0.85,"funda":-1.74,"wTech":0.0,"composite":-1.74,"signal":"UW"},{"date":"2023-12","tech":0.85,"funda":-2.46,"wTech":0.0,"composite":-2.46,"signal":"UW"},{"date":"2024-01","tech":0.5,"funda":-2.44,"wTech":0.0,"composite":-2.44,"signal":"UW"},{"date":"2024-02","tech":0.12,"funda":-2.53,"wTech":0.0,"composite":-2.53,"signal":"UW"},{"date":"2024-03","tech":-0.38,"funda":-2.68,"wTech":0.0,"composite":-2.68,"signal":"UW"},{"date":"2024-04","tech":-0.11,"funda":-2.68,"wTech":0.0,"composite":-2.68,"signal":"UW"},{"date":"2024-05","tech":0.34,"funda":-2.43,"wTech":0.0,"composite":-2.43,"signal":"UW"},{"date":"2024-06","tech":0.15,"funda":-2.52,"wTech":0.0,"composite":-2.52,"signal":"UW"},{"date":"2024-07","tech":-0.02,"funda":-1.95,"wTech":0.0,"composite":-1.95,"signal":"UW"},{"date":"2024-08","tech":0.41,"funda":-2.05,"wTech":0.0,"composite":-2.05,"signal":"UW"},{"date":"2024-09","tech":0.62,"funda":-1.27,"wTech":100.0,"composite":0.62,"signal":"N"}],"Cons. Disc.":[{"date":"2022-10","tech":1.14,"funda":-1.74,"wTech":0.0,"composite":-1.74,"signal":"UW"},{"date":"2022-11","tech":0.96,"funda":-1.3,"wTech":0.0,"composite":-1.3,"signal":"UW"},{"date":"2022-12","tech":0.87,"funda":-1.75,"wTech":0.0,"composite":-1.75,"signal":"UW"},{"date":"2023-01","tech":0.7,"funda":-1.71,"wTech":0.0,"composite":-1.71,"signal":"UW"},{"date":"2023-02","tech":1.07,"funda":-1.5,"wTech":0.0,"composite":-1.5,"signal":"UW"},{"date":"2023-03","tech":0.96,"funda":-1.58,"wTech":0.0,"composite":-1.58,"signal":"UW"},{"date":"2023-04","tech":0.93,"funda":-1.44,"wTech":0.0,"composite":-1.44,"signal":"UW"},{"date":"2023-05","tech":1.06,"funda":-1.61,"wTech":0.0,"composite":-1.61,"signal":"UW"},{"date":"2023-06","tech":0.65,"funda":-1.25,"wTech":0.0,"composite":-1.25,"signal":"UW"},{"date":"2023-07","tech":0.49,"funda":-1.29,"wTech":100.0,"composite":0.49,"signal":"N"},{"date":"2023-08","tech":1.24,"funda":-1.11,"wTech":100.0,"composite":1.24,"signal":"OW"},{"date":"2023-09","tech":1.68,"funda":-1.21,"wTech":100.0,"composite":1.68,"signal":"OW"},{"date":"2023-10","tech":1.87,"funda":-1.21,"wTech":100.0,"composite":1.87,"signal":"OW"},{"date":"2023-11","tech":1.57,"funda":-0.78,"wTech":100.0,"composite":1.57,"signal":"OW"},{"date":"2023-12","tech":1.88,"funda":-0.4,"wTech":0.0,"composite":-0.4,"signal":"N"},{"date":"2024-01","tech":2.12,"funda":-0.32,"wTech":0.0,"composite":-0.32,"signal":"N"},{"date":"2024-02","tech":1.46,"funda":-0.05,"wTech":0.0,"composite":-0.05,"signal":"N"},{"date":"2024-03","tech":1.31,"funda":0.27,"wTech":0.0,"composite":0.27,"signal":"N"},{"date":"2024-04","tech":0.91,"funda":0.14,"wTech":0.0,"composite":0.14,"signal":"N"},{"date":"2024-05","tech":0.75,"funda":0.48,"wTech":0.0,"composite":0.48,"signal":"N"},{"date":"2024-06","tech":1.02,"funda":0.26,"wTech":100.0,"composite":1.02,"signal":"OW"},{"date":"2024-07","tech":0.03,"funda":0.29,"wTech":100.0,"composite":0.03,"signal":"N"},{"date":"2024-08","tech":-0.06,"funda":0.37,"wTech":100.0,"composite":-0.06,"signal":"N"},{"date":"2024-09","tech":-0.31,"funda":0.78,"wTech":100.0,"composite":-0.31,"signal":"N"}],"Industrials":[{"date":"2022-10","tech":0.17,"funda":-2.34,"wTech":100.0,"composite":0.17,"signal":"N"},{"date":"2022-11","tech":0.08,"funda":-1.98,"wTech":100.0,"composite":0.08,"signal":"N"},{"date":"2022-12","tech":0.07,"funda":-2.24,"wTech":100.0,"composite":0.07,"signal":"N"},{"date":"2023-01","tech":-0.4,"funda":-2.61,"wTech":100.0,"composite":-0.4,"signal":"N"},{"date":"2023-02","tech":-0.27,"funda":-2.26,"wTech":100.0,"composite":-0.27,"signal":"N"},{"date":"2023-03","tech":-0.54,"funda":-2.62,"wTech":100.0,"composite":-0.54,"signal":"N"},{"date":"2023-04","tech":-0.8,"funda":-2.73,"wTech":100.0,"composite":-0.8,"signal":"N"},{"date":"2023-05","tech":-1.25,"funda":-2.53,"wTech":100.0,"composite":-1.25,"signal":"UW"},{"date":"2023-06","tech":-0.85,"funda":-2.56,"wTech":100.0,"composite":-0.85,"signal":"N"},{"date":"2023-07","tech":-0.85,"funda":-2.91,"wTech":100.0,"composite":-0.85,"signal":"N"},{"date":"2023-08","tech":-0.47,"funda":-2.79,"wTech":100.0,"composite":-0.47,"signal":"N"},{"date":"2023-09","tech":-0.36,"funda":-2.76,"wTech":100.0,"composite":-0.36,"signal":"N"},{"date":"2023-10","tech":-0.85,"funda":-2.36,"wTech":0.0,"composite":-2.36,"signal":"UW"},{"date":"2023-11","tech":-1.12,"funda":-2.14,"wTech":0.0,"composite":-2.14,"signal":"UW"},{"date":"2023-12","tech":-0.82,"funda":-1.32,"wTech":0.0,"composite":-1.32,"signal":"UW"},{"date":"2024-01","tech":-0.99,"funda":-1.72,"wTech":0.0,"composite":-1.72,"signal":"UW"},{"date":"2024-02","tech":-1.23,"funda":-1.68,"wTech":0.0,"composite":-1.68,"signal":"UW"},{"date":"2024-03","tech":-1.17,"funda":-1.9,"wTech":0.0,"composite":-1.9,"signal":"UW"},{"date":"2024-04","tech":-1.1,"funda":-1.53,"wTech":0.0,"composite":-1.53,"signal":"UW"},{"date":"2024-05","tech":-1.26,"funda":-1.28,"wTech":0.0,"composite":-1.28,"signal":"UW"},{"date":"2024-06","tech":-1.15,"funda":-1.07,"wTech":0.0,"composite":-1.07,"signal":"UW"},{"date":"2024-07","tech":-1.05,"funda":-1.27,"wTech":0.0,"composite":-1.27,"signal":"UW"},{"date":"2024-08","tech":-1.48,"funda":-1.41,"wTech":0.0,"composite":-1.41,"signal":"UW"},{"date":"2024-09","tech":0.1,"funda":-1.12,"wTech":100.0,"composite":0.1,"signal":"N"}],"Cons. Staples":[{"date":"2022-10","tech":1.16,"funda":-2.5,"wTech":100.0,"composite":1.16,"signal":"OW"},{"date":"2022-11","tech":1.45,"funda":-2.68,"wTech":100.0,"composite":1.45,"signal":"OW"},{"date":"2022-12","tech":1.68,"funda":-2.65,"wTech":100.0,"composite":1.68,"signal":"OW"},{"date":"2023-01","tech":1.97,"funda":-2.13,"wTech":100.0,"composite":1.97,"signal":"OW"},{"date":"2023-02","tech":1.47,"funda":-2.03,"wTech":100.0,"composite":1.47,"signal":"OW"},{"date":"2023-03","tech":1.25,"funda":-1.78,"wTech":100.0,"composite":1.25,"signal":"OW"},{"date":"2023-04","tech":1.32,"funda":-1.96,"wTech":100.0,"composite":1.32,"signal":"OW"},{"date":"2023-05","tech":1.44,"funda":-1.92,"wTech":100.0,"composite":1.44,"signal":"OW"},{"date":"2023-06","tech":1.73,"funda":-2.2,"wTech":0.0,"composite":-2.2,"signal":"UW"},{"date":"2023-07","tech":1.42,"funda":-2.31,"wTech":100.0,"composite":1.42,"signal":"OW"},{"date":"2023-08","tech":1.46,"funda":-2.07,"wTech":100.0,"composite":1.46,"signal":"OW"},{"date":"2023-09","tech":2.13,"funda":-2.05,"wTech":100.0,"composite":2.13,"signal":"OW"},{"date":"2023-10","tech":2.31,"funda":-1.66,"wTech":100.0,"composite":2.31,"signal":"OW"},{"date":"2023-11","tech":2.53,"funda":-1.7,"wTech":0.0,"composite":-1.7,"signal":"UW"},{"date":"2023-12","tech":2.46,"funda":-1.74,"wTech":0.0,"composite":-1.74,"signal":"UW"},{"date":"2024-01","tech":2.63,"funda":-1.4,"wTech":0.0,"composite":-1.4,"signal":"UW"},{"date":"2024-02","tech":3.09,"funda":-1.57,"wTech":0.0,"composite":-1.57,"signal":"UW"},{"date":"2024-03","tech":2.99,"funda":-1.94,"wTech":0.0,"composite":-1.94,"signal":"UW"},{"date":"2024-04","tech":3.22,"funda":-1.57,"wTech":0.0,"composite":-1.57,"signal":"UW"},{"date":"2024-05","tech":2.75,"funda":-1.46,"wTech":0.0,"composite":-1.46,"signal":"UW"},{"date":"2024-06","tech":2.75,"funda":-2.01,"wTech":0.0,"composite":-2.01,"signal":"UW"},{"date":"2024-07","tech":2.78,"funda":-1.89,"wTech":0.0,"composite":-1.89,"signal":"UW"},{"date":"2024-08","tech":2.19,"funda":-1.87,"wTech":0.0,"composite":-1.87,"signal":"UW"},{"date":"2024-09","tech":1.55,"funda":-1.49,"wTech":0,"composite":-1.49,"signal":"UW"}],"Health Care":[{"date":"2022-10","tech":0.02,"funda":-0.56,"wTech":100.0,"composite":0.02,"signal":"N"},{"date":"2022-11","tech":-0.38,"funda":-0.97,"wTech":100.0,"composite":-0.38,"signal":"N"},{"date":"2022-12","tech":-0.65,"funda":-1.04,"wTech":100.0,"composite":-0.65,"signal":"N"},{"date":"2023-01","tech":-1.09,"funda":-0.95,"wTech":100.0,"composite":-1.09,"signal":"UW"},{"date":"2023-02","tech":-1.47,"funda":-0.83,"wTech":100.0,"composite":-1.47,"signal":"UW"},{"date":"2023-03","tech":-1.86,"funda":-0.88,"wTech":100.0,"composite":-1.86,"signal":"UW"},{"date":"2023-04","tech":-1.92,"funda":-0.41,"wTech":100.0,"composite":-1.92,"signal":"UW"},{"date":"2023-05","tech":-2.02,"funda":-0.55,"wTech":100.0,"composite":-2.02,"signal":"UW"},{"date":"2023-06","tech":-2.27,"funda":-0.7,"wTech":100.0,"composite":-2.27,"signal":"UW"},{"date":"2023-07","tech":-1.99,"funda":-1.42,"wTech":100.0,"composite":-1.99,"signal":"UW"},{"date":"2023-08","tech":-1.88,"funda":-0.98,"wTech":100.0,"composite":-1.88,"signal":"UW"},{"date":"2023-09","tech":-1.87,"funda":-1.09,"wTech":100.0,"composite":-1.87,"signal":"UW"},{"date":"2023-10","tech":-1.86,"funda":-1.4,"wTech":100.0,"composite":-1.86,"signal":"UW"},{"date":"2023-11","tech":-1.22,"funda":-1.07,"wTech":100.0,"composite":-1.22,"signal":"UW"},{"date":"2023-12","tech":-1.01,"funda":-0.78,"wTech":100.0,"composite":-1.01,"signal":"UW"},{"date":"2024-01","tech":-0.73,"funda":-0.8,"wTech":100.0,"composite":-0.73,"signal":"N"},{"date":"2024-02","tech":-1.37,"funda":-1.2,"wTech":100.0,"composite":-1.37,"signal":"UW"},{"date":"2024-03","tech":-1.36,"funda":-1.12,"wTech":100.0,"composite":-1.36,"signal":"UW"},{"date":"2024-04","tech":-1.77,"funda":-1.3,"wTech":100.0,"composite":-1.77,"signal":"UW"},{"date":"2024-05","tech":-1.56,"funda":-1.61,"wTech":100.0,"composite":-1.56,"signal":"UW"},{"date":"2024-06","tech":-1.05,"funda":-1.32,"wTech":100.0,"composite":-1.05,"signal":"UW"},{"date":"2024-07","tech":-0.83,"funda":-1.87,"wTech":0.0,"composite":-1.87,"signal":"UW"},{"date":"2024-08","tech":-0.1,"funda":-1.6,"wTech":0.0,"composite":-1.6,"signal":"UW"},{"date":"2024-09","tech":1.07,"funda":-1.42,"wTech":0,"composite":-1.42,"signal":"UW"}],"Info Tech":[{"date":"2022-10","tech":-3.04,"funda":-2.18,"wTech":0.0,"composite":-2.18,"signal":"UW"},{"date":"2022-11","tech":-3.21,"funda":-2.13,"wTech":0.0,"composite":-2.13,"signal":"UW"},{"date":"2022-12","tech":-3.1,"funda":-2.02,"wTech":0.0,"composite":-2.02,"signal":"UW"},{"date":"2023-01","tech":-2.9,"funda":-2.0,"wTech":0.0,"composite":-2.0,"signal":"UW"},{"date":"2023-02","tech":-2.52,"funda":-2.15,"wTech":0.0,"composite":-2.15,"signal":"UW"},{"date":"2023-03","tech":-3.03,"funda":-1.91,"wTech":0.0,"composite":-1.91,"signal":"UW"},{"date":"2023-04","tech":-3.02,"funda":-1.4,"wTech":0.0,"composite":-1.4,"signal":"UW"},{"date":"2023-05","tech":-2.62,"funda":-1.52,"wTech":0.0,"composite":-1.52,"signal":"UW"},{"date":"2023-06","tech":-2.06,"funda":-1.18,"wTech":0.0,"composite":-1.18,"signal":"UW"},{"date":"2023-07","tech":-1.42,"funda":-0.93,"wTech":0.0,"composite":-0.93,"signal":"N"},{"date":"2023-08","tech":-1.47,"funda":-1.59,"wTech":0.0,"composite":-1.59,"signal":"UW"},{"date":"2023-09","tech":-1.07,"funda":-1.73,"wTech":0.0,"composite":-1.73,"signal":"UW"},{"date":"2023-10","tech":-0.5,"funda":-1.84,"wTech":0.0,"composite":-1.84,"signal":"UW"},{"date":"2023-11","tech":-0.11,"funda":-1.58,"wTech":0.0,"composite":-1.58,"signal":"UW"},{"date":"2023-12","tech":0.11,"funda":-1.47,"wTech":0.0,"composite":-1.47,"signal":"UW"},{"date":"2024-01","tech":0.36,"funda":-1.3,"wTech":0.0,"composite":-1.3,"signal":"UW"},{"date":"2024-02","tech":0.1,"funda":-1.09,"wTech":0.0,"composite":-1.09,"signal":"UW"},{"date":"2024-03","tech":-0.34,"funda":-1.28,"wTech":0.0,"composite":-1.28,"signal":"UW"},{"date":"2024-04","tech":-0.01,"funda":-1.4,"wTech":0.0,"composite":-1.4,"signal":"UW"},{"date":"2024-05","tech":-0.1,"funda":-1.62,"wTech":0.0,"composite":-1.62,"signal":"UW"},{"date":"2024-06","tech":-0.09,"funda":-1.52,"wTech":100.0,"composite":-0.09,"signal":"N"},{"date":"2024-07","tech":-0.24,"funda":-1.37,"wTech":100.0,"composite":-0.24,"signal":"N"},{"date":"2024-08","tech":-0.27,"funda":-1.11,"wTech":100.0,"composite":-0.27,"signal":"N"},{"date":"2024-09","tech":0.05,"funda":-0.65,"wTech":100.0,"composite":0.05,"signal":"N"}],"Energy":[{"date":"2022-10","tech":1.52,"funda":1.87,"wTech":100.0,"composite":1.52,"signal":"OW"},{"date":"2022-11","tech":1.16,"funda":1.93,"wTech":100.0,"composite":1.16,"signal":"OW"},{"date":"2022-12","tech":0.67,"funda":1.67,"wTech":100.0,"composite":0.67,"signal":"N"},{"date":"2023-01","tech":0.39,"funda":1.89,"wTech":100.0,"composite":0.39,"signal":"N"},{"date":"2023-02","tech":0.45,"funda":1.68,"wTech":100.0,"composite":0.45,"signal":"N"},{"date":"2023-03","tech":0.97,"funda":1.69,"wTech":100.0,"composite":0.97,"signal":"N"},{"date":"2023-04","tech":1.05,"funda":1.34,"wTech":100.0,"composite":1.05,"signal":"OW"},{"date":"2023-05","tech":0.64,"funda":1.04,"wTech":100.0,"composite":0.64,"signal":"N"},{"date":"2023-06","tech":0.5,"funda":1.32,"wTech":100.0,"composite":0.5,"signal":"N"},{"date":"2023-07","tech":1.35,"funda":1.09,"wTech":100.0,"composite":1.35,"signal":"OW"},{"date":"2023-08","tech":1.69,"funda":0.94,"wTech":100.0,"composite":1.69,"signal":"OW"},{"date":"2023-09","tech":1.61,"funda":1.25,"wTech":100.0,"composite":1.61,"signal":"OW"},{"date":"2023-10","tech":1.6,"funda":2.1,"wTech":0.0,"composite":2.1,"signal":"OW"},{"date":"2023-11","tech":1.41,"funda":2.18,"wTech":0.0,"composite":2.18,"signal":"OW"},{"date":"2023-12","tech":1.47,"funda":2.22,"wTech":100.0,"composite":1.47,"signal":"OW"},{"date":"2024-01","tech":1.29,"funda":1.88,"wTech":100.0,"composite":1.29,"signal":"OW"},{"date":"2024-02","tech":0.91,"funda":2.07,"wTech":100.0,"composite":0.91,"signal":"N"},{"date":"2024-03","tech":1.29,"funda":2.17,"wTech":100.0,"composite":1.29,"signal":"OW"},{"date":"2024-04","tech":1.18,"funda":1.49,"wTech":100.0,"composite":1.18,"signal":"OW"},{"date":"2024-05","tech":1.08,"funda":1.54,"wTech":0.0,"composite":1.54,"signal":"OW"},{"date":"2024-06","tech":0.99,"funda":1.3,"wTech":0.0,"composite":1.3,"signal":"OW"},{"date":"2024-07","tech":1.07,"funda":1.24,"wTech":0.0,"composite":1.24,"signal":"OW"},{"date":"2024-08","tech":0.8,"funda":1.22,"wTech":0.0,"composite":1.22,"signal":"OW"},{"date":"2024-09","tech":0.6,"funda":0.36,"wTech":34.8,"composite":0.44,"signal":"N"}],"Materials":[{"date":"2022-10","tech":-1.38,"funda":0.96,"wTech":100.0,"composite":-1.38,"signal":"UW"},{"date":"2022-11","tech":-1.4,"funda":1.14,"wTech":100.0,"composite":-1.4,"signal":"UW"},{"date":"2022-12","tech":-1.46,"funda":1.2,"wTech":100.0,"composite":-1.46,"signal":"UW"},{"date":"2023-01","tech":-1.5,"funda":0.84,"wTech":100.0,"composite":-1.5,"signal":"UW"},{"date":"2023-02","tech":-1.62,"funda":0.51,"wTech":100.0,"composite":-1.62,"signal":"UW"},{"date":"2023-03","tech":-2.12,"funda":0.29,"wTech":100.0,"composite":-2.12,"signal":"UW"},{"date":"2023-04","tech":-2.34,"funda":0.19,"wTech":100.0,"composite":-2.34,"signal":"UW"},{"date":"2023-05","tech":-2.67,"funda":0.26,"wTech":100.0,"composite":-2.67,"signal":"UW"},{"date":"2023-06","tech":-2.6,"funda":-0.02,"wTech":100.0,"composite":-2.6,"signal":"UW"},{"date":"2023-07","tech":-2.69,"funda":0.23,"wTech":0.0,"composite":0.23,"signal":"N"},{"date":"2023-08","tech":-2.77,"funda":0.18,"wTech":0.0,"composite":0.18,"signal":"N"},{"date":"2023-09","tech":-2.57,"funda":-0.38,"wTech":0.0,"composite":-0.38,"signal":"N"},{"date":"2023-10","tech":-2.6,"funda":-0.53,"wTech":0.0,"composite":-0.53,"signal":"N"},{"date":"2023-11","tech":-2.17,"funda":-1.21,"wTech":0.0,"composite":-1.21,"signal":"UW"},{"date":"2023-12","tech":-2.14,"funda":-1.39,"wTech":0.0,"composite":-1.39,"signal":"UW"},{"date":"2024-01","tech":-1.91,"funda":-1.5,"wTech":100.0,"composite":-1.91,"signal":"UW"},{"date":"2024-02","tech":-2.15,"funda":-1.62,"wTech":100.0,"composite":-2.15,"signal":"UW"},{"date":"2024-03","tech":-1.75,"funda":-1.66,"wTech":100.0,"composite":-1.75,"signal":"UW"},{"date":"2024-04","tech":-1.67,"funda":-1.69,"wTech":100.0,"composite":-1.67,"signal":"UW"},{"date":"2024-05","tech":-1.32,"funda":-1.77,"wTech":0.0,"composite":-1.77,"signal":"UW"},{"date":"2024-06","tech":-0.99,"funda":-1.29,"wTech":0.0,"composite":-1.29,"signal":"UW"},{"date":"2024-07","tech":-0.79,"funda":-0.94,"wTech":0.0,"composite":-0.94,"signal":"N"},{"date":"2024-08","tech":-0.42,"funda":-1.26,"wTech":0.0,"composite":-1.26,"signal":"UW"},{"date":"2024-09","tech":0.24,"funda":-1.06,"wTech":0,"composite":-1.06,"signal":"UW"}],"Telecom":[{"date":"2022-10","tech":1.05,"funda":-0.2,"wTech":100.0,"composite":1.05,"signal":"OW"},{"date":"2022-11","tech":0.65,"funda":-0.53,"wTech":100.0,"composite":0.65,"signal":"N"},{"date":"2022-12","tech":0.6,"funda":-0.46,"wTech":100.0,"composite":0.6,"signal":"N"},{"date":"2023-01","tech":0.53,"funda":-0.42,"wTech":100.0,"composite":0.53,"signal":"N"},{"date":"2023-02","tech":1.03,"funda":-0.23,"wTech":100.0,"composite":1.03,"signal":"OW"},{"date":"2023-03","tech":0.76,"funda":0.05,"wTech":100.0,"composite":0.76,"signal":"N"},{"date":"2023-04","tech":0.72,"funda":-0.06,"wTech":0.0,"composite":-0.06,"signal":"N"},{"date":"2023-05","tech":0.89,"funda":-0.26,"wTech":0.0,"composite":-0.26,"signal":"N"},{"date":"2023-06","tech":0.79,"funda":-0.42,"wTech":0.0,"composite":-0.42,"signal":"N"},{"date":"2023-07","tech":0.52,"funda":-0.67,"wTech":0.0,"composite":-0.67,"signal":"N"},{"date":"2023-08","tech":0.49,"funda":-0.85,"wTech":0.0,"composite":-0.85,"signal":"N"},{"date":"2023-09","tech":0.5,"funda":-0.76,"wTech":0.0,"composite":-0.76,"signal":"N"},{"date":"2023-10","tech":0.75,"funda":-0.75,"wTech":0.0,"composite":-0.75,"signal":"N"},{"date":"2023-11","tech":0.44,"funda":-0.86,"wTech":0.0,"composite":-0.86,"signal":"N"},{"date":"2023-12","tech":0.29,"funda":-1.02,"wTech":0.0,"composite":-1.02,"signal":"UW"},{"date":"2024-01","tech":0.38,"funda":-0.9,"wTech":0.0,"composite":-0.9,"signal":"N"},{"date":"2024-02","tech":0.31,"funda":-1.0,"wTech":0.0,"composite":-1.0,"signal":"N"},{"date":"2024-03","tech":0.25,"funda":-1.22,"wTech":0.0,"composite":-1.22,"signal":"UW"},{"date":"2024-04","tech":0.24,"funda":-1.19,"wTech":0.0,"composite":-1.19,"signal":"UW"},{"date":"2024-05","tech":0.02,"funda":-1.18,"wTech":0.0,"composite":-1.18,"signal":"UW"},{"date":"2024-06","tech":-0.19,"funda":-1.35,"wTech":0.0,"composite":-1.35,"signal":"UW"},{"date":"2024-07","tech":0.02,"funda":-0.98,"wTech":0.0,"composite":-0.98,"signal":"N"},{"date":"2024-08","tech":-0.26,"funda":-0.63,"wTech":0.0,"composite":-0.63,"signal":"N"},{"date":"2024-09","tech":0.19,"funda":-0.53,"wTech":100.0,"composite":0.19,"signal":"N"}],"Utilities":[{"date":"2022-10","tech":1.36,"funda":-3.5,"wTech":0.0,"composite":-3.5,"signal":"UW"},{"date":"2022-11","tech":1.52,"funda":-3.36,"wTech":0.0,"composite":-3.36,"signal":"UW"},{"date":"2022-12","tech":1.2,"funda":-3.49,"wTech":0.0,"composite":-3.49,"signal":"UW"},{"date":"2023-01","tech":1.21,"funda":-3.23,"wTech":0.0,"composite":-3.23,"signal":"UW"},{"date":"2023-02","tech":1.48,"funda":-2.97,"wTech":0.0,"composite":-2.97,"signal":"UW"},{"date":"2023-03","tech":1.75,"funda":-2.77,"wTech":0.0,"composite":-2.77,"signal":"UW"},{"date":"2023-04","tech":1.79,"funda":-2.82,"wTech":0.0,"composite":-2.82,"signal":"UW"},{"date":"2023-05","tech":2.16,"funda":-2.72,"wTech":0.0,"composite":-2.72,"signal":"UW"},{"date":"2023-06","tech":2.0,"funda":-2.39,"wTech":0.0,"composite":-2.39,"signal":"UW"},{"date":"2023-07","tech":1.74,"funda":-2.67,"wTech":0.0,"composite":-2.67,"signal":"UW"},{"date":"2023-08","tech":1.34,"funda":-2.55,"wTech":0.0,"composite":-2.55,"signal":"UW"},{"date":"2023-09","tech":1.64,"funda":-2.08,"wTech":0.0,"composite":-2.08,"signal":"UW"},{"date":"2023-10","tech":1.33,"funda":-1.75,"wTech":0.0,"composite":-1.75,"signal":"UW"},{"date":"2023-11","tech":1.47,"funda":-1.58,"wTech":0.0,"composite":-1.58,"signal":"UW"},{"date":"2023-12","tech":1.71,"funda":-1.75,"wTech":0.0,"composite":-1.75,"signal":"UW"},{"date":"2024-01","tech":1.82,"funda":-1.78,"wTech":0.0,"composite":-1.78,"signal":"UW"},{"date":"2024-02","tech":1.52,"funda":-1.73,"wTech":0.0,"composite":-1.73,"signal":"UW"},{"date":"2024-03","tech":1.66,"funda":-1.96,"wTech":0.0,"composite":-1.96,"signal":"UW"},{"date":"2024-04","tech":1.49,"funda":-1.59,"wTech":0.0,"composite":-1.59,"signal":"UW"},{"date":"2024-05","tech":1.31,"funda":-1.69,"wTech":0.0,"composite":-1.69,"signal":"UW"},{"date":"2024-06","tech":0.7,"funda":-1.63,"wTech":0.0,"composite":-1.63,"signal":"UW"},{"date":"2024-07","tech":1.31,"funda":-1.55,"wTech":0.0,"composite":-1.55,"signal":"UW"},{"date":"2024-08","tech":1.72,"funda":-1.6,"wTech":100.0,"composite":1.72,"signal":"OW"},{"date":"2024-09","tech":1.55,"funda":-1.7,"wTech":0,"composite":-1.7,"signal":"UW"}]};
+let historyData = structuredClone(SAMPLE_HISTORY);  // name → [{date, tech, funda, wTech, composite, signal}, ...]
+
+// ═══════════════════════════════════════════════════════
+// ENGINE
+// ═══════════════════════════════════════════════════════
+
+function comp(item, techOff=0, fundaOff=0, wOver=-1) {
+  const w = (wOver >= 0 ? wOver : item.wTech) / 100;
+  return w * (item.tech + techOff) + (1 - w) * (item.funda + fundaOff);
+}
+
+function sig(c) {
+  const ow = +document.getElementById('thOW').value || 1;
+  const uw = +document.getElementById('thUW').value || -1;
+  return c > ow ? 'ow' : c < uw ? 'uw' : 'ne';
+}
+
+function sigLabel(s) { return s === 'ow' ? 'OVERWEIGHT' : s === 'uw' ? 'UNDERWEIGHT' : 'NEUTRAL'; }
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+
+function goPage(id, el) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-' + id).classList.add('active');
+  if (id === 'dashboard') setTimeout(drawAll, 20);
+  if (id === 'history') setTimeout(drawHistory, 20);
+  if (id === 'scenario') setTimeout(() => { runScenario(); }, 20);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+
+function recalc() {
+  renderStrip('stripAssets', assets);
+  renderStrip('stripSectors', sectors);
+  renderTable('tblAssets', assets, 'a');
+  renderTable('tblSectors', sectors, 's');
+  drawAll();
+  renderStats();
+  if (selectedItem) showDetail(selectedItem);
+}
+
+function drawAll() {
+  drawScatter('cvAssets', assets);
+  drawScatter('cvSectors', sectors);
+}
+
+function renderStats() {
+  const all = [...assets, ...sectors];
+  let ow=0, uw=0, ne=0, sum=0;
+  all.forEach(it => { const c = comp(it); const s = sig(c); if(s==='ow')ow++; else if(s==='uw')uw++; else ne++; sum+=c; });
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat"><span class="stat-label">Overweight</span><span class="stat-val pos">${ow}</span></div>
+    <div class="stat"><span class="stat-label">Underweight</span><span class="stat-val neg">${uw}</span></div>
+    <div class="stat"><span class="stat-label">Neutral</span><span class="stat-val" style="color:var(--amber)">${ne}</span></div>
+    <div class="stat"><span class="stat-label">Avg Composite</span><span class="stat-val" style="color:var(--text-2)">${(sum/all.length).toFixed(2)}</span></div>
+    <div class="stat"><span class="stat-label">Total Assets</span><span class="stat-val" style="color:var(--text-2)">${all.length}</span></div>
+  `;
+}
+
+function renderStrip(id, data) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  data.forEach((it, i) => {
+    const c = comp(it);
+    const s = sig(c);
+    const pc = comp({...it, tech:it.prevTech||it.tech, funda:it.prevFunda||it.funda});
+    const d = c - pc;
+    const arrow = d > 0.05 ? '▲' : d < -0.05 ? '▼' : '';
+    const arrowCls = d > 0.05 ? 'pos' : d < -0.05 ? 'neg' : '';
+    const card = document.createElement('div');
+    card.className = `sig-card sig-${s}${selectedItem === it ? ' selected' : ''}`;
+    card.onclick = () => { selectedItem = it; recalc(); };
+    card.innerHTML = `
+      <div class="sc-name">${it.name}</div>
+      <div class="sc-signal"><span class="sc-dot"></span><span class="sc-label">${sigLabel(s)}</span></div>
+      <div class="sc-val">${c>=0?'+':''}${c.toFixed(2)}</div>
+      ${arrow ? `<span class="sc-delta ${arrowCls}">${arrow} ${Math.abs(d).toFixed(2)}</span>` : ''}
+    `;
+    el.appendChild(card);
+  });
+}
+
+function renderTable(tid, data, prefix) {
+  const t = document.getElementById(tid);
+  t.innerHTML = `<thead><tr>
+    <th>Asset</th><th class="r">Z<sub>tech</sub></th><th class="r">Prev</th>
+    <th class="r">Z<sub>funda</sub></th><th class="r">Prev</th>
+    <th class="r">w<sub>tech</sub>%</th><th class="r">Composite</th><th class="r">Δ</th><th>Signal</th>
+  </tr></thead><tbody></tbody>`;
+  const tb = t.querySelector('tbody');
+  data.forEach((it, i) => {
+    const c = comp(it);
+    const s = sig(c);
+    const pc = comp({...it, tech:it.prevTech||it.tech, funda:it.prevFunda||it.funda});
+    const d = c - pc;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="name" style="cursor:pointer" onclick="selectFromTable('${prefix}',${i})">${it.name}</td>
+      <td class="r"><input type="number" step="0.01" value="${it.tech}" onchange="upd('${prefix}',${i},'tech',this.value)"></td>
+      <td class="r" style="color:var(--text-3)">${(it.prevTech||0).toFixed(2)}</td>
+      <td class="r"><input type="number" step="0.01" value="${it.funda}" onchange="upd('${prefix}',${i},'funda',this.value)"></td>
+      <td class="r" style="color:var(--text-3)">${(it.prevFunda||0).toFixed(2)}</td>
+      <td class="r"><input type="number" step="1" min="0" max="100" value="${it.wTech}" onchange="upd('${prefix}',${i},'wTech',this.value)"></td>
+      <td class="r ${c>0?'pos':c<0?'neg':''}" style="font-weight:600">${c>=0?'+':''}${c.toFixed(2)}</td>
+      <td class="r ${d>0.05?'pos':d<-0.05?'neg':''}">${d>=0?'+':''}${d.toFixed(2)}</td>
+      <td><span class="badge ${s}">${sigLabel(s)}</span></td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+function upd(prefix, i, field, val) {
+  const v = parseFloat(val); if(isNaN(v)) return;
+  (prefix==='a'?assets:sectors)[i][field] = v;
+  recalc();
+}
+
+function selectFromTable(prefix, i) {
+  selectedItem = (prefix==='a'?assets:sectors)[i];
+  recalc();
+  goPage('dashboard', document.querySelector('[data-page="dashboard"]'));
+}
+
+// ═══════════════════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════════════════
+
+function showDetail(item) {
+  const dp = document.getElementById('detailPanel');
+  dp.classList.add('visible');
+  document.getElementById('detailName').textContent = item.name;
+
+  const c = comp(item);
+  const s = sig(c);
+  const w = item.wTech / 100;
+  const techContrib = w * item.tech;
+  const fundaContrib = (1 - w) * item.funda;
+  const pc = comp({...item, tech:item.prevTech||item.tech, funda:item.prevFunda||item.funda});
+
+  const grid = document.getElementById('detailGrid');
+  grid.innerHTML = `
+    <div class="detail-metric"><div class="dm-label">Technical Z</div><div class="dm-val ${item.tech>0?'pos':'neg'}">${item.tech>=0?'+':''}${item.tech.toFixed(2)}</div><div class="dm-sub">prev: ${(item.prevTech||0).toFixed(2)}</div></div>
+    <div class="detail-metric"><div class="dm-label">Fundamental Z</div><div class="dm-val ${item.funda>0?'pos':'neg'}">${item.funda>=0?'+':''}${item.funda.toFixed(2)}</div><div class="dm-sub">prev: ${(item.prevFunda||0).toFixed(2)}</div></div>
+    <div class="detail-metric"><div class="dm-label">w_tech</div><div class="dm-val" style="color:var(--blue)">${item.wTech.toFixed(1)}%</div><div class="dm-sub">w_funda: ${(100-item.wTech).toFixed(1)}%</div></div>
+    <div class="detail-metric"><div class="dm-label">Composite</div><div class="dm-val ${c>0?'pos':'neg'}">${c>=0?'+':''}${c.toFixed(3)}</div><div class="dm-sub">Δ ${(c-pc)>=0?'+':''}${(c-pc).toFixed(3)}</div></div>
+    <div class="detail-metric"><div class="dm-label">Signal</div><div class="dm-val" style="color:var(${s==='ow'?'--green':s==='uw'?'--red':'--amber'})">${sigLabel(s)}</div></div>
+    <div class="detail-metric"><div class="dm-label">Tech Contribution</div><div class="dm-val" style="color:var(--text-1)">${techContrib>=0?'+':''}${techContrib.toFixed(3)}</div><div class="dm-sub">${(w*100).toFixed(0)}% × ${item.tech.toFixed(2)}</div></div>
+    <div class="detail-metric"><div class="dm-label">Funda Contribution</div><div class="dm-val" style="color:var(--text-1)">${fundaContrib>=0?'+':''}${fundaContrib.toFixed(3)}</div><div class="dm-sub">${((1-w)*100).toFixed(0)}% × ${item.funda.toFixed(2)}</div></div>
+  `;
+
+  // Waterfall
+  const wf = document.getElementById('detailWaterfall');
+  const maxBar = Math.max(Math.abs(techContrib), Math.abs(fundaContrib), Math.abs(c), 0.5);
+  const barScale = 100 / (maxBar * 2);
+  function wfBar(val, color) {
+    const pct = Math.abs(val) * barScale;
+    const left = val >= 0 ? 50 : 50 - pct;
+    return `<div class="waterfall-bar" style="width:${pct}%;left:${left}%;background:${color}"></div>`;
+  }
+  wf.innerHTML = `
+    <div class="waterfall-row">
+      <span class="waterfall-label">Tech (w=${(w*100).toFixed(0)}%)</span>
+      <div class="waterfall-bar-wrap"><div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border-2)"></div>${wfBar(techContrib, techContrib>=0?'var(--green)':'var(--red)')}</div>
+      <span class="waterfall-val ${techContrib>=0?'pos':'neg'}">${techContrib>=0?'+':''}${techContrib.toFixed(2)}</span>
+    </div>
+    <div class="waterfall-row">
+      <span class="waterfall-label">Funda (w=${((1-w)*100).toFixed(0)}%)</span>
+      <div class="waterfall-bar-wrap"><div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border-2)"></div>${wfBar(fundaContrib, fundaContrib>=0?'var(--green)':'var(--red)')}</div>
+      <span class="waterfall-val ${fundaContrib>=0?'pos':'neg'}">${fundaContrib>=0?'+':''}${fundaContrib.toFixed(2)}</span>
+    </div>
+    <div style="border-top:1px solid var(--border-1);margin:4px 0"></div>
+    <div class="waterfall-row">
+      <span class="waterfall-label" style="font-weight:600;color:var(--text-0)">Composite</span>
+      <div class="waterfall-bar-wrap"><div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border-2)"></div>${wfBar(c, c>=0?'var(--green)':'var(--red)')}</div>
+      <span class="waterfall-val ${c>=0?'pos':'neg'}" style="font-weight:700">${c>=0?'+':''}${c.toFixed(2)}</span>
+    </div>
+  `;
+}
+
+function closeDetail() {
+  selectedItem = null;
+  document.getElementById('detailPanel').classList.remove('visible');
+  recalc();
+}
+
+// ═══════════════════════════════════════════════════════
+// SCATTER (Canvas)
+// ═══════════════════════════════════════════════════════
+
+function drawScatter(cid, data, techOff=0, fundaOff=0, wOver=-1) {
+  const cv = document.getElementById(cid);
+  const ctx = cv.getContext('2d');
+  const dpr = devicePixelRatio || 1;
+  const wrap = cv.parentElement;
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight || Math.round(W * 0.76);
+  cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  const m = { t:16, r:16, b:36, l:44 };
+  const pW = W-m.l-m.r, pH = H-m.t-m.b;
+  const R = 3.8;
+  const tx = v => m.l + ((v+R)/(2*R))*pW;
+  const ty = v => m.t + ((R-v)/(2*R))*pH;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Quadrant shading
+  const owTh = +document.getElementById('thOW').value||1;
+  const uwTh = +document.getElementById('thUW').value||-1;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(148,163,184,0.05)'; ctx.lineWidth = 1;
+  for(let v=-3;v<=3;v++) {
+    ctx.beginPath(); ctx.moveTo(tx(v),m.t); ctx.lineTo(tx(v),m.t+pH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(m.l,ty(v)); ctx.lineTo(m.l+pW,ty(v)); ctx.stroke();
+  }
+
+  // Zero axes
+  ctx.strokeStyle = 'rgba(148,163,184,0.15)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(tx(0),m.t); ctx.lineTo(tx(0),m.t+pH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(m.l,ty(0)); ctx.lineTo(m.l+pW,ty(0)); ctx.stroke();
+
+  // Threshold lines
+  ctx.setLineDash([3,3]);
+  ctx.strokeStyle = 'rgba(52,211,153,0.15)'; ctx.beginPath(); ctx.moveTo(m.l,ty(owTh)); ctx.lineTo(m.l+pW,ty(owTh)); ctx.stroke();
+  ctx.strokeStyle = 'rgba(248,113,113,0.15)'; ctx.beginPath(); ctx.moveTo(m.l,ty(uwTh)); ctx.lineTo(m.l+pW,ty(uwTh)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Axis labels
+  ctx.font = '9px JetBrains Mono'; ctx.fillStyle = '#5a6f94'; ctx.textAlign = 'center';
+  for(let v=-3;v<=3;v++) ctx.fillText(v, tx(v), m.t+pH+14);
+  ctx.textAlign = 'right';
+  for(let v=-3;v<=3;v++) ctx.fillText(v, m.l-6, ty(v)+3);
+  ctx.textAlign = 'center';
+  ctx.fillText('TECHNICAL', m.l+pW/2, H-3);
+  ctx.save(); ctx.translate(10, m.t+pH/2); ctx.rotate(-Math.PI/2); ctx.fillText('FUNDAMENTAL',0,0); ctx.restore();
+
+  // Movement arrows
+  data.forEach(it => {
+    const pt = it.prevTech != null ? it.prevTech : it.tech;
+    const pf = it.prevFunda != null ? it.prevFunda : it.funda;
+    const x1 = tx(pt+techOff), y1 = ty(pf+fundaOff);
+    const x2 = tx(it.tech+techOff), y2 = ty(it.funda+fundaOff);
+    ctx.strokeStyle = 'rgba(148,163,184,0.12)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    const a = Math.atan2(y2-y1, x2-x1), al = 5;
+    ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+    ctx.beginPath();
+    ctx.moveTo(x2-al*Math.cos(a-0.4), y2-al*Math.sin(a-0.4));
+    ctx.lineTo(x2,y2);
+    ctx.lineTo(x2-al*Math.cos(a+0.4), y2-al*Math.sin(a+0.4));
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(x1,y1,2.5,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(148,163,184,0.15)'; ctx.fill();
+  });
+
+  // Points
+  const colors = { ow:'#34d399', uw:'#f87171', ne:'#fbbf24' };
+  const glows = { ow:'rgba(52,211,153,0.25)', uw:'rgba(248,113,113,0.25)', ne:'rgba(251,191,36,0.15)' };
+  cv._pts = [];
+
+  data.forEach(it => {
+    const c = comp(it, techOff, fundaOff, wOver);
+    const s = sig(c);
+    const x = tx(it.tech+techOff), y = ty(it.funda+fundaOff);
+    ctx.beginPath(); ctx.arc(x,y,10,0,Math.PI*2); ctx.fillStyle = glows[s]; ctx.fill();
+    ctx.beginPath(); ctx.arc(x,y,4.5,0,Math.PI*2); ctx.fillStyle = colors[s]; ctx.fill();
+
+    // Selected ring
+    if(selectedItem === it) {
+      ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2);
+      ctx.strokeStyle = 'var(--blue)'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    ctx.font = '500 8px JetBrains Mono'; ctx.fillStyle = '#8b9dc3'; ctx.textAlign = 'left';
+    const lbl = it.name.length > 13 ? it.name.substring(0,11)+'…' : it.name;
+    ctx.fillText(lbl, x+8, y+3);
+    cv._pts.push({x,y,it,c,s});
+  });
+}
+
+// Tooltip
+document.addEventListener('mousemove', e => {
+  const cvs = document.querySelectorAll('canvas');
+  const tt = document.getElementById('tt');
+  let found = null;
+  cvs.forEach(cv => {
+    if(!cv._pts) return;
+    const r = cv.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    if(mx < 0 || my < 0 || mx > r.width || my > r.height) return;
+    cv._pts.forEach(p => { if(Math.hypot(mx-p.x, my-p.y) < 18) found = p; });
+  });
+  if(found) {
+    const it = found.it;
+    tt.style.display = 'block';
+    tt.style.left = (e.clientX+14)+'px'; tt.style.top = (e.clientY-8)+'px';
+    tt.innerHTML = `<div class="ttn">${it.name}</div>
+      <div class="ttr"><span class="ttl">Z_tech</span><span class="ttv">${it.tech.toFixed(2)}</span></div>
+      <div class="ttr"><span class="ttl">Z_funda</span><span class="ttv">${it.funda.toFixed(2)}</span></div>
+      <div class="ttr"><span class="ttl">w_tech</span><span class="ttv">${it.wTech.toFixed(1)}%</span></div>
+      <div class="ttr"><span class="ttl">Composite</span><span class="ttv" style="color:${found.c>0?'#34d399':'#f87171'}">${found.c>=0?'+':''}${found.c.toFixed(3)}</span></div>
+      <div class="ttr"><span class="ttl">Signal</span><span class="ttv" style="color:${found.s==='ow'?'#34d399':found.s==='uw'?'#f87171':'#fbbf24'}">${sigLabel(found.s)}</span></div>`;
+  } else { tt.style.display = 'none'; }
+});
+
+// Click to select
+document.addEventListener('click', e => {
+  const cvs = ['cvAssets','cvSectors'];
+  cvs.forEach(cid => {
+    const cv = document.getElementById(cid);
+    if(!cv._pts) return;
+    const r = cv.getBoundingClientRect();
+    const mx = e.clientX - r.left, my = e.clientY - r.top;
+    if(mx < 0 || my < 0 || mx > r.width || my > r.height) return;
+    cv._pts.forEach(p => {
+      if(Math.hypot(mx-p.x, my-p.y) < 18) { selectedItem = p.it; recalc(); }
+    });
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// SCENARIO
+// ═══════════════════════════════════════════════════════
+
+function runScenario() {
+  const tOff = +document.getElementById('shockTech').value;
+  const fOff = +document.getElementById('shockFunda').value;
+  const wOv = +document.getElementById('shockW').value;
+  document.getElementById('shockTechVal').textContent = tOff.toFixed(1);
+  document.getElementById('shockFundaVal').textContent = fOff.toFixed(1);
+  document.getElementById('shockWVal').textContent = wOv < 0 ? 'Off' : wOv + '%';
+
+  const all = [...assets, ...sectors];
+  let ow=0, uw=0, ne=0, changes=0;
+  const rows = [];
+  all.forEach(it => {
+    const baseC = comp(it);
+    const baseS = sig(baseC);
+    const scenC = comp(it, tOff, fOff, wOv);
+    const scenS = sig(scenC);
+    if(baseS !== scenS) changes++;
+    if(scenS==='ow')ow++; else if(scenS==='uw')uw++; else ne++;
+    rows.push({name:it.name, baseC, baseS, scenC, scenS, changed: baseS!==scenS});
+  });
+
+  document.getElementById('scenarioStats').innerHTML = `
+    <div class="panel"><div class="panel-body"><div class="stat"><span class="stat-label">Overweight</span><span class="stat-val pos">${ow}</span></div></div></div>
+    <div class="panel"><div class="panel-body"><div class="stat"><span class="stat-label">Underweight</span><span class="stat-val neg">${uw}</span></div></div></div>
+    <div class="panel"><div class="panel-body"><div class="stat"><span class="stat-label">Neutral</span><span class="stat-val" style="color:var(--amber)">${ne}</span></div></div></div>
+    <div class="panel"><div class="panel-body"><div class="stat"><span class="stat-label">Signal Changes</span><span class="stat-val" style="color:var(--purple)">${changes}</span></div></div></div>
+  `;
+
+  drawScatter('cvScenAssets', assets, tOff, fOff, wOv);
+  drawScatter('cvScenSectors', sectors, tOff, fOff, wOv);
+
+  // Table
+  const t = document.getElementById('tblScenario');
+  t.innerHTML = `<thead><tr><th>Asset</th><th class="r">Base</th><th>Base Signal</th><th class="r">Scenario</th><th>Scenario Signal</th><th>Changed?</th></tr></thead><tbody></tbody>`;
+  const tb = t.querySelector('tbody');
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.style.background = r.changed ? 'rgba(167,139,250,0.04)' : '';
+    tr.innerHTML = `
+      <td class="name">${r.name}</td>
+      <td class="r ${r.baseC>0?'pos':'neg'}">${r.baseC>=0?'+':''}${r.baseC.toFixed(2)}</td>
+      <td><span class="badge ${r.baseS}">${sigLabel(r.baseS)}</span></td>
+      <td class="r ${r.scenC>0?'pos':'neg'}">${r.scenC>=0?'+':''}${r.scenC.toFixed(2)}</td>
+      <td><span class="badge ${r.scenS}">${sigLabel(r.scenS)}</span></td>
+      <td>${r.changed ? '<span style="color:var(--purple);font-weight:600">⬥ CHANGED</span>' : '—'}</td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// CSV IMPORT
+// ═══════════════════════════════════════════════════════
+
+function parseCSVPaste() {
+  const raw = document.getElementById('csvPaste').value.trim();
+  if(!raw) return;
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+  // Skip header if first field is non-numeric
+  let start = 0;
+  const firstFields = lines[0].split(/[,\t]/);
+  if(isNaN(parseFloat(firstFields[1]))) start = 1;
+
+  const parsed = [];
+  for(let i=start; i<lines.length; i++) {
+    const cols = lines[i].split(/[,\t]/);
+    if(cols.length < 4) continue;
+    parsed.push({
+      name: cols[0].trim().replace(/^"|"$/g,''),
+      tech: parseFloat(cols[1]) || 0,
+      funda: parseFloat(cols[2]) || 0,
+      wTech: parseFloat(cols[3]) || 0,
+      prevTech: cols[4] !== undefined ? parseFloat(cols[4]) || 0 : 0,
+      prevFunda: cols[5] !== undefined ? parseFloat(cols[5]) || 0 : 0,
+    });
+  }
+  if(parsed.length > 0) {
+    // Heuristic: if all names contain "equity"/"bond"/"gold"/"oil"/"euro"/"dollar"/"currency" → assets
+    // Otherwise replace the appropriate array
+    assets = parsed;
+    recalc();
+    goPage('dashboard', document.querySelector('[data-page="dashboard"]'));
+  }
+}
+
+document.getElementById('csvFile').addEventListener('change', e => {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('csvPaste').value = ev.target.result;
+    goPage('data', document.querySelector('[data-page="data"]'));
+  };
+  reader.readAsText(file);
+});
+
+// ═══════════════════════════════════════════════════════
+// JSON IMPORT / EXPORT
+// ═══════════════════════════════════════════════════════
+
+function exportJSON() {
+  const d = { date:new Date().toISOString(), assets, sectors, thOW:+document.getElementById('thOW').value, thUW:+document.getElementById('thUW').value, history:historyData };
+  const b = new Blob([JSON.stringify(d,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+  a.download = `tacsignal-${new Date().toISOString().slice(0,10)}.json`; a.click();
+}
+
+function importJSON() { document.getElementById('importFile').click(); }
+document.getElementById('importFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if(d.assets) assets = d.assets;
+      if(d.sectors) sectors = d.sectors;
+      if(d.thOW != null) document.getElementById('thOW').value = d.thOW;
+      if(d.thUW != null) document.getElementById('thUW').value = d.thUW;
+      if(d.history) { historyData = d.history; populateHistorySelect(); }
+      recalc();
+    } catch(err) { alert('Invalid JSON'); }
+  };
+  r.readAsText(f);
+});
+
+function resetSample() {
+  assets = structuredClone(SAMPLE_ASSETS);
+  sectors = structuredClone(SAMPLE_SECTORS);
+  historyData = structuredClone(SAMPLE_HISTORY);
+  document.getElementById('thOW').value = 1;
+  document.getElementById('thUW').value = -1;
+  selectedItem = null;
+  closeDetail();
+  recalc();
+  populateHistorySelect();
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════
+
+function populateHistorySelect() {
+  const sel = document.getElementById('histAssetSelect');
+  sel.innerHTML = '';
+  const names = Object.keys(historyData).filter(n => historyData[n] && historyData[n].length > 0);
+  if (names.length === 0) {
+    sel.innerHTML = '<option value="">— no history data —</option>';
+    document.getElementById('historyInfo').innerHTML = 'Import a JSON file generated by the Python pipeline to see monthly time series. The pipeline outputs up to 24 months of history.';
+    return;
+  }
+  document.getElementById('historyInfo').innerHTML = `History loaded for <strong>${names.length}</strong> assets. Select one below to explore its signal evolution.`;
+  names.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n; opt.textContent = n;
+    sel.appendChild(opt);
+  });
+  drawHistory();
+}
+
+function drawHistory() {
+  const name = document.getElementById('histAssetSelect').value;
+  if (!name || !historyData[name] || historyData[name].length === 0) return;
+  const hist = historyData[name];
+
+  drawHistComposite('cvHistComposite', hist, name);
+  drawHistScores('cvHistScores', hist, name);
+  drawHistPhase('cvHistPhase', hist, name);
+  renderHistTimeline(hist, name);
+}
+
+function initHistCanvas(cid) {
+  const cv = document.getElementById(cid);
+  const ctx = cv.getContext('2d');
+  const dpr = devicePixelRatio || 1;
+  const wrap = cv.parentElement;
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight || Math.round(W * 0.55);
+  cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  return { cv, ctx, W, H };
+}
+
+function drawHistComposite(cid, hist, name) {
+  const { cv, ctx, W, H } = initHistCanvas(cid);
+  const m = { t:20, r:16, b:40, l:50 };
+  const pW = W-m.l-m.r, pH = H-m.t-m.b;
+  ctx.clearRect(0,0,W,H);
+
+  const owTh = +document.getElementById('thOW').value||1;
+  const uwTh = +document.getElementById('thUW').value||-1;
+
+  const vals = hist.map(h => h.composite);
+  const yMax = Math.max(4, Math.ceil(Math.max(...vals.map(Math.abs))));
+  const yMin = -yMax;
+
+  const tx = i => m.l + (i / (hist.length - 1)) * pW;
+  const ty = v => m.t + ((yMax - v) / (yMax - yMin)) * pH;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(148,163,184,0.06)'; ctx.lineWidth = 1;
+  for (let v = -yMax; v <= yMax; v++) {
+    ctx.beginPath(); ctx.moveTo(m.l, ty(v)); ctx.lineTo(m.l+pW, ty(v)); ctx.stroke();
+  }
+
+  // Zero line
+  ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+  ctx.beginPath(); ctx.moveTo(m.l, ty(0)); ctx.lineTo(m.l+pW, ty(0)); ctx.stroke();
+
+  // Threshold bands
+  ctx.fillStyle = 'rgba(52,211,153,0.04)';
+  ctx.fillRect(m.l, m.t, pW, ty(owTh) - m.t);
+  ctx.fillStyle = 'rgba(248,113,113,0.04)';
+  ctx.fillRect(m.l, ty(uwTh), pW, m.t + pH - ty(uwTh));
+
+  // Threshold lines
+  ctx.setLineDash([3,3]);
+  ctx.strokeStyle = 'rgba(52,211,153,0.3)';
+  ctx.beginPath(); ctx.moveTo(m.l, ty(owTh)); ctx.lineTo(m.l+pW, ty(owTh)); ctx.stroke();
+  ctx.strokeStyle = 'rgba(248,113,113,0.3)';
+  ctx.beginPath(); ctx.moveTo(m.l, ty(uwTh)); ctx.lineTo(m.l+pW, ty(uwTh)); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Composite line
+  ctx.beginPath();
+  hist.forEach((h, i) => {
+    const x = tx(i), y = ty(h.composite);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Points colored by signal
+  const sigColors = { OW:'#34d399', UW:'#f87171', N:'#fbbf24' };
+  hist.forEach((h, i) => {
+    ctx.beginPath(); ctx.arc(tx(i), ty(h.composite), 4, 0, Math.PI*2);
+    ctx.fillStyle = sigColors[h.signal] || '#fbbf24'; ctx.fill();
+  });
+
+  // X labels
+  ctx.font = '8px JetBrains Mono'; ctx.fillStyle = '#5a6f94'; ctx.textAlign = 'center';
+  hist.forEach((h, i) => {
+    if (i % Math.max(1, Math.floor(hist.length / 8)) === 0 || i === hist.length - 1) {
+      ctx.fillText(h.date, tx(i), H - 8);
+    }
+  });
+
+  // Y labels
+  ctx.textAlign = 'right';
+  for (let v = -yMax; v <= yMax; v++) {
+    ctx.fillText(v, m.l - 6, ty(v) + 3);
+  }
+
+  // Title labels
+  ctx.font = '9px JetBrains Mono'; ctx.fillStyle = '#5a6f94'; ctx.textAlign = 'right';
+  ctx.fillText('OW →', m.l - 6, ty(owTh) - 4);
+  ctx.fillText('UW →', m.l - 6, ty(uwTh) + 12);
+}
+
+function drawHistScores(cid, hist, name) {
+  const { cv, ctx, W, H } = initHistCanvas(cid);
+  const m = { t:20, r:16, b:40, l:50 };
+  const pW = W-m.l-m.r, pH = H-m.t-m.b;
+  ctx.clearRect(0,0,W,H);
+
+  const allVals = hist.flatMap(h => [h.tech, h.funda]);
+  const yMax = Math.max(4, Math.ceil(Math.max(...allVals.map(Math.abs))));
+  const yMin = -yMax;
+
+  const tx = i => m.l + (i / (hist.length - 1)) * pW;
+  const ty = v => m.t + ((yMax - v) / (yMax - yMin)) * pH;
+
+  // Grid
+  ctx.strokeStyle = 'rgba(148,163,184,0.06)'; ctx.lineWidth = 1;
+  for (let v = -yMax; v <= yMax; v++) {
+    ctx.beginPath(); ctx.moveTo(m.l, ty(v)); ctx.lineTo(m.l+pW, ty(v)); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+  ctx.beginPath(); ctx.moveTo(m.l, ty(0)); ctx.lineTo(m.l+pW, ty(0)); ctx.stroke();
+
+  // Tech line
+  ctx.beginPath();
+  hist.forEach((h, i) => { const x = tx(i), y = ty(h.tech); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Funda line
+  ctx.beginPath();
+  hist.forEach((h, i) => { const x = tx(i), y = ty(h.funda); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.strokeStyle = '#f87171'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Points
+  hist.forEach((h, i) => {
+    ctx.beginPath(); ctx.arc(tx(i), ty(h.tech), 3, 0, Math.PI*2);
+    ctx.fillStyle = '#60a5fa'; ctx.fill();
+    ctx.beginPath(); ctx.arc(tx(i), ty(h.funda), 3, 0, Math.PI*2);
+    ctx.fillStyle = '#f87171'; ctx.fill();
+  });
+
+  // Legend
+  ctx.font = '9px JetBrains Mono';
+  ctx.fillStyle = '#60a5fa'; ctx.textAlign = 'left'; ctx.fillText('■ Technical', m.l + 8, m.t + 12);
+  ctx.fillStyle = '#f87171'; ctx.fillText('■ Fundamental', m.l + 100, m.t + 12);
+
+  // X labels
+  ctx.font = '8px JetBrains Mono'; ctx.fillStyle = '#5a6f94'; ctx.textAlign = 'center';
+  hist.forEach((h, i) => {
+    if (i % Math.max(1, Math.floor(hist.length / 8)) === 0 || i === hist.length - 1) {
+      ctx.fillText(h.date, tx(i), H - 8);
+    }
+  });
+  ctx.textAlign = 'right';
+  for (let v = -yMax; v <= yMax; v++) ctx.fillText(v, m.l - 6, ty(v) + 3);
+}
+
+function drawHistPhase(cid, hist, name) {
+  const { cv, ctx, W, H } = initHistCanvas(cid);
+  const m = { t:16, r:16, b:36, l:44 };
+  const pW = W-m.l-m.r, pH = H-m.t-m.b;
+  const R = 3.8;
+  const tx = v => m.l + ((v+R)/(2*R))*pW;
+  const ty = v => m.t + ((R-v)/(2*R))*pH;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(148,163,184,0.05)'; ctx.lineWidth = 1;
+  for(let v=-3;v<=3;v++) {
+    ctx.beginPath(); ctx.moveTo(tx(v),m.t); ctx.lineTo(tx(v),m.t+pH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(m.l,ty(v)); ctx.lineTo(m.l+pW,ty(v)); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+  ctx.beginPath(); ctx.moveTo(tx(0),m.t); ctx.lineTo(tx(0),m.t+pH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(m.l,ty(0)); ctx.lineTo(m.l+pW,ty(0)); ctx.stroke();
+
+  // Axis labels
+  ctx.font = '9px JetBrains Mono'; ctx.fillStyle = '#5a6f94'; ctx.textAlign = 'center';
+  for(let v=-3;v<=3;v++) ctx.fillText(v, tx(v), m.t+pH+14);
+  ctx.textAlign = 'right';
+  for(let v=-3;v<=3;v++) ctx.fillText(v, m.l-6, ty(v)+3);
+  ctx.textAlign = 'center';
+  ctx.fillText('TECHNICAL', m.l+pW/2, H-3);
+  ctx.save(); ctx.translate(10, m.t+pH/2); ctx.rotate(-Math.PI/2); ctx.fillText('FUNDAMENTAL',0,0); ctx.restore();
+
+  const sigColors = { OW:'#34d399', UW:'#f87171', N:'#fbbf24' };
+
+  // Path
+  for (let i = 1; i < hist.length; i++) {
+    const x1 = tx(hist[i-1].tech), y1 = ty(hist[i-1].funda);
+    const x2 = tx(hist[i].tech), y2 = ty(hist[i].funda);
+    const alpha = 0.15 + 0.7 * (i / hist.length);
+    ctx.strokeStyle = `rgba(96,165,250,${alpha})`; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+
+    // Arrow
+    const a = Math.atan2(y2-y1, x2-x1), al = 5;
+    ctx.beginPath();
+    ctx.moveTo(x2-al*Math.cos(a-0.4), y2-al*Math.sin(a-0.4));
+    ctx.lineTo(x2,y2);
+    ctx.lineTo(x2-al*Math.cos(a+0.4), y2-al*Math.sin(a+0.4));
+    ctx.stroke();
+  }
+
+  // Points
+  hist.forEach((h, i) => {
+    const x = tx(h.tech), y = ty(h.funda);
+    const r = i === hist.length - 1 ? 6 : 3.5;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = sigColors[h.signal] || '#fbbf24'; ctx.fill();
+
+    // Label first and last
+    if (i === 0 || i === hist.length - 1) {
+      ctx.font = `${i === hist.length - 1 ? 'bold ' : ''}8px JetBrains Mono`;
+      ctx.fillStyle = i === hist.length - 1 ? '#e2e8f0' : '#5a6f94';
+      ctx.textAlign = 'left';
+      ctx.fillText(h.date, x + r + 4, y + 3);
+    }
+  });
+}
+
+function renderHistTimeline(hist, name) {
+  const el = document.getElementById('histSignalTimeline');
+  const sigColors = { OW:'var(--green)', UW:'var(--red)', N:'var(--amber)' };
+  const sigBg = { OW:'var(--green-dim)', UW:'var(--red-dim)', N:'var(--amber-dim)' };
+  const sigLabels = { OW:'OVERWEIGHT', UW:'UNDERWEIGHT', N:'NEUTRAL' };
+
+  let html = '<div style="display:grid;grid-template-columns:70px 90px 80px 80px 80px auto;gap:2px;align-items:center">';
+  html += '<div style="color:var(--text-3);font-size:9px;font-weight:600">DATE</div>';
+  html += '<div style="color:var(--text-3);font-size:9px;font-weight:600">SIGNAL</div>';
+  html += '<div style="color:var(--text-3);font-size:9px;font-weight:600;text-align:right">COMPOSITE</div>';
+  html += '<div style="color:var(--text-3);font-size:9px;font-weight:600;text-align:right">Z_TECH</div>';
+  html += '<div style="color:var(--text-3);font-size:9px;font-weight:600;text-align:right">Z_FUNDA</div>';
+  html += '<div style="color:var(--text-3);font-size:9px;font-weight:600;text-align:right">W_TECH</div>';
+
+  // Show newest first
+  [...hist].reverse().forEach((h, i) => {
+    const prevH = i < hist.length - 1 ? [...hist].reverse()[i + 1] : null;
+    const changed = prevH && prevH.signal !== h.signal;
+    const rowBg = changed ? 'background:rgba(167,139,250,0.06);border-radius:3px' : '';
+    html += `<div style="padding:4px 0;${rowBg}">${h.date}</div>`;
+    html += `<div style="padding:4px 0;${rowBg}"><span style="display:inline-block;padding:1px 6px;border-radius:3px;background:${sigBg[h.signal]};color:${sigColors[h.signal]};font-size:9px;font-weight:600">${sigLabels[h.signal]}</span>${changed ? ' <span style="color:var(--purple);font-size:8px">⬥</span>' : ''}</div>`;
+    html += `<div style="padding:4px 0;text-align:right;${rowBg};color:${h.composite > 0 ? 'var(--green)' : h.composite < 0 ? 'var(--red)' : 'var(--text-2)'};font-weight:600">${h.composite >= 0 ? '+' : ''}${h.composite.toFixed(2)}</div>`;
+    html += `<div style="padding:4px 0;text-align:right;${rowBg};color:var(--text-2)">${h.tech >= 0 ? '+' : ''}${h.tech.toFixed(2)}</div>`;
+    html += `<div style="padding:4px 0;text-align:right;${rowBg};color:var(--text-2)">${h.funda >= 0 ? '+' : ''}${h.funda.toFixed(2)}</div>`;
+    html += `<div style="padding:4px 0;text-align:right;${rowBg};color:var(--blue)">${h.wTech.toFixed(0)}%</div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+
+document.getElementById('hDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+recalc();
+populateHistorySelect();
+window.addEventListener('resize', () => { drawAll(); if(document.getElementById('pg-history').classList.contains('active')) drawHistory(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TacSignal — Setup Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap');
+  :root { --bg:#06090f; --bg1:#0c1220; --bg2:#111a2e; --border:#1a2744; --text:#f1f5f9; --text2:#cbd5e1; --text3:#8b9dc3; --text4:#5a6f94; --green:#34d399; --red:#f87171; --blue:#60a5fa; --amber:#fbbf24; --purple:#a78bfa; --mono:'JetBrains Mono',monospace; --sans:'Instrument Sans',sans-serif; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:var(--sans); background:var(--bg); color:var(--text2); min-height:100vh; line-height:1.7; }
+  .container { max-width:780px; margin:0 auto; padding:40px 24px 80px; }
+  h1 { font-family:var(--mono); font-size:28px; color:var(--text); margin-bottom:6px; }
+  h1 em { font-style:normal; color:var(--blue); }
+  .subtitle { font-size:14px; color:var(--text4); margin-bottom:40px; }
+  h2 { font-family:var(--mono); font-size:16px; color:var(--blue); margin:40px 0 16px; letter-spacing:-0.3px; }
+  .step { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:24px; margin:16px 0; }
+  .step-number { display:inline-block; width:28px; height:28px; line-height:28px; text-align:center; background:rgba(96,165,250,0.15); color:var(--blue); border-radius:50%; font-family:var(--mono); font-size:13px; font-weight:700; margin-right:10px; }
+  .step-title { font-family:var(--mono); font-size:14px; font-weight:600; color:var(--text); display:inline; }
+  .step p { margin:12px 0 0 38px; font-size:14px; }
+  .step a { color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(96,165,250,0.3); }
+  .step a:hover { border-bottom-color:var(--blue); }
+  code { font-family:var(--mono); font-size:12px; background:var(--bg1); border:1px solid var(--border); border-radius:4px; padding:2px 6px; color:var(--green); }
+  .cmd { display:block; margin:12px 0 0 38px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:14px 18px; font-family:var(--mono); font-size:12px; color:var(--green); cursor:pointer; position:relative; }
+  .cmd::after { content:'click to copy'; position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:9px; color:var(--text4); opacity:0; transition:opacity 0.15s; }
+  .cmd:hover::after { opacity:1; }
+  .cmd.copied::after { content:'copied!'; color:var(--green); opacity:1; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-family:var(--mono); font-size:10px; font-weight:600; }
+  .tag-mac { background:rgba(96,165,250,0.12); color:var(--blue); }
+  .tag-win { background:rgba(167,139,250,0.12); color:var(--purple); }
+  .tag-both { background:rgba(52,211,153,0.12); color:var(--green); }
+  .tag-free { background:rgba(251,191,36,0.12); color:var(--amber); }
+  .note { background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.15); border-radius:8px; padding:16px 20px; margin:12px 0 0 38px; font-size:13px; }
+  .note strong { color:var(--amber); }
+  .files { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0 0 38px; }
+  .file-card { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:12px 14px; }
+  .file-name { font-family:var(--mono); font-size:11px; color:var(--text); font-weight:600; }
+  .file-desc { font-size:11px; color:var(--text4); margin-top:4px; }
+  .checklist { margin:12px 0 0 38px; list-style:none; }
+  .checklist li { padding:6px 0; font-size:13px; }
+  .checklist li::before { content:'○ '; color:var(--text4); font-family:var(--mono); }
+  .divider { border:none; border-top:1px solid var(--border); margin:40px 0; }
+  .tldr { background:linear-gradient(135deg, rgba(96,165,250,0.08), rgba(167,139,250,0.08)); border:1px solid rgba(96,165,250,0.2); border-radius:10px; padding:24px; margin:24px 0; }
+  .tldr h3 { font-family:var(--mono); font-size:14px; color:var(--text); margin-bottom:12px; }
+  .tldr ol { margin-left:20px; font-size:14px; }
+  .tldr li { padding:4px 0; }
+  .platform-tabs { display:flex; gap:0; margin-bottom:0; }
+  .platform-tab { font-family:var(--mono); font-size:11px; padding:8px 16px; cursor:pointer; background:var(--bg1); border:1px solid var(--border); color:var(--text4); }
+  .platform-tab:first-child { border-radius:6px 0 0 0; }
+  .platform-tab:last-child { border-radius:0 6px 0 0; }
+  .platform-tab.active { background:var(--bg2); color:var(--text); border-bottom-color:var(--bg2); }
+  .platform-content { display:none; }
+  .platform-content.active { display:block; }
+  .freq { font-family:var(--mono); font-size:10px; padding:2px 8px; border-radius:3px; background:rgba(52,211,153,0.08); color:var(--green); display:inline-block; margin-left:8px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Tac<em>Signal</em> Setup Guide</h1>
+<p class="subtitle">Get live data flowing into your dashboard in 5 minutes</p>
+
+<div class="tldr">
+  <h3>TL;DR — The 30-second version</h3>
+  <ol>
+    <li>Install Python → <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a></li>
+    <li>Get a free FRED key → <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank">fred.stlouisfed.org</a></li>
+    <li>Double-click <code>run_tacsignal.command</code> (Mac) or <code>run_tacsignal.bat</code> (Windows)</li>
+    <li>It produces a JSON file → Import it into the dashboard</li>
+    <li>Repeat monthly</li>
+  </ol>
+</div>
+
+<!-- ═══ FILES IN YOUR FOLDER ═══ -->
+
+<h2>What's in your folder</h2>
+<div class="step">
+  <div class="files" style="margin:0">
+    <div class="file-card">
+      <div class="file-name">tactical-signal-v2.html</div>
+      <div class="file-desc">The dashboard. Open in any browser.</div>
+    </div>
+    <div class="file-card">
+      <div class="file-name">tacsignal_data_pipeline.py</div>
+      <div class="file-desc">Python script that fetches data.</div>
+    </div>
+    <div class="file-card">
+      <div class="file-name">run_tacsignal.command <span class="tag tag-mac">Mac</span></div>
+      <div class="file-desc">Double-click to run pipeline.</div>
+    </div>
+    <div class="file-card">
+      <div class="file-name">run_tacsignal.bat <span class="tag tag-win">Win</span></div>
+      <div class="file-desc">Double-click to run pipeline.</div>
+    </div>
+    <div class="file-card">
+      <div class="file-name">TacSignal_Monthly_Playbook.docx</div>
+      <div class="file-desc">Detailed methodology reference.</div>
+    </div>
+    <div class="file-card">
+      <div class="file-name">SETUP_GUIDE.html</div>
+      <div class="file-desc">You're reading this right now.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ONE-TIME SETUP ═══ -->
+
+<h2>One-time setup (5 minutes)</h2>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Install Python</span>
+  <p>Go to <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a> and download the latest version (3.10+).</p>
+  <div class="note">
+    <strong>Windows users:</strong> On the installer's first screen, check the box that says <strong>"Add Python to PATH"</strong>. This is critical — everything else will fail without it.
+  </div>
+  <div class="note">
+    <strong>Mac users:</strong> Python 3 may already be installed. Open Terminal (press Cmd+Space, type "Terminal") and type <code>python3 --version</code>. If you see a version number, you're good.
+  </div>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Get a free FRED API key</span> <span class="tag tag-free">FREE</span>
+  <p>FRED is the Federal Reserve's data portal. The API key gives you access to yields, spreads, VIX, and other macro data.</p>
+  <ol style="margin:12px 0 0 38px; font-size:14px;">
+    <li style="padding:4px 0">Go to <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank">fred.stlouisfed.org/docs/api/api_key.html</a></li>
+    <li style="padding:4px 0">Click <strong>"Request or view your API keys"</strong></li>
+    <li style="padding:4px 0">Create an account (just email + password) or sign in</li>
+    <li style="padding:4px 0">Click <strong>"Request API Key"</strong>, fill in any description</li>
+    <li style="padding:4px 0">Copy the 32-character key (looks like <code>a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6</code>)</li>
+  </ol>
+  <div class="note">
+    <strong>This is optional</strong> — the pipeline will still work without it, using price-derived proxies for fundamental scores. But with FRED, you get real yield data, credit spreads, VIX, etc., which makes the fundamental scores much more accurate.
+  </div>
+</div>
+
+<div class="step">
+  <span class="step-number">3</span>
+  <span class="step-title">That's it for setup.</span>
+  <p>The launcher script handles everything else automatically (installing Python packages, saving your API key, etc.).</p>
+</div>
+
+<hr class="divider">
+
+<!-- ═══ MONTHLY UPDATE ═══ -->
+
+<h2>Monthly update (2 minutes) <span class="freq">once a month</span></h2>
+
+<div class="step">
+  <span class="step-number">1</span>
+  <span class="step-title">Run the pipeline</span>
+  <p><strong>Mac:</strong> Double-click <code>run_tacsignal.command</code></p>
+  <p><strong>Windows:</strong> Double-click <code>run_tacsignal.bat</code></p>
+  <div class="note">
+    <strong>First time only:</strong> The script will ask you to paste your FRED API key. After that, it remembers the key and won't ask again.
+  </div>
+  <p>The script will:</p>
+  <ul style="margin:8px 0 0 54px; font-size:13px; color:var(--text3)">
+    <li>Pull 3 years of daily prices from Yahoo Finance (24 assets + sectors)</li>
+    <li>Pull macro data from FRED (yields, VIX, credit spreads, etc.)</li>
+    <li>Compute z-scores, behavioral weights, and composite signals</li>
+    <li>Output a JSON file named <code>tacsignal-YYYY-MM-DD.json</code></li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-number">2</span>
+  <span class="step-title">Import into the dashboard</span>
+  <p>Open <code>tactical-signal-v2.html</code> in your browser (the script offers to do this for you).</p>
+  <p>Click the <strong>Import</strong> button in the top-right corner, then select the JSON file the pipeline just created.</p>
+  <p>Everything updates instantly — signal cards, scatter plots, history charts, the lot.</p>
+</div>
+
+<hr class="divider">
+
+<!-- ═══ MANUAL / TERMINAL ═══ -->
+
+<h2>Alternative: run from Terminal</h2>
+<div class="step">
+  <p style="margin-left:0">If you prefer the command line, or if the double-click approach has issues:</p>
+
+  <div class="cmd" onclick="copyCmd(this)">cd ~/path/to/your/Bhfs/folder</div>
+  <div class="cmd" onclick="copyCmd(this)">pip install yfinance pandas numpy fredapi</div>
+  <div class="cmd" onclick="copyCmd(this)">export FRED_API_KEY=your_key_here</div>
+  <div class="cmd" onclick="copyCmd(this)">python3 tacsignal_data_pipeline.py</div>
+
+  <p style="margin-left:0; margin-top:16px">That's it. The JSON file appears in the same folder.</p>
+</div>
+
+<hr class="divider">
+
+<!-- ═══ DATA SOURCES ═══ -->
+
+<h2>Where the data comes from</h2>
+
+<div class="step">
+  <p style="margin-left:0"><strong>Yahoo Finance</strong> <span class="tag tag-free">FREE</span> — Price data for all 24 assets and sectors. No API key needed. The <code>yfinance</code> Python library handles it automatically.</p>
+  <p style="margin-left:0; margin-top:16px"><strong>FRED</strong> <span class="tag tag-free">FREE</span> — Federal Reserve Economic Data. Provides: 10-year Treasury yields (US, EU, JP), credit spreads (BBB, HY), VIX, unemployment, CPI, ISM Manufacturing. Free API key required (see setup above).</p>
+  <p style="margin-left:0; margin-top:16px">Both sources are 100% free, maintained by reputable institutions, and have no usage limits for the volumes we pull (a few hundred data points per month).</p>
+</div>
+
+<hr class="divider">
+
+<!-- ═══ TROUBLESHOOTING ═══ -->
+
+<h2>Troubleshooting</h2>
+
+<div class="step">
+  <span class="step-title">"Python not found" or "command not found"</span>
+  <p>Python isn't installed or not in your PATH. Reinstall from <a href="https://www.python.org/downloads/" target="_blank">python.org</a>. On Windows, make sure you check "Add Python to PATH" during installation.</p>
+</div>
+
+<div class="step">
+  <span class="step-title">"No data for ticker XYZ"</span>
+  <p>Yahoo Finance occasionally has outages. Wait an hour and try again. The script will still produce output — assets with missing data default to 0 scores and are flagged.</p>
+</div>
+
+<div class="step">
+  <span class="step-title">"FRED API key invalid"</span>
+  <p>Double-check your key at <a href="https://fred.stlouisfed.org/docs/api/api_key.html" target="_blank">fred.stlouisfed.org</a>. To reset the saved key, delete the file <code>~/.tacsignal_fred_key</code> (Mac/Linux) or <code>%USERPROFILE%\.tacsignal_fred_key</code> (Windows) and run again.</p>
+</div>
+
+<div class="step">
+  <span class="step-title">Mac: "run_tacsignal.command can't be opened because it's from an unidentified developer"</span>
+  <p>Right-click the file → Open → Click "Open" in the dialog. You only need to do this once. Alternatively, run in Terminal: <code>bash run_tacsignal.command</code></p>
+</div>
+
+<div class="step">
+  <span class="step-title">The History tab shows "no history data" after import</span>
+  <p>The pipeline needs at least ~18 months of daily price data to compute 12 months of z-score history. Very new or illiquid tickers may not produce enough history. The dashboard falls back to sample data in that case.</p>
+</div>
+
+</div>
+
+<script>
+function copyCmd(el) {
+  navigator.clipboard.writeText(el.textContent.trim());
+  el.classList.add('copied');
+  setTimeout(() => el.classList.remove('copied'), 1500);
+}
+</script>
+</body>
+</html>
