@@ -792,12 +792,20 @@
             <button class="btn" id="btPanelCore" onclick="setBtPanel('core')" style="border:none;border-radius:0;font-size:9px;padding:5px 10px">Core (no alts)</button>
             <button class="btn" id="btPanelFull" onclick="setBtPanel('full')" style="border:none;border-radius:0;border-left:1px solid var(--border-1);font-size:9px;padding:5px 10px">Full Portfolio</button>
           </div>
-          <!-- Sub-period selector -->
-          <select id="btPeriodSelect" onchange="setBtPeriod(this.value)" style="font-family:var(--mono);font-size:10px;background:var(--bg-2);color:var(--text-1);border:1px solid var(--border-1);border-radius:5px;padding:5px 8px;cursor:pointer">
-            <option value="Full Period">Full Period</option>
-            <option value="Pre-2018">Pre-2018</option>
-            <option value="Post-2018">Post-2018</option>
-          </select>
+          <!-- Year range slider -->
+          <div style="display:flex;align-items:center;gap:6px">
+            <span id="btYearLabel" style="font-family:var(--mono);font-size:10px;color:var(--text-2);min-width:70px">2012–2025</span>
+            <input type="range" id="btYearStart" min="2012" max="2024" value="2012" oninput="setBtYearRange()" style="width:80px;accent-color:var(--blue);cursor:pointer">
+            <input type="range" id="btYearEnd" min="2013" max="2025" value="2025" oninput="setBtYearRange()" style="width:80px;accent-color:var(--blue);cursor:pointer">
+          </div>
+          <!-- Quick presets -->
+          <div style="display:flex;gap:0;border:1px solid var(--border-1);border-radius:5px;overflow:hidden">
+            <button class="btn btPeriodBtn" onclick="setBtPreset('Full Period')" style="border:none;border-radius:0;font-size:8px;padding:4px 8px">ALL</button>
+            <button class="btn btPeriodBtn" onclick="setBtPreset('Pre-2018')" style="border:none;border-radius:0;border-left:1px solid var(--border-1);font-size:8px;padding:4px 8px">PRE-18</button>
+            <button class="btn btPeriodBtn" onclick="setBtPreset('Post-2018')" style="border:none;border-radius:0;border-left:1px solid var(--border-1);font-size:8px;padding:4px 8px">POST-18</button>
+            <button class="btn btPeriodBtn" onclick="setBtPreset('Last5')" style="border:none;border-radius:0;border-left:1px solid var(--border-1);font-size:8px;padding:4px 8px">5Y</button>
+            <button class="btn btPeriodBtn" onclick="setBtPreset('Last3')" style="border:none;border-radius:0;border-left:1px solid var(--border-1);font-size:8px;padding:4px 8px">3Y</button>
+          </div>
         </div>
       </div>
 
@@ -1664,31 +1672,28 @@ let backtestData = null;
 
 // Auto-assign colors based on strategy name patterns
 function getBtColor(name) {
-  // Tactical strategies (green family — the stars)
+  // Smart tilt strategies (amber/orange family — conviction-weighted)
+  if (name.includes('+ Smart')) {
+    if (name.includes('60/40')) return '#fbbf24';
+    if (name.includes('80/20')) return '#f59e0b';
+    return '#fbbf24';
+  }
+  // Uniform tilt strategies (green family)
   if (name.includes('+ Tac')) {
-    if (name.includes('40/60') || name.includes('Conservative')) return '#6ee7b7';
-    if (name.includes('60/40') || name.includes('Balanced')) return '#34d399';
-    if (name.includes('80/20') || name.includes('Growth')) return '#10b981';
-    if (name.includes('Full Conservative')) return '#a7f3d0';
-    if (name.includes('Full Balanced')) return '#6ee7b7';
-    if (name.includes('Full Growth')) return '#34d399';
+    if (name.includes('60/40')) return '#34d399';
+    if (name.includes('80/20')) return '#10b981';
     return '#34d399';
   }
   // SAA baselines (blue family)
-  if (!name.includes('iShares') && !name.includes('Global') && !name.includes('US 60') && !name.includes('+ Tac')) {
-    if (name.includes('40/60') || name.includes('Conservative')) return '#93c5fd';
-    if (name.includes('60/40') || name.includes('Balanced')) return '#60a5fa';
-    if (name.includes('80/20') || name.includes('Growth')) return '#3b82f6';
-    if (name.includes('Full Conservative')) return '#bfdbfe';
-    if (name.includes('Full Balanced')) return '#93c5fd';
-    if (name.includes('Full Growth')) return '#60a5fa';
+  if (!name.includes('iShares') && !name.includes('Global') && !name.includes('US 60') && !name.includes('+ Tac') && !name.includes('+ Smart')) {
+    if (name.includes('60/40')) return '#60a5fa';
+    if (name.includes('80/20')) return '#3b82f6';
     return '#60a5fa';
   }
   // Benchmarks (gray family)
   if (name.includes('AOR')) return '#94a3b8';
   if (name.includes('AOA')) return '#78716c';
   if (name.includes('VT') || name.includes('Global')) return '#64748b';
-  if (name.includes('SPY/AGG') || name.includes('US 60')) return '#475569';
   return '#888';
 }
 const BT_COLORS = {}; // populated dynamically
@@ -1726,6 +1731,41 @@ function setBtPeriod(period) {
   btPeriod = period;
   renderBtKPIs();
   renderBtTable();
+}
+
+function setBtYearRange() {
+  let s = parseInt(document.getElementById('btYearStart').value);
+  let e = parseInt(document.getElementById('btYearEnd').value);
+  if (e <= s) { e = s + 1; document.getElementById('btYearEnd').value = e; }
+  document.getElementById('btYearLabel').textContent = s + '–' + e;
+  // Find closest matching sub-period or use Full Period
+  if (s <= 2012 && e >= 2025) btPeriod = 'Full Period';
+  else if (s <= 2012 && e <= 2017) btPeriod = 'Pre-2018';
+  else if (s >= 2018 && e >= 2025) btPeriod = 'Post-2018';
+  else btPeriod = 'Full Period';  // custom range falls back to full
+  renderBtKPIs();
+  renderBtTable();
+  // Filter cumulative chart by date range
+  btFilterStart = s;
+  btFilterEnd = e;
+  setTimeout(drawBtChart, 20);
+}
+let btFilterStart = 2012;
+let btFilterEnd = 2025;
+
+function setBtPreset(preset) {
+  document.querySelectorAll('.btPeriodBtn').forEach(b => { b.style.background = ''; b.style.color = ''; });
+  if (preset === 'Full Period') { btPeriod = 'Full Period'; btFilterStart = 2012; btFilterEnd = 2025; }
+  else if (preset === 'Pre-2018') { btPeriod = 'Pre-2018'; btFilterStart = 2012; btFilterEnd = 2017; }
+  else if (preset === 'Post-2018') { btPeriod = 'Post-2018'; btFilterStart = 2018; btFilterEnd = 2025; }
+  else if (preset === 'Last5') { btPeriod = 'Full Period'; btFilterStart = 2020; btFilterEnd = 2025; }
+  else if (preset === 'Last3') { btPeriod = 'Full Period'; btFilterStart = 2022; btFilterEnd = 2025; }
+  document.getElementById('btYearStart').value = btFilterStart;
+  document.getElementById('btYearEnd').value = btFilterEnd;
+  document.getElementById('btYearLabel').textContent = btFilterStart + '–' + btFilterEnd;
+  renderBtKPIs();
+  renderBtTable();
+  setTimeout(drawBtChart, 20);
 }
 
 function getBtMetrics() {
@@ -1819,20 +1859,31 @@ function renderBtCurrentSignals() {
   const sigBg = { OW: 'var(--green-dim)', UW: 'var(--red-dim)', N: 'var(--amber-dim)' };
   const sigLabel = { OW: 'OW', UW: 'UW', N: 'N' };
 
-  let html = '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:4px 10px;align-items:center;font-family:var(--mono);font-size:10px">';
-  html += '<div style="color:var(--text-3);font-weight:600;font-size:9px">ASSET</div>';
-  html += '<div style="color:var(--text-3);font-weight:600;font-size:9px;text-align:center">SIGNAL</div>';
-  html += '<div style="color:var(--text-3);font-weight:600;font-size:9px;text-align:right">COMPOSITE</div>';
-  html += '<div style="color:var(--text-3);font-weight:600;font-size:9px;text-align:right">W_TECH</div>';
+  let html = '<div style="display:grid;grid-template-columns:1fr auto auto auto auto auto;gap:4px 8px;align-items:center;font-family:var(--mono);font-size:10px">';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:8px">ASSET</div>';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:8px;text-align:center">SIGNAL</div>';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:8px;text-align:right">SCORE</div>';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:8px;text-align:center">TREND</div>';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:8px;text-align:right">STREAK</div>';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:8px;text-align:right">TILT</div>';
 
   keys.forEach(name => {
     const s = sigs[name];
     const changed = s.changed;
-    const rowBg = changed ? 'background:rgba(167,139,250,0.06);border-radius:3px;' : '';
-    html += `<div style="padding:5px 4px;${rowBg};color:var(--text-1)">${name}${changed ? ' <span style="color:var(--purple);font-size:8px">⬥</span>' : ''}</div>`;
-    html += `<div style="padding:5px 4px;${rowBg};text-align:center"><span style="padding:1px 6px;border-radius:3px;background:${sigBg[s.signal]};color:${sigColor[s.signal]};font-weight:600;font-size:9px">${sigLabel[s.signal]}</span></div>`;
-    html += `<div style="padding:5px 4px;${rowBg};text-align:right;color:${s.composite > 0 ? 'var(--green)' : s.composite < 0 ? 'var(--red)' : 'var(--text-2)'};font-weight:600">${s.composite >= 0 ? '+' : ''}${s.composite.toFixed(2)}</div>`;
-    html += `<div style="padding:5px 4px;${rowBg};text-align:right;color:var(--blue)">${s.wTech.toFixed(0)}%</div>`;
+    const streak = s.streak || 1;
+    const momentum = s.momentum || 0;
+    const smartTilt = s.smart_tilt || 0;
+    const momArrow = momentum > 0.1 ? '↑' : (momentum < -0.1 ? '↓' : '→');
+    const momColor = momentum > 0.1 ? 'var(--green)' : (momentum < -0.1 ? 'var(--red)' : 'var(--text-3)');
+    const rowBg = changed ? 'background:rgba(167,139,250,0.08);border-radius:3px;' : '';
+    const freshBg = streak <= 2 ? 'background:rgba(251,191,36,0.06);' : '';
+    const finalBg = changed ? rowBg : (streak <= 2 ? freshBg : '');
+    html += `<div style="padding:5px 4px;${finalBg};color:var(--text-1)">${name}${changed ? ' <span style="color:var(--purple);font-size:8px">⬥ NEW</span>' : ''}</div>`;
+    html += `<div style="padding:5px 4px;${finalBg};text-align:center"><span style="padding:1px 6px;border-radius:3px;background:${sigBg[s.signal]};color:${sigColor[s.signal]};font-weight:600;font-size:9px">${sigLabel[s.signal]}</span></div>`;
+    html += `<div style="padding:5px 4px;${finalBg};text-align:right;color:${s.composite > 0 ? 'var(--green)' : s.composite < 0 ? 'var(--red)' : 'var(--text-2)'};font-weight:600">${s.composite >= 0 ? '+' : ''}${s.composite.toFixed(2)}</div>`;
+    html += `<div style="padding:5px 4px;${finalBg};text-align:center;color:${momColor};font-size:12px">${momArrow}</div>`;
+    html += `<div style="padding:5px 4px;${finalBg};text-align:right;color:${streak <= 2 ? 'var(--amber)' : 'var(--text-3)'}">${streak}mo</div>`;
+    html += `<div style="padding:5px 4px;${finalBg};text-align:right;color:${smartTilt >= 5 ? 'var(--green)' : smartTilt >= 3 ? 'var(--amber)' : 'var(--text-3)'}">±${smartTilt}%</div>`;
   });
   html += '</div>';
   if (keys.length > 0) {
@@ -1852,11 +1903,10 @@ function renderBtRecommended() {
     return;
   }
 
-  const TILT = 5;
+  const smartTilts = backtestData.smart_tilts || {};
   const assetColors = {'Equity U.S.':'#60a5fa','Equity Intl':'#3b82f6','Equity EM':'#2dd4bf','Bond U.S.':'#f87171','Bond Intl':'#fb923c','Gold':'#fbbf24','Commodities':'#a78bfa','REITs':'#e879f9'};
 
   let html = '';
-  // Show 3 key profiles
   const showProfiles = Object.keys(saaProfiles).slice(0, 6);
   showProfiles.forEach(profileName => {
     const weights = saaProfiles[profileName];
@@ -1866,10 +1916,11 @@ function renderBtRecommended() {
     const adjusted = {};
     for (const [asset, basePct] of Object.entries(weights)) {
       let w = basePct;
+      const tilt = smartTilts[asset] || 5;
       if (sigs[asset]) {
         const sig = sigs[asset].signal;
-        if (sig === 'OW') w = Math.min(100, basePct + TILT);
-        else if (sig === 'UW') w = Math.max(0, basePct - TILT);
+        if (sig === 'OW') w = Math.min(100, basePct + tilt);
+        else if (sig === 'UW') w = Math.max(0, basePct - tilt);
       }
       adjusted[asset] = w;
       totalW += w;
@@ -1903,15 +1954,15 @@ function renderBtKPIs() {
   const spread = backtestData.spread || {};
   const hr = backtestData.hit_rates || {};
 
-  // Find best tactical strategy (contains "+ Tac")
-  const tacKeys = Object.keys(m).filter(k => k.includes('Tac'));
-  const saaKeys = Object.keys(m).filter(k => !k.includes('Tac') && !k.includes('iShares') && !k.includes('Global') && !k.includes('US 60'));
+  // Find best tactical strategy (Tac or Smart)
+  const tacKeys = Object.keys(m).filter(k => k.includes('Tac') || k.includes('Smart'));
+  const saaKeys = Object.keys(m).filter(k => !k.includes('Tac') && !k.includes('Smart') && !k.includes('iShares') && !k.includes('Global') && !k.includes('US 60'));
   let bestTac = tacKeys[0] || '';
   let bestSharpe = -999;
   tacKeys.forEach(k => { if ((m[k]?.sharpe||0) > bestSharpe) { bestSharpe = m[k].sharpe; bestTac = k; }});
 
   // Find matching SAA baseline
-  const baseName = bestTac.replace(' + Tac', '');
+  const baseName = bestTac.replace(' + Tac', '').replace(' + Smart', '');
   const base = m[baseName] || {};
   const best = m[bestTac] || {};
 
@@ -1944,10 +1995,11 @@ function renderBtKPIs() {
 function renderBtTable() {
   const el = document.getElementById('btTable');
   const m = getBtMetrics();
-  const saaKeys = Object.keys(m).filter(k => !k.includes('Tac') && !k.includes('iShares') && !k.includes('Global') && !k.includes('US 60')).sort();
-  const tacKeys = Object.keys(m).filter(k => k.includes('Tac')).sort();
+  const saaKeys = Object.keys(m).filter(k => !k.includes('Tac') && !k.includes('Smart') && !k.includes('iShares') && !k.includes('Global') && !k.includes('US 60')).sort();
+  const tacKeys = Object.keys(m).filter(k => k.includes('Tac') && !k.includes('Smart')).sort();
+  const smartKeys = Object.keys(m).filter(k => k.includes('Smart')).sort();
   const bmKeys = Object.keys(m).filter(k => k.includes('iShares') || k.includes('Global') || k.includes('US 60'));
-  const order = [...saaKeys, ...tacKeys, ...bmKeys];
+  const order = [...saaKeys, ...tacKeys, ...smartKeys, ...bmKeys];
   const keys = order.filter(k => m[k]);
 
   let html = '<table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px">';
@@ -1969,11 +2021,12 @@ function renderBtTable() {
     const d = m[k];
     const isBest = d.sharpe === bestSharpe;
     const isTac = k.includes('Tac');
+    const isSmart = k.includes('Smart');
     const bg = isBest ? 'rgba(52,211,153,0.06)' : (i % 2 ? 'transparent' : 'rgba(255,255,255,0.01)');
     const border = isBest ? '1px solid rgba(52,211,153,0.2)' : 'none';
     const retColor = d.ann_return > 0 ? 'var(--green)' : 'var(--red)';
     const shColor = d.sharpe > 0.5 ? 'var(--green)' : d.sharpe > 0 ? 'var(--amber)' : 'var(--red)';
-    const nameColor = isTac ? 'var(--green)' : bmKeys.includes(k) ? 'var(--text-3)' : 'var(--blue)';
+    const nameColor = isSmart ? 'var(--amber)' : isTac ? 'var(--green)' : bmKeys.includes(k) ? 'var(--text-3)' : 'var(--blue)';
 
     html += `<tr style="background:${bg};border:${border}">`;
     html += `<td style="padding:8px;color:${nameColor};font-weight:${isBest?700:400}">${k}${isBest?' ★':''}</td>`;
@@ -2006,12 +2059,19 @@ function drawBtChart() {
   const keys = Object.keys(series);
   if (keys.length === 0) return;
 
-  // Convert to $100 base
+  // Filter by year range and rebase to $100
+  const startFilter = btFilterStart + '-01';
+  const endFilter = btFilterEnd + '-12';
   let allDates = [];
   let allVals = [];
   const processed = {};
   keys.forEach(k => {
-    processed[k] = series[k].map(d => ({ date: d.date, value: d.value * 100 }));
+    // Filter to date range
+    let pts = series[k].filter(d => d.date >= startFilter && d.date <= endFilter);
+    if (pts.length === 0) return;
+    // Rebase: first value becomes $100
+    const baseVal = pts[0].value;
+    processed[k] = pts.map(d => ({ date: d.date, value: (d.value / baseVal) * 100 }));
     processed[k].forEach(d => {
       allDates.push(d.date);
       allVals.push(d.value);
@@ -2019,6 +2079,7 @@ function drawBtChart() {
   });
 
   const uniqueDates = [...new Set(allDates)].sort();
+  if (uniqueDates.length === 0) return;
   const minV = Math.min(...allVals) * 0.95;
   const maxV = Math.max(...allVals) * 1.05;
 
@@ -2054,9 +2115,10 @@ function drawBtChart() {
 
   // Draw lines: benchmarks first (dim), then SAA baselines (medium), then Tac (bright)
   const bmKeys = keys.filter(k => k.includes('iShares') || k.includes('Global') || k.includes('US 60') || k.includes('100%'));
-  const tacKeys = keys.filter(k => k.includes('Tac'));
-  const saaKeys = keys.filter(k => !tacKeys.includes(k) && !bmKeys.includes(k));
-  const drawOrder = [...bmKeys, ...saaKeys, ...tacKeys];
+  const smartKeys = keys.filter(k => k.includes('Smart'));
+  const tacKeys = keys.filter(k => k.includes('Tac') && !k.includes('Smart'));
+  const saaKeys = keys.filter(k => !tacKeys.includes(k) && !bmKeys.includes(k) && !smartKeys.includes(k));
+  const drawOrder = [...bmKeys, ...saaKeys, ...tacKeys, ...smartKeys];
 
   const legendEl = document.getElementById('btLegend');
   legendEl.innerHTML = '';

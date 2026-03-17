@@ -63,43 +63,49 @@ ALT_ASSETS = {k: v for k, v in ASSET_UNIVERSE.items() if v["group"] == "alt"}
 # SAA PROFILES — Core (equity+bond only) and Full (with alts)
 # ═══════════════════════════════════════════════════════════════
 
-# Core profiles: equity + bonds = 100%, directly comparable to AOR/AOA
+# Core profiles: matched to real benchmark ETF holdings
+# AOR actual: US 36.5, Intl 17.3, EM 7.2, USBond 28.8, IntlBond 10.2
+# AOA actual: US 48.1, Intl 23.5, EM 8.6, USBond 14.7, IntlBond 5.1
 CORE_SAA = {
-    "Conservative 40/60": {
-        "Equity U.S.": 20, "Equity Intl": 12, "Equity EM": 8,
-        "Bond U.S.": 45, "Bond Intl": 15,
+    "BhFS 60/40": {
+        "Equity U.S.": 36, "Equity Intl": 17, "Equity EM": 7,
+        "Bond U.S.": 29, "Bond Intl": 11,
     },
-    "Balanced 60/40": {
-        "Equity U.S.": 30, "Equity Intl": 18, "Equity EM": 12,
-        "Bond U.S.": 30, "Bond Intl": 10,
-    },
-    "Growth 80/20": {
-        "Equity U.S.": 40, "Equity Intl": 24, "Equity EM": 16,
+    "BhFS 80/20": {
+        "Equity U.S.": 48, "Equity Intl": 23, "Equity EM": 9,
         "Bond U.S.": 15, "Bond Intl": 5,
     },
 }
 
-# Full profiles: with alternatives
+# Full profiles: with alternatives (carved from bond allocation)
 FULL_SAA = {
-    "Full Conservative": {
-        "Equity U.S.": 18, "Equity Intl": 10, "Equity EM": 7,
-        "Bond U.S.": 35, "Bond Intl": 10,
-        "Gold": 8, "Commodities": 4, "REITs": 8,
+    "BhFS Full 60/40": {
+        "Equity U.S.": 36, "Equity Intl": 17, "Equity EM": 7,
+        "Bond U.S.": 19, "Bond Intl": 6,
+        "Gold": 6, "Commodities": 3, "REITs": 6,
     },
-    "Full Balanced": {
-        "Equity U.S.": 25, "Equity Intl": 15, "Equity EM": 10,
-        "Bond U.S.": 20, "Bond Intl": 5,
-        "Gold": 8, "Commodities": 4, "REITs": 13,
-    },
-    "Full Growth": {
-        "Equity U.S.": 30, "Equity Intl": 20, "Equity EM": 12,
-        "Bond U.S.": 8, "Bond Intl": 2,
-        "Gold": 8, "Commodities": 5, "REITs": 15,
+    "BhFS Full 80/20": {
+        "Equity U.S.": 48, "Equity Intl": 23, "Equity EM": 9,
+        "Bond U.S.": 5, "Bond Intl": 2,
+        "Gold": 5, "Commodities": 3, "REITs": 5,
     },
 }
 
+# Smart tilts: per-asset tilt sizes based on signal hit rates
+# Strong signal (>60% hit rate) → full tilt, Medium (55-60%) → 3%, Weak (<55%) → 1%
+SMART_TILTS = {
+    "Equity U.S.":  7,   # 69.8% hit rate — strongest
+    "Equity Intl":  2,   # 52.5% — weak
+    "Equity EM":    5,   # 63.6% — strong
+    "Bond U.S.":    2,   # 52.9% — weak
+    "Bond Intl":    1,   # 47.9% — very weak
+    "Gold":         2,   # 52.4% — weak
+    "Commodities":  1,   # 48.1% — very weak, near-zero tilt
+    "REITs":        4,   # 60.0% — moderate
+}
+
 # For backward compat
-DEFAULT_SAA = "Balanced 60/40"
+DEFAULT_SAA = "BhFS 60/40"
 BACKTEST_ASSETS = {name: {**config, "saa": CORE_SAA[DEFAULT_SAA].get(name, 0)}
                    for name, config in ASSET_UNIVERSE.items()}
 
@@ -118,7 +124,7 @@ BENCHMARK_ETFS = {
     "Global Equity (VT)":    {"ticker": "VT"},
 }
 
-# Tilt size
+# Tilt size (uniform — used for standard Tac strategies)
 TILT_PCT = 5.0
 
 # Sub-periods for analysis
@@ -351,14 +357,17 @@ def compute_wtech_series(prices_series, enhanced=False):
 # BACKTEST ENGINE
 # ═══════════════════════════════════════════════════════════════
 
-def build_signals(prices, fred_data, window=24, enhanced=False):
-    """Build monthly signal history for each asset."""
+def build_signals(prices, fred_data, window=24, enhanced=False, mode='A'):
+    """Build monthly signal history for each asset.
+
+    Mode A (Blended): S = w_tech * Z_tech + (1-w_tech) * Z_funda
+        OW if S > 1, UW if S < -1
+    Mode B (Independent Confirmation):
+        OW if tech > 0.8 OR funda > 0.8 (either factor strong enough)
+        UW if tech < -0.8 OR funda < -0.8
+        Both agree = STRONG OW/UW (larger tilt available)
+    """
     signal_data = {}
-    mode = "Enhanced" if enhanced else "Original"
-    # Enhanced uses slightly lower thresholds since smoothed w_tech
-    # produces more moderate composites
-    ow_threshold = 0.8 if enhanced else 1.0
-    uw_threshold = -0.8 if enhanced else -1.0
 
     for name, config in ASSET_UNIVERSE.items():
         ticker = config["price"]
@@ -376,10 +385,38 @@ def build_signals(prices, fred_data, window=24, enhanced=False):
             continue
 
         df = pd.DataFrame({'tech': z_tech, 'funda': z_funda, 'wTech': w_tech}).dropna()
-        df['composite'] = (df['wTech']/100) * df['tech'] + (1 - df['wTech']/100) * df['funda']
-        df['signal'] = 'N'
-        df.loc[df['composite'] > ow_threshold, 'signal'] = 'OW'
-        df.loc[df['composite'] < uw_threshold, 'signal'] = 'UW'
+
+        if mode == 'B':
+            # Independent confirmation: either factor can trigger
+            tech_ow = df['tech'] > 0.8
+            tech_uw = df['tech'] < -0.8
+            funda_ow = df['funda'] > 0.8
+            funda_uw = df['funda'] < -0.8
+
+            df['signal'] = 'N'
+            df.loc[tech_ow | funda_ow, 'signal'] = 'OW'
+            df.loc[tech_uw | funda_uw, 'signal'] = 'UW'
+            # If conflicting (one says OW, other says UW), stay Neutral
+            df.loc[(tech_ow & funda_uw) | (tech_uw & funda_ow), 'signal'] = 'N'
+
+            # Strength: 2 = both agree, 1 = single factor
+            df['strength'] = 0
+            df.loc[(tech_ow & funda_ow), 'strength'] = 2
+            df.loc[(tech_ow & ~funda_ow) | (~tech_ow & funda_ow), 'strength'] = 1
+            df.loc[(tech_uw & funda_uw), 'strength'] = 2
+            df.loc[(tech_uw & ~funda_uw) | (~tech_uw & funda_uw), 'strength'] = 1
+
+            # Composite for display: average of the two z-scores
+            df['composite'] = (df['tech'] + df['funda']) / 2
+        else:
+            # Mode A: original blended
+            df['composite'] = (df['wTech']/100) * df['tech'] + (1 - df['wTech']/100) * df['funda']
+            df['signal'] = 'N'
+            ow_threshold = 0.8 if enhanced else 1.0
+            uw_threshold = -0.8 if enhanced else -1.0
+            df.loc[df['composite'] > ow_threshold, 'signal'] = 'OW'
+            df.loc[df['composite'] < uw_threshold, 'signal'] = 'UW'
+            df['strength'] = 1  # uniform strength for mode A
 
         signal_data[name] = df
         n_ow = (df['signal'] == 'OW').sum()
@@ -411,8 +448,12 @@ def compute_metrics(rets):
     }
 
 
-def compute_strategy(returns_df, saa_weights_pct, signal_data=None, tilt_pct=0):
-    """Compute portfolio return series for given SAA weights + optional signal tilts."""
+def compute_strategy(returns_df, saa_weights_pct, signal_data=None, tilt_pct=0, smart_tilts=None):
+    """Compute portfolio return series for given SAA weights + optional signal tilts.
+
+    If smart_tilts is provided (dict of asset→tilt%), uses per-asset tilt sizes.
+    Otherwise uses uniform tilt_pct for all assets.
+    """
     strat_returns = pd.Series(0.0, index=returns_df.index)
     tilt = tilt_pct / 100.0
 
@@ -432,15 +473,18 @@ def compute_strategy(returns_df, saa_weights_pct, signal_data=None, tilt_pct=0):
             adjusted_w = base_w
             sig = 'N'
 
-            if signal_data and name in signal_data and tilt > 0:
+            if signal_data and name in signal_data and (tilt > 0 or smart_tilts):
                 sig_df = signal_data[name]
                 prev_signals = sig_df[sig_df.index < dt]
                 if len(prev_signals) > 0:
-                    sig = prev_signals.iloc[-1]['signal']
+                    row = prev_signals.iloc[-1]
+                    sig = row['signal']
+                    # Use per-asset smart tilt if available, else uniform
+                    effective_tilt = (smart_tilts.get(name, 0) / 100.0) if smart_tilts else tilt
                     if sig == 'OW':
-                        adjusted_w = base_w + tilt
+                        adjusted_w = base_w + effective_tilt
                     elif sig == 'UW':
-                        adjusted_w = max(0, base_w - tilt)
+                        adjusted_w = max(0, base_w - effective_tilt)
 
             adjusted_w = max(0, adjusted_w)
             period_return += adjusted_w * returns_df.loc[dt, name]
@@ -458,9 +502,9 @@ def compute_strategy(returns_df, saa_weights_pct, signal_data=None, tilt_pct=0):
 def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
     """Run the full historical backtest."""
 
-    # Build signals for ALL assets
+    # Build signals
     print(f"\n  Computing signals for {len(ASSET_UNIVERSE)} assets...")
-    signals = build_signals(prices, fred_data, window, enhanced=False)
+    signals = build_signals(prices, fred_data, window, enhanced=False, mode='A')
 
     # Build monthly returns for all assets
     monthly_returns = {}
@@ -503,7 +547,7 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
 
         print(f"\n  --- {period_name} ({p_start}–{p_end}, {len(period_ret)} months) ---")
         period_metrics = {}
-        header = f"  {'Strategy':<28s} {'Return':>8s} {'Vol':>8s} {'Sharpe':>8s} {'MaxDD':>8s}"
+        header = f"  {'Strategy':<32s} {'Return':>8s} {'Vol':>8s} {'Sharpe':>8s} {'MaxDD':>8s}"
         print(header)
         print("  " + "─" * (len(header) - 2))
 
@@ -512,28 +556,32 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
             saa_ret, _ = compute_strategy(period_ret, weights)
             m = compute_metrics(saa_ret)
             period_metrics[profile_name] = m
-            print(f"  {profile_name:<28s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['max_drawdown']:>7.1f}%")
+            print(f"  {profile_name:<32s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['max_drawdown']:>7.1f}%")
 
-            # SAA + TacSignal
+            # Uniform tilt (±5%)
             tac_name = f"{profile_name} + Tac"
             tac_ret, wh = compute_strategy(period_ret, weights, signals, TILT_PCT)
             m2 = compute_metrics(tac_ret)
             period_metrics[tac_name] = m2
             delta = m2['ann_return'] - m['ann_return']
-            print(f"  {tac_name:<28s} {m2['ann_return']:>7.1f}% {m2['ann_vol']:>7.1f}% {m2['sharpe']:>8.3f} {m2['max_drawdown']:>7.1f}%  Δ{delta:>+.1f}%")
+            print(f"  {tac_name:<32s} {m2['ann_return']:>7.1f}% {m2['ann_vol']:>7.1f}% {m2['sharpe']:>8.3f} {m2['max_drawdown']:>7.1f}%  Δ{delta:>+.1f}%")
+
+            # Smart tilt (per-asset sizing)
+            smart_name = f"{profile_name} + Smart"
+            smart_ret, wh_s = compute_strategy(period_ret, weights, signals, 0, smart_tilts=SMART_TILTS)
+            m3 = compute_metrics(smart_ret)
+            period_metrics[smart_name] = m3
+            delta_s = m3['ann_return'] - m['ann_return']
+            print(f"  {smart_name:<32s} {m3['ann_return']:>7.1f}% {m3['ann_vol']:>7.1f}% {m3['sharpe']:>8.3f} {m3['max_drawdown']:>7.1f}%  Δ{delta_s:>+.1f}%")
 
             # Save cumulative for full period
             if period_name == "Full Period":
-                cum_saa = (1 + saa_ret).cumprod()
-                cum_tac = (1 + tac_ret).cumprod()
-                core_cumulative[profile_name] = [
-                    {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
-                    for dt, v in cum_saa.items()
-                ]
-                core_cumulative[tac_name] = [
-                    {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
-                    for dt, v in cum_tac.items()
-                ]
+                for label, rets in [(profile_name, saa_ret), (tac_name, tac_ret), (smart_name, smart_ret)]:
+                    cum = (1 + rets).cumprod()
+                    core_cumulative[label] = [
+                        {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                        for dt, v in cum.items()
+                    ]
 
         # Benchmarks for this period
         for bm_name, bm_config in BENCHMARK_ETFS.items():
@@ -543,7 +591,7 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
                     bm_ret = bm_returns[t].reindex(period_ret.index).fillna(0)
                     m = compute_metrics(bm_ret)
                     period_metrics[bm_name] = m
-                    print(f"  {bm_name:<28s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['max_drawdown']:>7.1f}%")
+                    print(f"  {bm_name:<32s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['max_drawdown']:>7.1f}%")
                     if period_name == "Full Period":
                         cum = (1 + bm_ret).cumprod()
                         core_cumulative[bm_name] = [
@@ -573,7 +621,7 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
 
         print(f"\n  --- {period_name} ({p_start}–{p_end}) ---")
         period_metrics = {}
-        header = f"  {'Strategy':<28s} {'Return':>8s} {'Vol':>8s} {'Sharpe':>8s} {'MaxDD':>8s}"
+        header = f"  {'Strategy':<32s} {'Return':>8s} {'Vol':>8s} {'Sharpe':>8s} {'MaxDD':>8s}"
         print(header)
         print("  " + "─" * (len(header) - 2))
 
@@ -581,28 +629,33 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
             saa_ret, _ = compute_strategy(period_ret, weights)
             m = compute_metrics(saa_ret)
             period_metrics[profile_name] = m
-            print(f"  {profile_name:<28s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['max_drawdown']:>7.1f}%")
+            print(f"  {profile_name:<32s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['max_drawdown']:>7.1f}%")
 
+            # Uniform tilt
             tac_name = f"{profile_name} + Tac"
             tac_ret, wh = compute_strategy(period_ret, weights, signals, TILT_PCT)
             m2 = compute_metrics(tac_ret)
             period_metrics[tac_name] = m2
             delta = m2['ann_return'] - m['ann_return']
-            print(f"  {tac_name:<28s} {m2['ann_return']:>7.1f}% {m2['ann_vol']:>7.1f}% {m2['sharpe']:>8.3f} {m2['max_drawdown']:>7.1f}%  Δ{delta:>+.1f}%")
+            print(f"  {tac_name:<32s} {m2['ann_return']:>7.1f}% {m2['ann_vol']:>7.1f}% {m2['sharpe']:>8.3f} {m2['max_drawdown']:>7.1f}%  Δ{delta:>+.1f}%")
+
+            # Smart tilt
+            smart_name = f"{profile_name} + Smart"
+            smart_ret, wh_s = compute_strategy(period_ret, weights, signals, 0, smart_tilts=SMART_TILTS)
+            m3 = compute_metrics(smart_ret)
+            period_metrics[smart_name] = m3
+            delta_s = m3['ann_return'] - m['ann_return']
+            print(f"  {smart_name:<32s} {m3['ann_return']:>7.1f}% {m3['ann_vol']:>7.1f}% {m3['sharpe']:>8.3f} {m3['max_drawdown']:>7.1f}%  Δ{delta_s:>+.1f}%")
 
             if period_name == "Full Period":
-                cum_saa = (1 + saa_ret).cumprod()
-                cum_tac = (1 + tac_ret).cumprod()
-                full_cumulative[profile_name] = [
-                    {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
-                    for dt, v in cum_saa.items()
-                ]
-                full_cumulative[tac_name] = [
-                    {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
-                    for dt, v in cum_tac.items()
-                ]
-                # Save weight history for the dashboard
+                for label, rets in [(profile_name, saa_ret), (tac_name, tac_ret), (smart_name, smart_ret)]:
+                    cum = (1 + rets).cumprod()
+                    full_cumulative[label] = [
+                        {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                        for dt, v in cum.items()
+                    ]
                 full_weight_history[tac_name] = wh
+                full_weight_history[smart_name] = wh_s
 
         full_results[period_name] = period_metrics
 
@@ -695,18 +748,36 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
         sig = current['signal']
         prev_sig = previous['signal']
         changed = sig != prev_sig
+
+        # Signal freshness: how many consecutive months at this signal
+        streak = 1
+        for j in range(len(sig_df) - 2, -1, -1):
+            if sig_df.iloc[j]['signal'] == sig:
+                streak += 1
+            else:
+                break
+
+        # Signal momentum: composite change vs last month
+        prev_comp = float(previous['composite'])
+        curr_comp = float(current['composite'])
+        momentum = curr_comp - prev_comp  # positive = strengthening
+
         current_signals[name] = {
             "signal": sig,
-            "composite": round(float(current['composite']), 2),
+            "composite": round(curr_comp, 2),
             "tech": round(float(current['tech']), 2),
             "funda": round(float(current['funda']), 2),
             "wTech": round(float(current['wTech']), 1),
             "changed": changed,
             "previous": prev_sig,
             "date": sig_df.index[-1].strftime('%Y-%m'),
+            "streak": streak,
+            "momentum": round(momentum, 2),
+            "smart_tilt": SMART_TILTS.get(name, 0),
         }
-        marker = "⬥ CHANGED" if changed else ""
-        print(f"  {name:<20s} {sig:>2s}  composite:{current['composite']:>+.2f}  {marker}")
+        mom_arrow = "↑" if momentum > 0.1 else ("↓" if momentum < -0.1 else "→")
+        marker = f"⬥ CHANGED ({prev_sig}→{sig})" if changed else f"  {mom_arrow} {streak}mo streak"
+        print(f"  {name:<20s} {sig:>2s}  composite:{curr_comp:>+.2f}  tilt:±{SMART_TILTS.get(name,0)}%  {marker}")
         if changed:
             signal_changes[name] = {"from": prev_sig, "to": sig}
 
@@ -738,6 +809,7 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
         # Signal quality
         "hit_rates": hit_rates,
         "spread": spread_data,
+        "smart_tilts": SMART_TILTS,
         # Current state
         "current_signals": current_signals,
         "signal_changes": signal_changes,

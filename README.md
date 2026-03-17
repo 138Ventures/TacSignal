@@ -40,7 +40,9 @@ Click **Import** in the dashboard header → select the generated `tacsignal-YYY
 |------|-------------|
 | `tactical-signal-v2.html` | Interactive dashboard (7 tabs: Dashboard, Data Grid, History, What-If, Backtest, Methodology, Data Sources) |
 | `tacsignal_data_pipeline.py` | Python pipeline — pulls data from Yahoo Finance + FRED, computes all signals |
-| `tacsignal_backtest.py` | Historical backtest engine — tests signals vs 60/40, 80/20, 100% equity benchmarks (2012–2025) |
+| `tacsignal_backtest.py` | Historical backtest engine — tests signals vs benchmark-matched portfolios with Smart Tilts (2012–2025) |
+| `tacsignal-backtest.json` | Pre-computed backtest results (auto-loaded by dashboard) |
+| `tacsignal-latest.json` | Latest signal snapshot (auto-loaded by dashboard) |
 | `run_tacsignal.command` | One-click Mac launcher (installs packages, manages FRED key, runs pipeline) |
 | `run_tacsignal.bat` | One-click Windows launcher |
 | `SETUP_GUIDE.html` | Visual step-by-step setup guide |
@@ -93,6 +95,13 @@ Decision:
 - **Movement arrows** — show signal drift from previous month
 - **What-If Scenario** — stress-test signals with global tech/funda shocks
 - **History tab** — 24-month time series with composite lines, phase diagrams, signal timeline
+- **Backtest tab** — full 2012–2025 historical backtest with:
+  - Core (60/40, 80/20) and Full (with alts) portfolio profiles matched to AOR/AOA benchmark weights
+  - Smart Tilts — per-asset tilt sizing proportional to historical hit rates
+  - Year range slider with quick presets (ALL, PRE-18, POST-18, 5Y, 3Y)
+  - Signal freshness indicators (streak, momentum arrows, "NEW" tags)
+  - Recommended allocation panel with current signal-adjusted weights
+  - Weight history stacked area chart with signal change markers
 - **CSV paste import** — drop in spreadsheet data directly
 - **JSON import/export** — save and load complete signal snapshots
 
