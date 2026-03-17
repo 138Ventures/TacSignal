@@ -38,8 +38,9 @@ Click **Import** in the dashboard header → select the generated `tacsignal-YYY
 
 | File | Description |
 |------|-------------|
-| `tactical-signal-v2.html` | Interactive dashboard (6 tabs: Dashboard, Data Grid, History, What-If, Methodology, Data Sources) |
+| `tactical-signal-v2.html` | Interactive dashboard (7 tabs: Dashboard, Data Grid, History, What-If, Backtest, Methodology, Data Sources) |
 | `tacsignal_data_pipeline.py` | Python pipeline — pulls data from Yahoo Finance + FRED, computes all signals |
+| `tacsignal_backtest.py` | Historical backtest engine — tests signals vs 60/40, 80/20, 100% equity benchmarks (2012–2025) |
 | `run_tacsignal.command` | One-click Mac launcher (installs packages, manages FRED key, runs pipeline) |
 | `run_tacsignal.bat` | One-click Windows launcher |
 | `SETUP_GUIDE.html` | Visual step-by-step setup guide |

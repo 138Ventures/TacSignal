@@ -350,8 +350,10 @@
     <button class="btn" onclick="document.getElementById('csvFile').click()">Import CSV</button>
     <button class="btn" onclick="exportJSON()">Export JSON</button>
     <button class="btn" onclick="importJSON()">Import JSON</button>
+    <button class="btn btn-accent" onclick="importBacktest()">Import Backtest</button>
     <input type="file" id="importFile" accept=".json">
     <input type="file" id="csvFile" accept=".csv,.tsv,.txt">
+    <input type="file" id="backtestFile" accept=".json" style="display:none">
   </div>
 </header>
 
@@ -361,6 +363,7 @@
   <div class="nav-tab" data-page="data" onclick="goPage('data',this)">Data Grid</div>
   <div class="nav-tab" data-page="history" onclick="goPage('history',this)">History</div>
   <div class="nav-tab" data-page="scenario" onclick="goPage('scenario',this)">What-If Scenario</div>
+  <div class="nav-tab" data-page="backtest" onclick="goPage('backtest',this)">Backtest</div>
   <div class="nav-tab" data-page="method" onclick="goPage('method',this)">Methodology</div>
   <div class="nav-tab" data-page="sources" onclick="goPage('sources',this)">Data Sources</div>
 </nav>
@@ -760,6 +763,110 @@
   </div>
 </div>
 
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- BACKTEST PAGE -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="page" id="pg-backtest">
+  <div class="method-content fade-in">
+
+    <div id="btEmpty" style="text-align:center;padding:60px 20px">
+      <h2 style="color:var(--text-0);margin-bottom:12px">Backtest Engine</h2>
+      <p style="color:var(--text-2);max-width:540px;margin:0 auto 24px">
+        Run the backtest to see how TacSignal tilts would have performed against benchmarks over 13+ years of history.
+      </p>
+      <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:8px;padding:20px 28px;max-width:500px;margin:0 auto 20px;text-align:left">
+        <p style="font-family:var(--mono);font-size:11px;color:var(--text-0);margin-bottom:8px">Run in Terminal:</p>
+        <code style="font-family:var(--mono);font-size:12px;color:var(--green);display:block;padding:8px 0">python3 tacsignal_backtest.py</code>
+        <p style="font-size:11px;color:var(--text-3);margin-top:8px">Then click <strong style="color:var(--blue)">Import Backtest</strong> in the header to load results.</p>
+      </div>
+      <button class="btn btn-accent" onclick="importBacktest()" style="font-size:12px;padding:10px 20px">Import Backtest JSON</button>
+    </div>
+
+    <div id="btResults" style="display:none">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <h2 style="color:var(--text-0)">Backtest Results</h2>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span id="btPeriod" style="font-family:var(--mono);font-size:11px;color:var(--text-3)"></span>
+          <!-- Panel toggle -->
+          <div style="display:flex;gap:0;border:1px solid var(--border-1);border-radius:5px;overflow:hidden">
+            <button class="btn" id="btPanelCore" onclick="setBtPanel('core')" style="border:none;border-radius:0;font-size:9px;padding:5px 10px">Core (no alts)</button>
+            <button class="btn" id="btPanelFull" onclick="setBtPanel('full')" style="border:none;border-radius:0;border-left:1px solid var(--border-1);font-size:9px;padding:5px 10px">Full Portfolio</button>
+          </div>
+          <!-- Sub-period selector -->
+          <select id="btPeriodSelect" onchange="setBtPeriod(this.value)" style="font-family:var(--mono);font-size:10px;background:var(--bg-2);color:var(--text-1);border:1px solid var(--border-1);border-radius:5px;padding:5px 8px;cursor:pointer">
+            <option value="Full Period">Full Period</option>
+            <option value="Pre-2018">Pre-2018</option>
+            <option value="Post-2018">Post-2018</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Signal Change Alerts -->
+      <div id="btAlerts" style="display:none;margin-bottom:16px"></div>
+
+      <!-- KPI Strip -->
+      <div id="btKPIs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px"></div>
+
+      <!-- Current Signals & Recommended Allocation -->
+      <div id="btCurrentSection" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+        <div style="background:var(--bg-1);border:1px solid var(--border-1);border-radius:8px;padding:16px">
+          <h3 style="font-family:var(--mono);font-size:13px;color:var(--text-0);margin-bottom:12px">Current Signals</h3>
+          <div id="btCurrentSignals"></div>
+        </div>
+        <div style="background:var(--bg-1);border:1px solid var(--border-1);border-radius:8px;padding:16px">
+          <h3 style="font-family:var(--mono);font-size:13px;color:var(--text-0);margin-bottom:12px">Recommended Allocation Today</h3>
+          <div id="btRecommended"></div>
+        </div>
+      </div>
+
+      <!-- Cumulative Return Chart -->
+      <div style="background:var(--bg-1);border:1px solid var(--border-1);border-radius:8px;padding:16px;margin-bottom:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="font-family:var(--mono);font-size:13px;color:var(--text-0)">Cumulative Growth of $100</h3>
+          <div id="btLegend" style="display:flex;flex-wrap:wrap;gap:10px;font-family:var(--mono);font-size:9px;color:var(--text-2)"></div>
+        </div>
+        <canvas id="btChart" style="width:100%;height:400px"></canvas>
+      </div>
+
+      <!-- Performance Table -->
+      <div style="background:var(--bg-1);border:1px solid var(--border-1);border-radius:8px;padding:16px;margin-bottom:24px">
+        <h3 style="font-family:var(--mono);font-size:13px;color:var(--text-0);margin-bottom:12px">Performance Comparison</h3>
+        <div id="btTable" style="overflow-x:auto"></div>
+      </div>
+
+      <!-- Signal Quality -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+        <div style="background:var(--bg-1);border:1px solid var(--border-1);border-radius:8px;padding:16px">
+          <h3 style="font-family:var(--mono);font-size:13px;color:var(--text-0);margin-bottom:12px">Signal Hit Rates</h3>
+          <div id="btHitRates"></div>
+        </div>
+        <div style="background:var(--bg-1);border:1px solid var(--border-1);border-radius:8px;padding:16px">
+          <h3 style="font-family:var(--mono);font-size:13px;color:var(--text-0);margin-bottom:12px">OW vs UW Spread</h3>
+          <div id="btSpread"></div>
+          <canvas id="btSpreadChart" style="width:100%;height:180px;margin-top:12px"></canvas>
+        </div>
+      </div>
+
+      <!-- SAA Weights -->
+      <div style="background:var(--bg-1);border:1px solid var(--border-1);border-radius:8px;padding:16px;margin-bottom:24px">
+        <h3 style="font-family:var(--mono);font-size:13px;color:var(--text-0);margin-bottom:12px">Strategic Asset Allocation (SAA) Base Weights</h3>
+        <div id="btSAA"></div>
+      </div>
+
+      <!-- Weight History -->
+      <div style="background:var(--bg-1);border:1px solid var(--border-1);border-radius:8px;padding:16px;margin-bottom:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="font-family:var(--mono);font-size:13px;color:var(--text-0)">Tactical Weight History</h3>
+          <select id="btWeightProfile" onchange="drawBtWeightHistory()" style="font-family:var(--mono);font-size:10px;background:var(--bg-2);color:var(--text-1);border:1px solid var(--border-1);border-radius:5px;padding:5px 8px;cursor:pointer"></select>
+        </div>
+        <canvas id="btWeightChart" style="width:100%;height:300px"></canvas>
+        <div id="btWeightLegend" style="display:flex;flex-wrap:wrap;gap:10px;font-family:var(--mono);font-size:9px;color:var(--text-2);margin-top:8px"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 </main>
 
 <!-- ════════════════════════════════════════════════════════════ -->
@@ -835,6 +942,7 @@ function goPage(id, el) {
   if (id === 'dashboard') setTimeout(drawAll, 20);
   if (id === 'history') setTimeout(drawHistory, 20);
   if (id === 'scenario') setTimeout(() => { runScenario(); }, 20);
+  if (id === 'backtest' && backtestData) setTimeout(() => { drawBtChart(); drawBtSpreadChart(); drawBtWeightHistory(); }, 20);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1549,6 +1657,697 @@ function renderHistTimeline(hist, name) {
 }
 
 // ═══════════════════════════════════════════════════════
+// BACKTEST
+// ═══════════════════════════════════════════════════════
+
+let backtestData = null;
+
+// Auto-assign colors based on strategy name patterns
+function getBtColor(name) {
+  // Tactical strategies (green family — the stars)
+  if (name.includes('+ Tac')) {
+    if (name.includes('40/60') || name.includes('Conservative')) return '#6ee7b7';
+    if (name.includes('60/40') || name.includes('Balanced')) return '#34d399';
+    if (name.includes('80/20') || name.includes('Growth')) return '#10b981';
+    if (name.includes('Full Conservative')) return '#a7f3d0';
+    if (name.includes('Full Balanced')) return '#6ee7b7';
+    if (name.includes('Full Growth')) return '#34d399';
+    return '#34d399';
+  }
+  // SAA baselines (blue family)
+  if (!name.includes('iShares') && !name.includes('Global') && !name.includes('US 60') && !name.includes('+ Tac')) {
+    if (name.includes('40/60') || name.includes('Conservative')) return '#93c5fd';
+    if (name.includes('60/40') || name.includes('Balanced')) return '#60a5fa';
+    if (name.includes('80/20') || name.includes('Growth')) return '#3b82f6';
+    if (name.includes('Full Conservative')) return '#bfdbfe';
+    if (name.includes('Full Balanced')) return '#93c5fd';
+    if (name.includes('Full Growth')) return '#60a5fa';
+    return '#60a5fa';
+  }
+  // Benchmarks (gray family)
+  if (name.includes('AOR')) return '#94a3b8';
+  if (name.includes('AOA')) return '#78716c';
+  if (name.includes('VT') || name.includes('Global')) return '#64748b';
+  if (name.includes('SPY/AGG') || name.includes('US 60')) return '#475569';
+  return '#888';
+}
+const BT_COLORS = {}; // populated dynamically
+
+function importBacktest() { document.getElementById('backtestFile').click(); }
+document.getElementById('backtestFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      backtestData = JSON.parse(ev.target.result);
+      renderBacktest();
+      goPage('backtest', document.querySelector('[data-page="backtest"]'));
+    } catch(err) { alert('Invalid backtest JSON: ' + err.message); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+});
+
+let btPanel = 'core';  // 'core' or 'full'
+let btPeriod = 'Full Period';
+
+function setBtPanel(panel) {
+  btPanel = panel;
+  document.getElementById('btPanelCore').style.background = panel === 'core' ? 'var(--blue-dim)' : '';
+  document.getElementById('btPanelCore').style.color = panel === 'core' ? 'var(--blue)' : '';
+  document.getElementById('btPanelFull').style.background = panel === 'full' ? 'var(--blue-dim)' : '';
+  document.getElementById('btPanelFull').style.color = panel === 'full' ? 'var(--blue)' : '';
+  renderBtKPIs();
+  renderBtTable();
+  setTimeout(drawBtChart, 20);
+}
+
+function setBtPeriod(period) {
+  btPeriod = period;
+  renderBtKPIs();
+  renderBtTable();
+}
+
+function getBtMetrics() {
+  if (!backtestData) return {};
+  const panelData = btPanel === 'core' ? backtestData.core : backtestData.full;
+  if (panelData && panelData.results && panelData.results[btPeriod]) {
+    return panelData.results[btPeriod];
+  }
+  // Fallback to flat metrics for old JSON format
+  return backtestData.metrics || {};
+}
+
+function getBtCumulative() {
+  if (!backtestData) return {};
+  const panelData = btPanel === 'core' ? backtestData.core : backtestData.full;
+  if (panelData && panelData.cumulative) return panelData.cumulative;
+  return backtestData.cumulative || {};
+}
+
+function renderBacktest() {
+  if (!backtestData) return;
+  // Support both old (flat metrics) and new (core/full panels) format
+  if (!backtestData.metrics && !backtestData.core && !backtestData.full) return;
+  document.getElementById('btEmpty').style.display = 'none';
+  document.getElementById('btResults').style.display = 'block';
+  document.getElementById('btPeriod').textContent = backtestData.period + ' · ' + backtestData.months + ' months';
+
+  // Initialize panel toggle
+  setBtPanel(btPanel);
+
+  // Populate weight history profile selector
+  const whSelect = document.getElementById('btWeightProfile');
+  whSelect.innerHTML = '';
+  const wh = (backtestData.full && backtestData.full.weight_history) || {};
+  Object.keys(wh).forEach((k, i) => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = k;
+    whSelect.appendChild(opt);
+  });
+
+  renderBtAlerts();
+  renderBtCurrentSignals();
+  renderBtRecommended();
+  renderBtKPIs();
+  renderBtTable();
+  renderBtHitRates();
+  renderBtSpread();
+  renderBtSAA();
+  setTimeout(drawBtChart, 50);
+  setTimeout(drawBtSpreadChart, 50);
+  setTimeout(drawBtWeightHistory, 50);
+}
+
+function renderBtAlerts() {
+  const el = document.getElementById('btAlerts');
+  const changes = backtestData.signal_changes || {};
+  const keys = Object.keys(changes);
+  if (keys.length === 0) { el.style.display = 'none'; return; }
+
+  el.style.display = 'block';
+  const sigColor = { OW: 'var(--green)', UW: 'var(--red)', N: 'var(--amber)' };
+  const sigBg = { OW: 'var(--green-dim)', UW: 'var(--red-dim)', N: 'var(--amber-dim)' };
+  const sigLabel = { OW: 'OVERWEIGHT', UW: 'UNDERWEIGHT', N: 'NEUTRAL' };
+
+  el.innerHTML = `
+    <div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);border-radius:8px;padding:14px 18px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--purple);font-weight:700;margin-bottom:8px">
+        ⬥ ${keys.length} Signal Change${keys.length > 1 ? 's' : ''} This Month — Consider Rebalancing
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        ${keys.map(name => {
+          const ch = changes[name];
+          return `<div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px">
+            <span style="color:var(--text-2)">${name}:</span>
+            <span style="padding:1px 6px;border-radius:3px;background:${sigBg[ch.from]};color:${sigColor[ch.from]};font-size:9px;font-weight:600">${sigLabel[ch.from]}</span>
+            <span style="color:var(--text-3)">→</span>
+            <span style="padding:1px 6px;border-radius:3px;background:${sigBg[ch.to]};color:${sigColor[ch.to]};font-size:9px;font-weight:600">${sigLabel[ch.to]}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function renderBtCurrentSignals() {
+  const el = document.getElementById('btCurrentSignals');
+  const sigs = backtestData.current_signals || {};
+  const keys = Object.keys(sigs);
+  if (keys.length === 0) { el.innerHTML = '<div style="color:var(--text-3);font-size:11px">No signal data available</div>'; return; }
+
+  const sigColor = { OW: 'var(--green)', UW: 'var(--red)', N: 'var(--amber)' };
+  const sigBg = { OW: 'var(--green-dim)', UW: 'var(--red-dim)', N: 'var(--amber-dim)' };
+  const sigLabel = { OW: 'OW', UW: 'UW', N: 'N' };
+
+  let html = '<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:4px 10px;align-items:center;font-family:var(--mono);font-size:10px">';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:9px">ASSET</div>';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:9px;text-align:center">SIGNAL</div>';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:9px;text-align:right">COMPOSITE</div>';
+  html += '<div style="color:var(--text-3);font-weight:600;font-size:9px;text-align:right">W_TECH</div>';
+
+  keys.forEach(name => {
+    const s = sigs[name];
+    const changed = s.changed;
+    const rowBg = changed ? 'background:rgba(167,139,250,0.06);border-radius:3px;' : '';
+    html += `<div style="padding:5px 4px;${rowBg};color:var(--text-1)">${name}${changed ? ' <span style="color:var(--purple);font-size:8px">⬥</span>' : ''}</div>`;
+    html += `<div style="padding:5px 4px;${rowBg};text-align:center"><span style="padding:1px 6px;border-radius:3px;background:${sigBg[s.signal]};color:${sigColor[s.signal]};font-weight:600;font-size:9px">${sigLabel[s.signal]}</span></div>`;
+    html += `<div style="padding:5px 4px;${rowBg};text-align:right;color:${s.composite > 0 ? 'var(--green)' : s.composite < 0 ? 'var(--red)' : 'var(--text-2)'};font-weight:600">${s.composite >= 0 ? '+' : ''}${s.composite.toFixed(2)}</div>`;
+    html += `<div style="padding:5px 4px;${rowBg};text-align:right;color:var(--blue)">${s.wTech.toFixed(0)}%</div>`;
+  });
+  html += '</div>';
+  if (keys.length > 0) {
+    const dateStr = sigs[keys[0]].date || '';
+    html += `<div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--text-3)">As of ${dateStr}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderBtRecommended() {
+  const el = document.getElementById('btRecommended');
+  const sigs = backtestData.current_signals || {};
+  const saaProfiles = backtestData.saa_weights || {};
+  const sigKeys = Object.keys(sigs);
+  if (sigKeys.length === 0 || Object.keys(saaProfiles).length === 0) {
+    el.innerHTML = '<div style="color:var(--text-3);font-size:11px">Run backtest to see recommendations</div>';
+    return;
+  }
+
+  const TILT = 5;
+  const assetColors = {'Equity U.S.':'#60a5fa','Equity Intl':'#3b82f6','Equity EM':'#2dd4bf','Bond U.S.':'#f87171','Bond Intl':'#fb923c','Gold':'#fbbf24','Commodities':'#a78bfa','REITs':'#e879f9'};
+
+  let html = '';
+  // Show 3 key profiles
+  const showProfiles = Object.keys(saaProfiles).slice(0, 6);
+  showProfiles.forEach(profileName => {
+    const weights = saaProfiles[profileName];
+    if (typeof weights !== 'object') return;
+
+    let totalW = 0;
+    const adjusted = {};
+    for (const [asset, basePct] of Object.entries(weights)) {
+      let w = basePct;
+      if (sigs[asset]) {
+        const sig = sigs[asset].signal;
+        if (sig === 'OW') w = Math.min(100, basePct + TILT);
+        else if (sig === 'UW') w = Math.max(0, basePct - TILT);
+      }
+      adjusted[asset] = w;
+      totalW += w;
+    }
+    // Normalize
+    if (totalW > 0) { for (const k in adjusted) adjusted[k] = adjusted[k] / totalW * 100; }
+
+    html += `<div style="margin-bottom:10px">`;
+    html += `<div style="font-family:var(--mono);font-size:10px;color:var(--text-0);margin-bottom:4px">${profileName}</div>`;
+    html += `<div style="display:flex;height:16px;border-radius:3px;overflow:hidden;margin-bottom:3px">`;
+    for (const [asset, pct] of Object.entries(adjusted)) {
+      const color = assetColors[asset] || '#888';
+      if (pct > 0.5) html += `<div title="${asset}: ${pct.toFixed(1)}%" style="width:${pct}%;background:${color};opacity:0.8"></div>`;
+    }
+    html += `</div>`;
+    html += `<div style="display:flex;flex-wrap:wrap;gap:3px">`;
+    for (const [asset, pct] of Object.entries(adjusted)) {
+      const basePct = weights[asset] || 0;
+      const delta = pct - basePct;
+      const deltaStr = Math.abs(delta) > 0.3 ? ` <span style="color:${delta > 0 ? 'var(--green)' : 'var(--red)'}; font-size:7px">${delta > 0 ? '↑' : '↓'}</span>` : '';
+      if (pct > 0.5) html += `<span style="font-family:var(--mono);font-size:7px;color:var(--text-2);display:flex;align-items:center;gap:1px"><span style="width:5px;height:5px;border-radius:1px;background:${assetColors[asset]||'#888'}"></span>${asset.replace('Equity ','Eq ').replace('Bond ','Bd ')} ${pct.toFixed(0)}%${deltaStr}</span>`;
+    }
+    html += `</div></div>`;
+  });
+  el.innerHTML = html;
+}
+
+function renderBtKPIs() {
+  const el = document.getElementById('btKPIs');
+  const m = getBtMetrics();
+  const spread = backtestData.spread || {};
+  const hr = backtestData.hit_rates || {};
+
+  // Find best tactical strategy (contains "+ Tac")
+  const tacKeys = Object.keys(m).filter(k => k.includes('Tac'));
+  const saaKeys = Object.keys(m).filter(k => !k.includes('Tac') && !k.includes('iShares') && !k.includes('Global') && !k.includes('US 60'));
+  let bestTac = tacKeys[0] || '';
+  let bestSharpe = -999;
+  tacKeys.forEach(k => { if ((m[k]?.sharpe||0) > bestSharpe) { bestSharpe = m[k].sharpe; bestTac = k; }});
+
+  // Find matching SAA baseline
+  const baseName = bestTac.replace(' + Tac', '');
+  const base = m[baseName] || {};
+  const best = m[bestTac] || {};
+
+  // Core hit rates only
+  const coreHR = Object.entries(hr).filter(([k,v]) => v.group === 'core');
+  const avgCoreHit = coreHR.length > 0 ? coreHR.reduce((a,[k,v]) => a + v.rate, 0) / coreHR.length : 0;
+
+  // Signal changes
+  const changes = Object.keys(backtestData.signal_changes || {});
+
+  const kpis = [
+    { label: 'Best Strategy', value: bestTac || '—', color: 'var(--green)', small: true },
+    { label: 'Ann. Return', value: (best.ann_return||0).toFixed(1) + '%', color: (best.ann_return||0) > (base.ann_return||0) ? 'var(--green)' : 'var(--text-2)' },
+    { label: 'Sharpe', value: (best.sharpe||0).toFixed(3), color: (best.sharpe||0) > (base.sharpe||0) ? 'var(--green)' : 'var(--text-2)' },
+    { label: 'Signal Alpha', value: ((best.ann_return||0) - (base.ann_return||0) >= 0 ? '+' : '') + ((best.ann_return||0) - (base.ann_return||0)).toFixed(1) + '%', color: (best.ann_return||0) >= (base.ann_return||0) ? 'var(--green)' : 'var(--red)' },
+    { label: 'Max Drawdown', value: (best.max_drawdown||0).toFixed(1) + '%', color: 'var(--red)' },
+    { label: 'OW-UW Spread', value: (spread.spread||0).toFixed(2) + '%/mo', color: (spread.spread||0) > 0 ? 'var(--green)' : 'var(--red)' },
+    { label: 'Core Hit Rate', value: avgCoreHit.toFixed(1) + '%', color: avgCoreHit > 55 ? 'var(--green)' : 'var(--amber)' },
+    { label: 'Signal Changes', value: changes.length > 0 ? changes.length + ' this month' : 'None', color: changes.length > 0 ? 'var(--purple)' : 'var(--text-3)' },
+  ];
+
+  el.innerHTML = kpis.map(k => `
+    <div style="background:var(--bg-2);border:1px solid var(--border-1);border-radius:6px;padding:12px 14px">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${k.label}</div>
+      <div style="font-family:var(--mono);font-size:${k.small ? '13' : '18'}px;font-weight:700;color:${k.color}">${k.value}</div>
+    </div>
+  `).join('');
+}
+
+function renderBtTable() {
+  const el = document.getElementById('btTable');
+  const m = getBtMetrics();
+  const saaKeys = Object.keys(m).filter(k => !k.includes('Tac') && !k.includes('iShares') && !k.includes('Global') && !k.includes('US 60')).sort();
+  const tacKeys = Object.keys(m).filter(k => k.includes('Tac')).sort();
+  const bmKeys = Object.keys(m).filter(k => k.includes('iShares') || k.includes('Global') || k.includes('US 60'));
+  const order = [...saaKeys, ...tacKeys, ...bmKeys];
+  const keys = order.filter(k => m[k]);
+
+  let html = '<table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px">';
+  html += '<thead><tr style="border-bottom:1px solid var(--border-2)">';
+  html += '<th style="text-align:left;padding:6px 8px;color:var(--text-3)">Strategy</th>';
+  html += '<th style="text-align:right;padding:6px 8px;color:var(--text-3)">Ann. Return</th>';
+  html += '<th style="text-align:right;padding:6px 8px;color:var(--text-3)">Ann. Vol</th>';
+  html += '<th style="text-align:right;padding:6px 8px;color:var(--text-3)">Sharpe</th>';
+  html += '<th style="text-align:right;padding:6px 8px;color:var(--text-3)">Max DD</th>';
+  html += '<th style="text-align:right;padding:6px 8px;color:var(--text-3)">Calmar</th>';
+  html += '<th style="text-align:right;padding:6px 8px;color:var(--text-3)">Total</th>';
+  html += '</tr></thead><tbody>';
+
+  // Find best Sharpe
+  let bestSharpe = -999;
+  keys.forEach(k => { if (m[k].sharpe > bestSharpe) bestSharpe = m[k].sharpe; });
+
+  keys.forEach((k, i) => {
+    const d = m[k];
+    const isBest = d.sharpe === bestSharpe;
+    const isTac = k.includes('Tac');
+    const bg = isBest ? 'rgba(52,211,153,0.06)' : (i % 2 ? 'transparent' : 'rgba(255,255,255,0.01)');
+    const border = isBest ? '1px solid rgba(52,211,153,0.2)' : 'none';
+    const retColor = d.ann_return > 0 ? 'var(--green)' : 'var(--red)';
+    const shColor = d.sharpe > 0.5 ? 'var(--green)' : d.sharpe > 0 ? 'var(--amber)' : 'var(--red)';
+    const nameColor = isTac ? 'var(--green)' : bmKeys.includes(k) ? 'var(--text-3)' : 'var(--blue)';
+
+    html += `<tr style="background:${bg};border:${border}">`;
+    html += `<td style="padding:8px;color:${nameColor};font-weight:${isBest?700:400}">${k}${isBest?' ★':''}</td>`;
+    html += `<td style="text-align:right;padding:8px;color:${retColor}">${d.ann_return.toFixed(1)}%</td>`;
+    html += `<td style="text-align:right;padding:8px;color:var(--text-2)">${d.ann_vol.toFixed(1)}%</td>`;
+    html += `<td style="text-align:right;padding:8px;color:${shColor};font-weight:700">${d.sharpe.toFixed(3)}</td>`;
+    html += `<td style="text-align:right;padding:8px;color:var(--red)">${d.max_drawdown.toFixed(1)}%</td>`;
+    html += `<td style="text-align:right;padding:8px;color:var(--text-2)">${d.calmar.toFixed(3)}</td>`;
+    html += `<td style="text-align:right;padding:8px;color:${retColor}">${d.cumulative.toFixed(1)}%</td>`;
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+function drawBtChart() {
+  const canvas = document.getElementById('btChart');
+  const cumData = getBtCumulative();
+  if (!cumData || Object.keys(cumData).length === 0) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const series = cumData;
+  const keys = Object.keys(series);
+  if (keys.length === 0) return;
+
+  // Convert to $100 base
+  let allDates = [];
+  let allVals = [];
+  const processed = {};
+  keys.forEach(k => {
+    processed[k] = series[k].map(d => ({ date: d.date, value: d.value * 100 }));
+    processed[k].forEach(d => {
+      allDates.push(d.date);
+      allVals.push(d.value);
+    });
+  });
+
+  const uniqueDates = [...new Set(allDates)].sort();
+  const minV = Math.min(...allVals) * 0.95;
+  const maxV = Math.max(...allVals) * 1.05;
+
+  const pad = { l: 55, r: 15, t: 10, b: 30 };
+  const pw = W - pad.l - pad.r;
+  const ph = H - pad.t - pad.b;
+
+  const xScale = d => pad.l + (uniqueDates.indexOf(d) / (uniqueDates.length - 1)) * pw;
+  const yScale = v => pad.t + ph - ((v - minV) / (maxV - minV)) * ph;
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 0.5;
+  const nGridY = 6;
+  for (let i = 0; i <= nGridY; i++) {
+    const v = minV + (i / nGridY) * (maxV - minV);
+    const y = yScale(v);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font = '9px JetBrains Mono';
+    ctx.textAlign = 'right';
+    ctx.fillText('$' + v.toFixed(0), pad.l - 6, y + 3);
+  }
+
+  // X axis labels (every ~2 years)
+  ctx.textAlign = 'center';
+  const step = Math.max(1, Math.floor(uniqueDates.length / 7));
+  for (let i = 0; i < uniqueDates.length; i += step) {
+    const x = xScale(uniqueDates[i]);
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.fillText(uniqueDates[i], x, H - pad.b + 14);
+  }
+
+  // Draw lines: benchmarks first (dim), then SAA baselines (medium), then Tac (bright)
+  const bmKeys = keys.filter(k => k.includes('iShares') || k.includes('Global') || k.includes('US 60') || k.includes('100%'));
+  const tacKeys = keys.filter(k => k.includes('Tac'));
+  const saaKeys = keys.filter(k => !tacKeys.includes(k) && !bmKeys.includes(k));
+  const drawOrder = [...bmKeys, ...saaKeys, ...tacKeys];
+
+  const legendEl = document.getElementById('btLegend');
+  legendEl.innerHTML = '';
+
+  drawOrder.filter(k => processed[k]).forEach(k => {
+    const pts = processed[k];
+    const color = getBtColor(k);
+    const isTac = k.includes('Tac');
+    const width = isTac ? 2.0 : 1.2;
+    const alpha = isTac ? 1.0 : 0.5;
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+      const x = xScale(p.date);
+      const y = yScale(p.value);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Legend
+    legendEl.innerHTML += `<span style="display:flex;align-items:center;gap:3px;opacity:${alpha}"><span style="width:12px;height:2px;background:${color};display:inline-block"></span>${k}</span>`;
+  });
+}
+
+function renderBtHitRates() {
+  const el = document.getElementById('btHitRates');
+  const hr = backtestData.hit_rates || {};
+  const keys = Object.keys(hr).sort((a,b) => (hr[b].rate||0) - (hr[a].rate||0));
+
+  let html = '<div style="display:flex;flex-direction:column;gap:6px">';
+  keys.forEach(k => {
+    const d = hr[k];
+    const barColor = d.rate >= 55 ? 'var(--green)' : d.rate >= 50 ? 'var(--amber)' : 'var(--red)';
+    html += `
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text-2);width:100px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k}</span>
+        <div style="flex:1;height:14px;background:var(--bg-2);border-radius:3px;overflow:hidden;position:relative">
+          <div style="width:${d.rate}%;height:100%;background:${barColor};border-radius:3px;opacity:0.7"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:8px;color:var(--text-0)">${d.rate}%</div>
+        </div>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--text-3);width:50px;text-align:right">${d.hits}/${d.total}</span>
+      </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function renderBtSpread() {
+  const el = document.getElementById('btSpread');
+  const s = backtestData.spread || {};
+  const isPositive = (s.spread || 0) > 0;
+  el.innerHTML = `
+    <div style="font-family:var(--mono);font-size:11px;line-height:2">
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">OW → avg next-month:</span><span style="color:var(--green)">+${(s.ow_avg||0).toFixed(3)}%</span><span style="color:var(--text-3)">(${s.ow_count||0})</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text-2)">UW → avg next-month:</span><span style="color:var(--red)">${(s.uw_avg||0).toFixed(3)}%</span><span style="color:var(--text-3)">(${s.uw_count||0})</span></div>
+      <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border-1);padding-top:4px;margin-top:4px">
+        <span style="color:var(--text-0);font-weight:700">OW – UW Spread:</span>
+        <span style="color:${isPositive ? 'var(--green)' : 'var(--red)'};font-weight:700">${isPositive?'+':''}${(s.spread||0).toFixed(3)}%/mo</span>
+      </div>
+      <div style="margin-top:6px;font-size:10px;color:${isPositive ? 'var(--green)' : 'var(--red)'}">
+        ${isPositive ? '✅ Positive spread — signals have predictive power' : '⚠ Negative spread — signals need calibration'}
+      </div>
+    </div>`;
+}
+
+function drawBtSpreadChart() {
+  const canvas = document.getElementById('btSpreadChart');
+  if (!backtestData?.spread) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const s = backtestData.spread;
+  const bars = [
+    { label: 'OW', value: s.ow_avg || 0, color: 'var(--green)' },
+    { label: 'Neutral', value: s.n_avg || 0, color: 'var(--amber)' },
+    { label: 'UW', value: s.uw_avg || 0, color: 'var(--red)' },
+  ];
+
+  const maxAbs = Math.max(...bars.map(b => Math.abs(b.value)), 0.5);
+  const midY = H / 2;
+  const barW = W / 5;
+  const gap = barW * 0.4;
+
+  // Zero line
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(W, midY); ctx.stroke();
+
+  bars.forEach((b, i) => {
+    const x = (W - (bars.length * barW + (bars.length - 1) * gap)) / 2 + i * (barW + gap);
+    const barH = (b.value / maxAbs) * (H / 2 - 20);
+    const y = b.value >= 0 ? midY - barH : midY;
+    const h = Math.abs(barH);
+
+    const cs = getComputedStyle(document.documentElement);
+    let fillColor;
+    if (b.color === 'var(--green)') fillColor = cs.getPropertyValue('--green').trim();
+    else if (b.color === 'var(--red)') fillColor = cs.getPropertyValue('--red').trim();
+    else fillColor = cs.getPropertyValue('--amber').trim();
+
+    ctx.fillStyle = fillColor;
+    ctx.globalAlpha = 0.7;
+    const rx = x, ry = b.value >= 0 ? midY - h : midY;
+    ctx.beginPath();
+    if (ctx.roundRect) { ctx.roundRect(rx, ry, barW, h, 3); }
+    else { ctx.rect(rx, ry, barW, h); }
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '10px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(b.label, x + barW / 2, H - 4);
+    ctx.fillText((b.value >= 0 ? '+' : '') + b.value.toFixed(3) + '%', x + barW / 2, b.value >= 0 ? midY - h - 6 : midY + h + 12);
+  });
+}
+
+function renderBtSAA() {
+  const el = document.getElementById('btSAA');
+  const profiles = backtestData.saa_weights || {};
+  const smartTilts = backtestData.smart_tilts || {};
+  const assetColors = ['#60a5fa','#3b82f6','#2dd4bf','#f87171','#fb923c','#fbbf24','#a78bfa','#e879f9'];
+
+  let html = '';
+  // If it's the new multi-profile format (object of objects)
+  const isMulti = Object.values(profiles).length > 0 && typeof Object.values(profiles)[0] === 'object';
+
+  if (isMulti) {
+    for (const [profileName, weights] of Object.entries(profiles)) {
+      const keys = Object.keys(weights);
+      html += `<div style="margin-bottom:12px"><div style="font-family:var(--mono);font-size:10px;color:var(--text-0);margin-bottom:6px">${profileName}</div>`;
+      html += '<div style="display:flex;gap:12px;align-items:center"><div style="display:flex;height:20px;flex:1;min-width:200px;border-radius:3px;overflow:hidden">';
+      keys.forEach((k, i) => {
+        html += `<div title="${k}: ${weights[k]}%" style="width:${weights[k]}%;background:${assetColors[i%assetColors.length]};opacity:0.8"></div>`;
+      });
+      html += '</div><div style="display:flex;flex-wrap:wrap;gap:4px">';
+      keys.forEach((k, i) => {
+        html += `<span style="font-family:var(--mono);font-size:8px;color:var(--text-2);display:flex;align-items:center;gap:2px"><span style="width:6px;height:6px;border-radius:1px;background:${assetColors[i%assetColors.length]}"></span>${k} ${weights[k]}%</span>`;
+      });
+      html += '</div></div></div>';
+    }
+  } else {
+    // Legacy single-profile format
+    const keys = Object.keys(profiles);
+    html += '<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">';
+    html += '<div style="display:flex;height:24px;flex:1;min-width:200px;border-radius:4px;overflow:hidden">';
+    keys.forEach((k, i) => {
+      html += `<div title="${k}: ${profiles[k]}%" style="width:${profiles[k]}%;background:${assetColors[i%assetColors.length]};opacity:0.8"></div>`;
+    });
+    html += '</div></div>';
+  }
+
+  // Smart tilts
+  if (Object.keys(smartTilts).length > 0) {
+    html += '<div style="margin-top:12px;border-top:1px solid var(--border-1);padding-top:12px">';
+    html += '<div style="font-family:var(--mono);font-size:10px;color:var(--text-0);margin-bottom:6px">Smart Tilt Sizes (based on hit rates)</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    for (const [name, tilt] of Object.entries(smartTilts)) {
+      const c = tilt >= 5 ? 'var(--green)' : tilt >= 2 ? 'var(--amber)' : 'var(--text-3)';
+      html += `<span style="font-family:var(--mono);font-size:9px;color:${c}">±${tilt}% ${name}</span>`;
+    }
+    html += '</div></div>';
+  }
+
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// WEIGHT HISTORY CHART
+// ═══════════════════════════════════════════════════════
+
+function drawBtWeightHistory() {
+  const canvas = document.getElementById('btWeightChart');
+  if (!canvas) return;
+  const wh = (backtestData && backtestData.full && backtestData.full.weight_history) || {};
+  const profileSelect = document.getElementById('btWeightProfile');
+  const selectedProfile = profileSelect ? profileSelect.value : '';
+  const history = wh[selectedProfile];
+  if (!history || history.length === 0) return;
+
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const assetColors = {'Equity U.S.':'#60a5fa','Equity Intl':'#3b82f6','Equity EM':'#2dd4bf','Bond U.S.':'#f87171','Bond Intl':'#fb923c','Gold':'#fbbf24','Commodities':'#a78bfa','REITs':'#e879f9'};
+  const pad = { l: 40, r: 15, t: 10, b: 30 };
+  const pw = W - pad.l - pad.r;
+  const ph = H - pad.t - pad.b;
+  const n = history.length;
+
+  // Get all asset names from first entry
+  const assetNames = Object.keys(history[0].weights);
+
+  // Draw stacked area chart
+  for (let ai = assetNames.length - 1; ai >= 0; ai--) {
+    const asset = assetNames[ai];
+    const color = assetColors[asset] || '#888';
+
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const x = pad.l + (i / (n - 1)) * pw;
+      // Stack: sum weights of assets 0..ai
+      let stackTop = 0;
+      for (let j = 0; j <= ai; j++) {
+        stackTop += (history[i].weights[assetNames[j]]?.weight || 0);
+      }
+      const y = pad.t + ph - (stackTop / 100) * ph;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    // Close path back to bottom of this layer
+    for (let i = n - 1; i >= 0; i--) {
+      const x = pad.l + (i / (n - 1)) * pw;
+      let stackBot = 0;
+      for (let j = 0; j < ai; j++) {
+        stackBot += (history[i].weights[assetNames[j]]?.weight || 0);
+      }
+      const y = pad.t + ph - (stackBot / 100) * ph;
+      ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.75;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // Y axis labels
+  ctx.font = '9px JetBrains Mono';
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.textAlign = 'right';
+  for (let pct = 0; pct <= 100; pct += 25) {
+    const y = pad.t + ph - (pct / 100) * ph;
+    ctx.fillText(pct + '%', pad.l - 5, y + 3);
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+  }
+
+  // X axis labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  const step = Math.max(1, Math.floor(n / 8));
+  for (let i = 0; i < n; i += step) {
+    const x = pad.l + (i / (n - 1)) * pw;
+    ctx.fillText(history[i].date, x, H - pad.b + 14);
+  }
+
+  // Mark signal changes with vertical lines
+  for (let i = 1; i < n; i++) {
+    const prevW = history[i-1].weights;
+    const currW = history[i].weights;
+    let hasChange = false;
+    for (const asset of assetNames) {
+      if (prevW[asset]?.signal !== currW[asset]?.signal && currW[asset]?.signal !== 'N') {
+        hasChange = true;
+        break;
+      }
+    }
+    if (hasChange) {
+      const x = pad.l + (i / (n - 1)) * pw;
+      ctx.strokeStyle = 'rgba(167,139,250,0.3)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + ph); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  // Legend
+  const legendEl = document.getElementById('btWeightLegend');
+  legendEl.innerHTML = assetNames.map(a =>
+    `<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:2px;background:${assetColors[a]||'#888'};opacity:0.75"></span>${a}</span>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
 
@@ -1575,7 +2374,21 @@ fetch('tacsignal-latest.json')
   })
   .catch(() => { /* no latest.json found — keep sample data, that's fine */ });
 
-window.addEventListener('resize', () => { drawAll(); if(document.getElementById('pg-history').classList.contains('active')) drawHistory(); });
+// Auto-load backtest data if available
+fetch('tacsignal-backtest.json')
+  .then(r => { if(!r.ok) throw new Error('not found'); return r.json(); })
+  .then(d => {
+    backtestData = d;
+    renderBacktest();
+    console.log('✓ Auto-loaded tacsignal-backtest.json');
+  })
+  .catch(() => { /* no backtest.json found — that's fine */ });
+
+window.addEventListener('resize', () => {
+  drawAll();
+  if(document.getElementById('pg-history').classList.contains('active')) drawHistory();
+  if(document.getElementById('pg-backtest').classList.contains('active') && backtestData) { drawBtChart(); drawBtSpreadChart(); drawBtWeightHistory(); }
+});
 </script>
 </body>
 </html>
