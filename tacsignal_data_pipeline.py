@@ -49,6 +49,18 @@ warnings.filterwarnings('ignore')
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
 
+# Smart Tilts — per-asset tilt sizes (pp) proportional to backtest hit rates
+SMART_TILTS = {
+    "Equity U.S.":   7,   # 69.8% hit rate
+    "Equity Intl":   2,   # 52.5%
+    "Equity EM":     5,   # 63.6%
+    "Bond U.S.":     2,   # 52.9%
+    "Bond Intl":     1,   # 47.9%
+    "Gold":          2,   # 52.4%
+    "Commodities":   1,   # 48.1%
+    "REITs":         4,   # 60.0%
+}
+
 # Yahoo Finance tickers for each asset
 ASSET_TICKERS = {
     "Equity CH":        {"price": "^SSMI",   "type": "equity", "region": "CH"},
@@ -414,6 +426,7 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
     def process_universe(ticker_dict, label):
         results = []
         history_dict = {}  # name → [{date, tech, funda, wTech, composite, signal}, ...]
+        current_signals = {}  # name → {signal, composite, tech, funda, wTech, changed, previous, streak, momentum, smart_tilt, date}
 
         for name, config in ticker_dict.items():
             if asset_filter and name not in asset_filter:
@@ -453,7 +466,7 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
             # Compute composite
             w_pct = w / 100
             composite = w_pct * tech_current + (1 - w_pct) * funda_current
-            signal = "OW" if composite > 1 else "UW" if composite < -1 else "NEUTRAL"
+            signal = "OW" if composite > 1 else "UW" if composite < -1 else "N"
 
             print(f"  ✓ {name:22s} | tech={tech_current:+.2f} funda={funda_current:+.2f} w={w:5.1f}% | S={composite:+.2f} → {signal}")
 
@@ -489,13 +502,60 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
                     })
             history_dict[name] = hist
 
-        return results, history_dict
+            # ── Compute signal freshness (streak, momentum, changed) ──
+            prev_signal = "N"
+            streak = 1
+            if len(hist) >= 2:
+                prev_signal = hist[-2]["signal"]
+                # Count consecutive months at same signal
+                for i in range(len(hist) - 1, -1, -1):
+                    if hist[i]["signal"] == signal:
+                        streak = len(hist) - i
+                    else:
+                        break
+                # Recount properly: walk backwards from end
+                streak = 1
+                for i in range(len(hist) - 2, -1, -1):
+                    if hist[i]["signal"] == signal:
+                        streak += 1
+                    else:
+                        break
+
+            prev_composite = hist[-2]["composite"] if len(hist) >= 2 else composite
+            momentum = round(composite - prev_composite, 2)
+            changed = (signal != prev_signal) if len(hist) >= 2 else False
+
+            current_signals[name] = {
+                "signal": signal,
+                "composite": round(composite, 2),
+                "tech": round(tech_current, 2),
+                "funda": round(funda_current, 2),
+                "wTech": round(w, 1),
+                "changed": changed,
+                "previous": prev_signal,
+                "date": datetime.now().strftime('%Y-%m'),
+                "streak": streak,
+                "momentum": momentum,
+                "smart_tilt": SMART_TILTS.get(name, 0),
+            }
+
+        return results, history_dict, current_signals
 
     print(f"\n  --- {len(ASSET_TICKERS)} Asset Classes ---")
-    asset_results, asset_history = process_universe(ASSET_TICKERS, "Assets")
+    asset_results, asset_history, asset_current = process_universe(ASSET_TICKERS, "Assets")
 
     print(f"\n  --- {len(SECTOR_TICKERS)} U.S. Sectors ---")
-    sector_results, sector_history = process_universe(SECTOR_TICKERS, "Sectors")
+    sector_results, sector_history, sector_current = process_universe(SECTOR_TICKERS, "Sectors")
+
+    # Merge current signals
+    all_current_signals = {**asset_current, **sector_current}
+
+    # Detect signal changes (assets that flipped vs previous month)
+    signal_changes = [
+        {"asset": name, "from": sig["previous"], "to": sig["signal"], "date": sig["date"]}
+        for name, sig in all_current_signals.items()
+        if sig.get("changed", False)
+    ]
 
     # 3. Build output
     output = {
@@ -512,6 +572,9 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
         "assets": asset_results,
         "sectors": sector_results,
         "history": {**asset_history, **sector_history},
+        "smart_tilts": SMART_TILTS,
+        "current_signals": all_current_signals,
+        "signal_changes": signal_changes,
     }
 
     # 4. Save
@@ -537,6 +600,11 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
     uw = sum(1 for r in all_items if (r['wTech']/100)*r['tech'] + (1-r['wTech']/100)*r['funda'] < -1)
     ne = len(all_items) - ow - uw
     print(f"\n   Summary: {ow} Overweight | {uw} Underweight | {ne} Neutral")
+    if signal_changes:
+        print(f"\n   ⬥ Signal Changes This Month:")
+        for sc in signal_changes:
+            print(f"     {sc['asset']:22s}  {sc['from']:>2s} → {sc['to']}")
+    print(f"   Smart Tilts: {len(SMART_TILTS)} assets configured")
 
     return output
 
