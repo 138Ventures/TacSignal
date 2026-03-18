@@ -89,16 +89,19 @@ Decision:
 
 **10 U.S. Sectors:** Financials, Consumer Discretionary, Industrials, Consumer Staples, Health Care, Info Tech, Energy, Materials, Telecom, Utilities
 
+**5 Sub-Asset ETFs:** QQQ (US Growth), VTV (US Value), SMH (US Semis), EFV (Intl Value), EEM (EM Broad) — independent signals with their own tech/funda z-scores
+
 ## Dashboard Features
 
-- **Interactive scatter plots** — click any dot for waterfall decomposition
+- **Interactive scatter plots** — click any dot for waterfall decomposition (assets, sectors, and sub-asset ETFs)
 - **Movement arrows** — show signal drift from previous month
-- **What-If Scenario** — stress-test signals with global tech/funda shocks
-- **History tab** — 24-month time series with composite lines, phase diagrams, signal timeline
-- **Backtest tab** — full 2012–2025 historical backtest with:
+- **Sub-Asset ETF panel** — independent QQQ/VTV/SMH/EFV/EEM signals with dedicated scatter plot
+- **What-If Scenario** — stress-test signals with global tech/funda shocks (includes sub-assets)
+- **History tab** — 24-month time series with composite lines, phase diagrams, signal heatmap for all 29 assets
+- **Backtest tab** — full 2012–2025 historical backtest with collapsible sections:
   - Core (60/40, 80/20) and Full (with alts) portfolio profiles matched to AOR/AOA benchmark weights
   - Smart Tilts — per-asset tilt sizing proportional to historical hit rates
-  - Year range slider with quick presets (ALL, PRE-18, POST-18, 5Y, 3Y)
+  - Period selector with auto-adjusting presets (MAX, 10Y, 5Y, 3Y, 1Y, YTD) + custom slider
   - Signal freshness indicators (streak, momentum arrows, "NEW" tags)
   - Recommended allocation panel with current signal-adjusted weights
   - Weight history stacked area chart with signal change markers
