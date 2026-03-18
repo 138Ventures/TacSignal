@@ -485,6 +485,54 @@ def build_signals(prices, fred_data, window=24, enhanced=False, mode='A'):
     return signal_data
 
 
+def build_sub_asset_signals(prices, fred_data, window=24, enhanced=False):
+    """Build monthly signal history for sub-asset ETFs using their own prices.
+
+    Uses the same computation as parent assets — tech zscore from the ETF's own
+    price series, funda zscore from price + FRED data, and w_tech from the ETF's
+    own momentum regime.
+    """
+    signal_data = {}
+    all_etfs = {**SUB_ASSET_ETFS}
+    # Also include EEM and Gold which appear directly in MW Recommended
+    # EEM is in ASSET_UNIVERSE, Gold is in ASSET_UNIVERSE
+    for extra_name in ["Equity EM", "Gold"]:
+        if extra_name in ASSET_UNIVERSE and extra_name not in all_etfs:
+            all_etfs[extra_name] = ASSET_UNIVERSE[extra_name]
+
+    for name, config in all_etfs.items():
+        ticker = config["price"]
+        if ticker not in prices.columns:
+            print(f"    ✗ {name}: no price data for {ticker}")
+            continue
+
+        p = prices[ticker].dropna()
+        z_tech = compute_tech_zscore(p, window)
+        z_funda = compute_funda_zscore(p, config["type"], fred_data, window, enhanced=enhanced)
+        w_tech = compute_wtech_series(p, enhanced=enhanced)
+
+        if z_tech is None or z_funda is None or w_tech is None:
+            print(f"    ✗ {name}: insufficient data for independent signal")
+            continue
+
+        df = pd.DataFrame({'tech': z_tech, 'funda': z_funda, 'wTech': w_tech}).dropna()
+        df['composite'] = (df['wTech']/100) * df['tech'] + (1 - df['wTech']/100) * df['funda']
+        ow_threshold = 0.8 if enhanced else 1.0
+        uw_threshold = -0.8 if enhanced else -1.0
+        df['signal'] = 'N'
+        df.loc[df['composite'] > ow_threshold, 'signal'] = 'OW'
+        df.loc[df['composite'] < uw_threshold, 'signal'] = 'UW'
+        df['strength'] = 1
+
+        signal_data[name] = df
+        n_ow = (df['signal'] == 'OW').sum()
+        n_uw = (df['signal'] == 'UW').sum()
+        n_n = (df['signal'] == 'N').sum()
+        print(f"    ✓ {name}: {len(df)} mo | OW:{n_ow} UW:{n_uw} N:{n_n}")
+
+    return signal_data
+
+
 def compute_metrics(rets):
     """Compute standard performance metrics from a monthly return series."""
     cum = (1 + rets).cumprod()
@@ -934,6 +982,193 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
         opt_results[period_name] = period_metrics
 
     # ═══════════════════════════════════════════
+    # PANEL 5: SUB-ASSET INDEPENDENT SIGNALS
+    # ═══════════════════════════════════════════
+    print(f"\n  ══════════════════════════════════════════════════")
+    print(f"  PANEL 5: SUB-ASSET INDEPENDENT SIGNALS")
+    print(f"  ══════════════════════════════════════════════════")
+
+    print(f"\n  Computing independent signals for {len(SUB_ASSET_ETFS)} sub-asset ETFs + EM + Gold...")
+    sub_signals = build_sub_asset_signals(prices, fred_data, window, enhanced=False)
+
+    # Compute hit rates for sub-asset signals
+    sub_hit_rates = {}
+    sub_ow_rets = []
+    sub_uw_rets = []
+    sub_n_rets = []
+
+    for name in sub_signals:
+        sig_df = sub_signals[name]
+        ticker = None
+        if name in SUB_ASSET_ETFS:
+            ticker = SUB_ASSET_ETFS[name]["price"]
+        elif name in ASSET_UNIVERSE:
+            ticker = ASSET_UNIVERSE[name]["price"]
+        if not ticker or ticker not in prices.columns:
+            continue
+
+        monthly_price = prices[ticker].resample('ME').last()
+        asset_rets = monthly_price.pct_change().dropna()
+
+        hits, total = 0, 0
+        for i in range(len(sig_df) - 1):
+            dt = sig_df.index[i]
+            sig = sig_df.iloc[i]['signal']
+            if sig == 'N':
+                continue
+            future = asset_rets[asset_rets.index > dt]
+            if len(future) == 0:
+                continue
+            next_ret = float(future.iloc[0])
+            total += 1
+            if sig == 'OW' and next_ret > 0:
+                hits += 1
+            elif sig == 'UW' and next_ret < 0:
+                hits += 1
+            if sig == 'OW': sub_ow_rets.append(next_ret)
+            elif sig == 'UW': sub_uw_rets.append(next_ret)
+            else: sub_n_rets.append(next_ret)
+
+        rate = hits / total if total > 0 else 0
+        sub_hit_rates[name] = {"hits": hits, "total": total, "rate": round(rate * 100, 1)}
+        print(f"    ✓ {name:<20s} Hit rate: {rate:>5.1%} ({hits}/{total})")
+
+    # Derive sub-asset smart tilts from hit rates
+    SUB_SMART_TILTS = {}
+    for name, hr in sub_hit_rates.items():
+        r = hr['rate']
+        if r >= 60:
+            SUB_SMART_TILTS[name] = 7
+        elif r >= 55:
+            SUB_SMART_TILTS[name] = 4
+        elif r >= 50:
+            SUB_SMART_TILTS[name] = 2
+        else:
+            SUB_SMART_TILTS[name] = 1
+    print(f"\n  Derived sub-asset smart tilts: {SUB_SMART_TILTS}")
+
+    sub_spread_ow = np.mean(sub_ow_rets) if sub_ow_rets else 0
+    sub_spread_uw = np.mean(sub_uw_rets) if sub_uw_rets else 0
+    sub_spread = sub_spread_ow - sub_spread_uw
+    print(f"  Sub-asset OW → {sub_spread_ow:>+.2%}/mo   UW → {sub_spread_uw:>+.2%}/mo   Spread: {sub_spread:>+.2%}/mo {'✅' if sub_spread > 0 else '⚠'}")
+
+    # Test MW Recommended with independent signals vs parent signals
+    def compute_sub_signal_strategy(returns_df, saa_weights_pct, sub_signal_data, sub_smart_tilts):
+        """Like compute_strategy but uses independent sub-asset signals."""
+        strat_returns = pd.Series(0.0, index=returns_df.index)
+        weight_history = []
+
+        for dt in returns_df.index:
+            period_return = 0.0
+            total_weight = 0.0
+            month_weights = {}
+
+            for name, base_pct in saa_weights_pct.items():
+                if name not in returns_df.columns:
+                    continue
+                base_w = base_pct / 100.0
+                adjusted_w = base_w
+                sig = 'N'
+
+                if name in sub_signal_data:
+                    sig_df = sub_signal_data[name]
+                    prev_signals = sig_df[sig_df.index < dt]
+                    if len(prev_signals) > 0:
+                        sig = prev_signals.iloc[-1]['signal']
+                        tilt = sub_smart_tilts.get(name, 0) / 100.0
+                        if sig == 'OW':
+                            adjusted_w = base_w + tilt
+                        elif sig == 'UW':
+                            adjusted_w = max(0, base_w - tilt)
+
+                adjusted_w = max(0, adjusted_w)
+                period_return += adjusted_w * returns_df.loc[dt, name]
+                total_weight += adjusted_w
+                month_weights[name] = {"weight": round(adjusted_w * 100, 1), "signal": sig}
+
+            if total_weight > 0 and abs(total_weight - 1.0) > 0.001:
+                period_return = period_return / total_weight
+            strat_returns[dt] = period_return
+            weight_history.append({"date": dt.strftime('%Y-%m'), "weights": month_weights})
+
+        return strat_returns, weight_history
+
+    sub_results = {}
+    sub_cumulative = {}
+    sub_weight_history = {}
+
+    for period_name, p_start, p_end in SUB_PERIODS:
+        start_dt = pd.Timestamp(f"{p_start}-01-01")
+        end_dt = pd.Timestamp(f"{p_end}-12-31")
+        period_ret = all_sub_returns.loc[start_dt:end_dt]
+        if period_ret.empty:
+            continue
+
+        print(f"\n  --- {period_name} ({p_start}–{p_end}) ---")
+        period_metrics = {}
+        header = f"  {'Strategy':<40s} {'Return':>8s} {'Vol':>8s} {'Sharpe':>8s} {'Sortino':>8s} {'MaxDD':>8s}"
+        print(header)
+        print("  " + "─" * (len(header) - 2))
+
+        # For MW Recommended only — compare parent vs independent signals
+        mw_weights = OPTIMIZED_SAA["MW Recommended"]
+        missing = [a for a in mw_weights if a not in period_ret.columns]
+        if not missing:
+            # Static SAA (no signals)
+            saa_ret, _ = compute_strategy(period_ret, mw_weights)
+            m = compute_metrics(saa_ret)
+            period_metrics["MW Recommended (static)"] = m
+            print(f"  {'MW Recommended (static)':<40s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['sortino']:>8.3f} {m['max_drawdown']:>7.1f}%")
+
+            # Parent signals (from Panel 4)
+            parent_ret = compute_optimized_strategy(period_ret, mw_weights, signals, SMART_TILTS)
+            m2 = compute_metrics(parent_ret)
+            period_metrics["MW + Parent Signals"] = m2
+            delta2 = m2['ann_return'] - m['ann_return']
+            print(f"  {'MW + Parent Signals':<40s} {m2['ann_return']:>7.1f}% {m2['ann_vol']:>7.1f}% {m2['sharpe']:>8.3f} {m2['sortino']:>8.3f} {m2['max_drawdown']:>7.1f}%  Δ{delta2:>+.1f}%")
+
+            # Independent sub-asset signals
+            indep_ret, wh_i = compute_sub_signal_strategy(period_ret, mw_weights, sub_signals, SUB_SMART_TILTS)
+            m3 = compute_metrics(indep_ret)
+            period_metrics["MW + Independent Signals"] = m3
+            delta3 = m3['ann_return'] - m['ann_return']
+            print(f"  {'MW + Independent Signals':<40s} {m3['ann_return']:>7.1f}% {m3['ann_vol']:>7.1f}% {m3['sharpe']:>8.3f} {m3['sortino']:>8.3f} {m3['max_drawdown']:>7.1f}%  Δ{delta3:>+.1f}%")
+
+            # Signal alpha comparison
+            alpha_diff = m3['ann_return'] - m2['ann_return']
+            sharpe_diff = m3['sharpe'] - m2['sharpe']
+            print(f"\n  Independent vs Parent: Δreturn={alpha_diff:>+.2f}%  ΔSharpe={sharpe_diff:>+.3f}")
+
+            if period_name == "Full Period":
+                for label, rets in [("MW Recommended (static)", saa_ret),
+                                     ("MW + Parent Signals", parent_ret),
+                                     ("MW + Independent Signals", indep_ret)]:
+                    cum = (1 + rets).cumprod()
+                    sub_cumulative[label] = [
+                        {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                        for dt, v in cum.items()
+                    ]
+                sub_weight_history["MW + Independent Signals"] = wh_i
+
+        # Add benchmarks
+        for bm_name, bm_config in BENCHMARK_ETFS.items():
+            if "ticker" in bm_config:
+                t = bm_config["ticker"]
+                if t in bm_returns:
+                    bm_ret = bm_returns[t].reindex(period_ret.index).fillna(0)
+                    m = compute_metrics(bm_ret)
+                    period_metrics[bm_name] = m
+                    print(f"  {bm_name:<40s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['sortino']:>8.3f} {m['max_drawdown']:>7.1f}%")
+                    if period_name == "Full Period" and bm_name not in sub_cumulative:
+                        cum = (1 + bm_ret).cumprod()
+                        sub_cumulative[bm_name] = [
+                            {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                            for dt, v in cum.items()
+                        ]
+
+        sub_results[period_name] = period_metrics
+
+    # ═══════════════════════════════════════════
     # SIGNAL QUALITY (per-asset)
     # ═══════════════════════════════════════════
     print(f"\n  ══════════════════════════════════════════════════")
@@ -1093,7 +1328,22 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
             "cumulative": opt_cumulative,
             "saa_profiles": OPTIMIZED_SAA,
         },
-        # Signal quality
+        # Sub-asset independent signals (Panel 5)
+        "sub_asset_signals": {
+            "results": sub_results,
+            "cumulative": sub_cumulative,
+            "weight_history": sub_weight_history,
+            "hit_rates": sub_hit_rates,
+            "smart_tilts": SUB_SMART_TILTS,
+            "spread": {
+                "ow_avg": round(sub_spread_ow * 100, 3),
+                "uw_avg": round(sub_spread_uw * 100, 3),
+                "spread": round(sub_spread * 100, 3),
+                "ow_count": len(sub_ow_rets),
+                "uw_count": len(sub_uw_rets),
+            },
+        },
+        # Signal quality (parent assets)
         "hit_rates": hit_rates,
         "spread": spread_data,
         "smart_tilts": SMART_TILTS,
@@ -1102,7 +1352,7 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
         "signal_changes": signal_changes,
         # For dashboard metrics display
         "metrics": core_results.get("Full Period", {}),
-        "cumulative": {**core_cumulative, **full_cumulative, **agg_cumulative, **opt_cumulative},
+        "cumulative": {**core_cumulative, **full_cumulative, **agg_cumulative, **opt_cumulative, **sub_cumulative},
         "saa_weights": {**CORE_SAA, **FULL_SAA, **AGGRESSIVE_SAA, **OPTIMIZED_SAA},
     }
 
