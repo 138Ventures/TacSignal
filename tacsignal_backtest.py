@@ -55,9 +55,49 @@ ASSET_UNIVERSE = {
     "REITs":         {"price": "VNQ",  "type": "equity",    "group": "alt"},
 }
 
+# Sub-asset ETFs for optimized strategies
+SUB_ASSET_ETFS = {
+    # US Equity splits
+    "US Growth (QQQ)":     {"price": "QQQ",  "type": "equity",  "group": "sub", "parent": "Equity U.S."},
+    "US Value (VTV)":      {"price": "VTV",  "type": "equity",  "group": "sub", "parent": "Equity U.S."},
+    "US Semis (SMH)":      {"price": "SMH",  "type": "equity",  "group": "sub", "parent": "Equity U.S."},
+    # International Value (EAFE = Europe, Australasia, Far East)
+    "Intl Value (EFV)":    {"price": "EFV",  "type": "equity",  "group": "sub", "parent": "Equity Intl"},
+}
+
 # Core = equity + bonds only (for pure signal validation vs benchmarks)
 CORE_ASSETS = {k: v for k, v in ASSET_UNIVERSE.items() if v["group"] == "core"}
 ALT_ASSETS = {k: v for k, v in ASSET_UNIVERSE.items() if v["group"] == "alt"}
+
+# ═══════════════════════════════════════════════════════════════
+# OPTIMIZED PROFILES — sub-asset splits
+# ═══════════════════════════════════════════════════════════════
+# These replace a single broad ETF with a growth/value barbell or value tilt
+
+OPTIMIZED_SAA = {
+    # Barbell: split US equity into growth (QQQ) + value (VTV)
+    "Barbell 100% Equity": {
+        "US Growth (QQQ)": 30, "US Value (VTV)": 30,
+        "Intl Value (EFV)": 25, "Equity EM": 15,
+    },
+    # Barbell + small semiconductor satellite
+    "Barbell+SMH 100% Equity": {
+        "US Growth (QQQ)": 25, "US Value (VTV)": 25, "US Semis (SMH)": 5,
+        "Intl Value (EFV)": 25, "Equity EM": 10, "Gold": 10,
+    },
+    # Recommended: Barbell + Gold hedge (best Sharpe from prior test)
+    "Barbell 80/20 Eq-Gold": {
+        "US Growth (QQQ)": 25, "US Value (VTV)": 20,
+        "Intl Value (EFV)": 20, "Equity EM": 15,
+        "Gold": 20,
+    },
+    # Recommended + SMH satellite: the full house
+    "MW Recommended": {
+        "US Growth (QQQ)": 22, "US Value (VTV)": 18, "US Semis (SMH)": 5,
+        "Intl Value (EFV)": 20, "Equity EM": 15,
+        "Gold": 20,
+    },
+}
 
 # ═══════════════════════════════════════════════════════════════
 # SAA PROFILES — Core (equity+bond only) and Full (with alts)
@@ -117,10 +157,26 @@ FRED_SERIES = {
     "US_HY_SPREAD": "BAMLH0A0HYM2",
 }
 
+# Aggressive profiles: 100% equity and equity-gold blends
+AGGRESSIVE_SAA = {
+    "BhFS 100% Equity": {
+        "Equity U.S.": 60, "Equity Intl": 25, "Equity EM": 15,
+    },
+    "BhFS 90/10 Eq-Gold": {
+        "Equity U.S.": 54, "Equity Intl": 23, "Equity EM": 13,
+        "Gold": 10,
+    },
+    "BhFS 80/20 Eq-Gold": {
+        "Equity U.S.": 48, "Equity Intl": 20, "Equity EM": 12,
+        "Gold": 20,
+    },
+}
+
 # Real-world fund benchmarks
 BENCHMARK_ETFS = {
     "iShares 60/40 (AOR)":   {"ticker": "AOR"},
     "iShares 80/20 (AOA)":   {"ticker": "AOA"},
+    "Vanguard Total US (VTI)": {"ticker": "VTI"},
     "Global Equity (VT)":    {"ticker": "VT"},
 }
 
@@ -144,6 +200,8 @@ def fetch_prices(start_year=2007):
     import yfinance as yf
 
     tickers = list(set(v["price"] for v in ASSET_UNIVERSE.values()))
+    # Also fetch sub-asset ETFs
+    sub_tickers = set(v["price"] for v in SUB_ASSET_ETFS.values())
     # Also fetch benchmark ETFs
     benchmark_tickers = set()
     for bm in BENCHMARK_ETFS.values():
@@ -151,7 +209,7 @@ def fetch_prices(start_year=2007):
             benchmark_tickers.add(bm["ticker"])
         if "tickers" in bm:
             benchmark_tickers.update(bm["tickers"].keys())
-    tickers = list(set(tickers) | benchmark_tickers)
+    tickers = list(set(tickers) | benchmark_tickers | sub_tickers)
     start = f"{start_year}-01-01"
 
     print(f"  Fetching {len(tickers)} tickers from {start}...")
@@ -434,6 +492,10 @@ def compute_metrics(rets):
     ann_ret = (cum.iloc[-1] ** (1 / n_years) - 1) if n_years > 0 else 0
     ann_vol = rets.std() * np.sqrt(12)
     sharpe = ann_ret / ann_vol if ann_vol > 0 else 0
+    # Sortino: only penalize downside deviation
+    downside = rets[rets < 0]
+    downside_vol = downside.std() * np.sqrt(12) if len(downside) > 0 else 0
+    sortino = ann_ret / downside_vol if downside_vol > 0 else 0
     peak = cum.cummax()
     dd = (cum - peak) / peak
     max_dd = dd.min()
@@ -442,6 +504,7 @@ def compute_metrics(rets):
         "ann_return": round(float(ann_ret) * 100, 2),
         "ann_vol": round(float(ann_vol) * 100, 2),
         "sharpe": round(float(sharpe), 3),
+        "sortino": round(float(sortino), 3),
         "max_drawdown": round(float(max_dd) * 100, 2),
         "calmar": round(float(calmar), 3),
         "cumulative": round(float(cum.iloc[-1] - 1) * 100, 2),
@@ -660,6 +723,217 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
         full_results[period_name] = period_metrics
 
     # ═══════════════════════════════════════════
+    # PANEL 3: AGGRESSIVE (100% equity, equity-gold)
+    # ═══════════════════════════════════════════
+    print(f"\n  ══════════════════════════════════════════════════")
+    print(f"  PANEL 3: AGGRESSIVE (100% equity & equity-gold)")
+    print(f"  ══════════════════════════════════════════════════")
+
+    agg_results = {}
+    agg_cumulative = {}
+    agg_weight_history = {}
+
+    for period_name, p_start, p_end in SUB_PERIODS:
+        start_dt = pd.Timestamp(f"{p_start}-01-01")
+        end_dt = pd.Timestamp(f"{p_end}-12-31")
+        period_ret = all_returns.loc[start_dt:end_dt]
+        if period_ret.empty:
+            continue
+
+        print(f"\n  --- {period_name} ({p_start}–{p_end}) ---")
+        period_metrics = {}
+        header = f"  {'Strategy':<32s} {'Return':>8s} {'Vol':>8s} {'Sharpe':>8s} {'Sortino':>8s} {'MaxDD':>8s}"
+        print(header)
+        print("  " + "─" * (len(header) - 2))
+
+        for profile_name, weights in AGGRESSIVE_SAA.items():
+            saa_ret, _ = compute_strategy(period_ret, weights)
+            m = compute_metrics(saa_ret)
+            period_metrics[profile_name] = m
+            print(f"  {profile_name:<32s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['sortino']:>8.3f} {m['max_drawdown']:>7.1f}%")
+
+            # Uniform tilt
+            tac_name = f"{profile_name} + Tac"
+            tac_ret, wh = compute_strategy(period_ret, weights, signals, TILT_PCT)
+            m2 = compute_metrics(tac_ret)
+            period_metrics[tac_name] = m2
+            delta = m2['ann_return'] - m['ann_return']
+            print(f"  {tac_name:<32s} {m2['ann_return']:>7.1f}% {m2['ann_vol']:>7.1f}% {m2['sharpe']:>8.3f} {m2['sortino']:>8.3f} {m2['max_drawdown']:>7.1f}%  Δ{delta:>+.1f}%")
+
+            # Smart tilt
+            smart_name = f"{profile_name} + Smart"
+            smart_ret, wh_s = compute_strategy(period_ret, weights, signals, 0, smart_tilts=SMART_TILTS)
+            m3 = compute_metrics(smart_ret)
+            period_metrics[smart_name] = m3
+            delta_s = m3['ann_return'] - m['ann_return']
+            print(f"  {smart_name:<32s} {m3['ann_return']:>7.1f}% {m3['ann_vol']:>7.1f}% {m3['sharpe']:>8.3f} {m3['sortino']:>8.3f} {m3['max_drawdown']:>7.1f}%  Δ{delta_s:>+.1f}%")
+
+            if period_name == "Full Period":
+                for label, rets in [(profile_name, saa_ret), (tac_name, tac_ret), (smart_name, smart_ret)]:
+                    cum = (1 + rets).cumprod()
+                    agg_cumulative[label] = [
+                        {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                        for dt, v in cum.items()
+                    ]
+                agg_weight_history[tac_name] = wh
+                agg_weight_history[smart_name] = wh_s
+
+        # Benchmarks
+        for bm_name, bm_config in BENCHMARK_ETFS.items():
+            if "ticker" in bm_config:
+                t = bm_config["ticker"]
+                if t in bm_returns:
+                    bm_ret = bm_returns[t].reindex(period_ret.index).fillna(0)
+                    m = compute_metrics(bm_ret)
+                    period_metrics[bm_name] = m
+                    print(f"  {bm_name:<32s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['sortino']:>8.3f} {m['max_drawdown']:>7.1f}%")
+                    if period_name == "Full Period" and bm_name not in agg_cumulative:
+                        cum = (1 + bm_ret).cumprod()
+                        agg_cumulative[bm_name] = [
+                            {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                            for dt, v in cum.items()
+                        ]
+
+        agg_results[period_name] = period_metrics
+
+    # ═══════════════════════════════════════════
+    # PANEL 4: OPTIMIZED (sub-asset splits)
+    # ═══════════════════════════════════════════
+    print(f"\n  ══════════════════════════════════════════════════")
+    print(f"  PANEL 4: OPTIMIZED (growth/value barbell, value tilt)")
+    print(f"  ══════════════════════════════════════════════════")
+
+    # Build monthly returns for sub-assets
+    sub_returns = {}
+    for name, config in SUB_ASSET_ETFS.items():
+        ticker = config["price"]
+        if ticker in prices.columns:
+            monthly_price = prices[ticker].resample('ME').last()
+            sub_returns[name] = monthly_price.pct_change()
+    # Merge with main returns (sub-assets + core assets for mixed profiles)
+    all_sub_returns = pd.DataFrame({**monthly_returns, **sub_returns}).dropna()
+
+    # Map sub-assets to parent signals
+    def get_parent_signal(name):
+        """Get the parent asset name for signal lookup."""
+        if name in SUB_ASSET_ETFS:
+            return SUB_ASSET_ETFS[name].get("parent", name)
+        return name
+
+    def compute_optimized_strategy(returns_df, saa_weights_pct, signal_data, smart_tilts):
+        """Like compute_strategy but maps sub-assets to parent signals."""
+        strat_returns = pd.Series(0.0, index=returns_df.index)
+
+        for dt in returns_df.index:
+            period_return = 0.0
+            total_weight = 0.0
+
+            for name, base_pct in saa_weights_pct.items():
+                if name not in returns_df.columns:
+                    continue
+                base_w = base_pct / 100.0
+                adjusted_w = base_w
+
+                parent = get_parent_signal(name)
+                if signal_data and parent in signal_data:
+                    sig_df = signal_data[parent]
+                    prev_signals = sig_df[sig_df.index < dt]
+                    if len(prev_signals) > 0:
+                        sig = prev_signals.iloc[-1]['signal']
+                        tilt = (smart_tilts.get(parent, 0) / 100.0) if smart_tilts else 0
+                        if sig == 'OW':
+                            adjusted_w = base_w + tilt
+                        elif sig == 'UW':
+                            adjusted_w = max(0, base_w - tilt)
+
+                adjusted_w = max(0, adjusted_w)
+                period_return += adjusted_w * returns_df.loc[dt, name]
+                total_weight += adjusted_w
+
+            if total_weight > 0 and abs(total_weight - 1.0) > 0.001:
+                period_return = period_return / total_weight
+            strat_returns[dt] = period_return
+
+        return strat_returns
+
+    opt_results = {}
+    opt_cumulative = {}
+
+    for period_name, p_start, p_end in SUB_PERIODS:
+        start_dt = pd.Timestamp(f"{p_start}-01-01")
+        end_dt = pd.Timestamp(f"{p_end}-12-31")
+        period_ret = all_sub_returns.loc[start_dt:end_dt]
+        if period_ret.empty:
+            continue
+
+        print(f"\n  --- {period_name} ({p_start}–{p_end}) ---")
+        period_metrics = {}
+        header = f"  {'Strategy':<32s} {'Return':>8s} {'Vol':>8s} {'Sharpe':>8s} {'Sortino':>8s} {'MaxDD':>8s}"
+        print(header)
+        print("  " + "─" * (len(header) - 2))
+
+        for profile_name, weights in OPTIMIZED_SAA.items():
+            # Check all required assets have data
+            missing = [a for a in weights if a not in period_ret.columns]
+            if missing:
+                print(f"  ✗ {profile_name}: missing data for {missing}")
+                continue
+
+            # Static SAA
+            saa_ret, _ = compute_strategy(period_ret, weights)
+            m = compute_metrics(saa_ret)
+            period_metrics[profile_name] = m
+            print(f"  {profile_name:<32s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['sortino']:>8.3f} {m['max_drawdown']:>7.1f}%")
+
+            # Smart tilt (using parent signals)
+            smart_name = f"{profile_name} + Smart"
+            smart_ret = compute_optimized_strategy(period_ret, weights, signals, SMART_TILTS)
+            m2 = compute_metrics(smart_ret)
+            period_metrics[smart_name] = m2
+            delta = m2['ann_return'] - m['ann_return']
+            print(f"  {smart_name:<32s} {m2['ann_return']:>7.1f}% {m2['ann_vol']:>7.1f}% {m2['sharpe']:>8.3f} {m2['sortino']:>8.3f} {m2['max_drawdown']:>7.1f}%  Δ{delta:>+.1f}%")
+
+            if period_name == "Full Period":
+                for label, rets in [(profile_name, saa_ret), (smart_name, smart_ret)]:
+                    cum = (1 + rets).cumprod()
+                    opt_cumulative[label] = [
+                        {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                        for dt, v in cum.items()
+                    ]
+
+        # Add benchmarks for comparison
+        for bm_name, bm_config in BENCHMARK_ETFS.items():
+            if "ticker" in bm_config:
+                t = bm_config["ticker"]
+                if t in bm_returns:
+                    bm_ret = bm_returns[t].reindex(period_ret.index).fillna(0)
+                    m = compute_metrics(bm_ret)
+                    period_metrics[bm_name] = m
+                    print(f"  {bm_name:<32s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['sortino']:>8.3f} {m['max_drawdown']:>7.1f}%")
+                    if period_name == "Full Period" and bm_name not in opt_cumulative:
+                        cum = (1 + bm_ret).cumprod()
+                        opt_cumulative[bm_name] = [
+                            {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                            for dt, v in cum.items()
+                        ]
+
+        # Also add the plain 100% equity and 80/20 eq-gold for comparison
+        for ref_name in ["BhFS 100% Equity", "BhFS 80/20 Eq-Gold"]:
+            if ref_name in AGGRESSIVE_SAA:
+                ref_ret, _ = compute_strategy(period_ret, AGGRESSIVE_SAA[ref_name])
+                m = compute_metrics(ref_ret)
+                period_metrics[ref_name + " (ref)"] = m
+                print(f"  {ref_name + ' (ref)':<32s} {m['ann_return']:>7.1f}% {m['ann_vol']:>7.1f}% {m['sharpe']:>8.3f} {m['sortino']:>8.3f} {m['max_drawdown']:>7.1f}%")
+                if period_name == "Full Period" and ref_name + " (ref)" not in opt_cumulative:
+                    cum = (1 + ref_ret).cumprod()
+                    opt_cumulative[ref_name + " (ref)"] = [
+                        {"date": dt.strftime('%Y-%m'), "value": round(float(v), 4)}
+                        for dt, v in cum.items()
+                    ]
+
+        opt_results[period_name] = period_metrics
+
+    # ═══════════════════════════════════════════
     # SIGNAL QUALITY (per-asset)
     # ═══════════════════════════════════════════
     print(f"\n  ══════════════════════════════════════════════════")
@@ -806,6 +1080,19 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
             "saa_profiles": FULL_SAA,
             "weight_history": full_weight_history,
         },
+        # Aggressive (100% equity, equity-gold)
+        "aggressive": {
+            "results": agg_results,
+            "cumulative": agg_cumulative,
+            "saa_profiles": AGGRESSIVE_SAA,
+            "weight_history": agg_weight_history,
+        },
+        # Optimized (sub-asset splits: growth/value barbell, value tilt)
+        "optimized": {
+            "results": opt_results,
+            "cumulative": opt_cumulative,
+            "saa_profiles": OPTIMIZED_SAA,
+        },
         # Signal quality
         "hit_rates": hit_rates,
         "spread": spread_data,
@@ -815,8 +1102,8 @@ def run_backtest(prices, fred_data, start_year=2012, end_year=2025, window=24):
         "signal_changes": signal_changes,
         # For dashboard metrics display
         "metrics": core_results.get("Full Period", {}),
-        "cumulative": {**core_cumulative, **full_cumulative},
-        "saa_weights": {**CORE_SAA, **FULL_SAA},
+        "cumulative": {**core_cumulative, **full_cumulative, **agg_cumulative, **opt_cumulative},
+        "saa_weights": {**CORE_SAA, **FULL_SAA, **AGGRESSIVE_SAA, **OPTIMIZED_SAA},
     }
 
     return output

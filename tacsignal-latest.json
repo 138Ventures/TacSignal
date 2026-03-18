@@ -1,5 +1,5 @@
 {
-  "date": "2026-03-16T20:40:19.499793",
+  "date": "2026-03-18T14:58:17.427951",
   "generated_by": "tacsignal_data_pipeline.py",
   "window_months": 24,
   "data_sources": {
@@ -12,63 +12,63 @@
   "assets": [
     {
       "name": "Equity CH",
-      "tech": 0.4916,
-      "funda": 0.337,
+      "tech": 0.6291,
+      "funda": 0.4388,
       "wTech": 0.0,
       "prevTech": 1.2457,
       "prevFunda": -1.5646
     },
     {
       "name": "Equity EU ex CH",
-      "tech": 0.0476,
-      "funda": 0.1672,
+      "tech": 0.2664,
+      "funda": 0.1582,
       "wTech": 100.0,
       "prevTech": 1.2517,
       "prevFunda": -1.3407
     },
     {
       "name": "Equity U.S.",
-      "tech": -0.6722,
-      "funda": 1.7652,
+      "tech": -0.5277,
+      "funda": 1.8815,
       "wTech": 100.0,
       "prevTech": -0.5322,
       "prevFunda": 1.7546
     },
     {
       "name": "Equity Japan",
-      "tech": 1.3345,
-      "funda": -1.1373,
+      "tech": 1.5284,
+      "funda": -1.1661,
       "wTech": 100.0,
       "prevTech": 2.3447,
       "prevFunda": -3.1461
     },
     {
       "name": "Equity Asia-Pac",
-      "tech": 1.3254,
-      "funda": -0.7311,
+      "tech": 1.6271,
+      "funda": -0.8362,
       "wTech": 100.0,
       "prevTech": 2.3365,
       "prevFunda": -2.3378
     },
     {
       "name": "Equity EM",
-      "tech": 1.2842,
-      "funda": -0.6608,
+      "tech": 1.5698,
+      "funda": -0.7607,
       "wTech": 100.0,
       "prevTech": 2.42,
       "prevFunda": -2.2747
     },
     {
       "name": "Bond CH",
-      "tech": -1.3324,
-      "funda": 2.1603,
+      "tech": -1.1268,
+      "funda": 1.9036,
       "wTech": 0.0,
       "prevTech": -1.1076,
       "prevFunda": 1.4197
     },
     {
       "name": "Bond EU",
-      "tech": -0.7689,
+      "tech": -0.5091,
       "funda": 0.9221,
       "wTech": 0.0,
       "prevTech": -0.5311,
@@ -76,48 +76,48 @@
     },
     {
       "name": "Bond U.S.",
-      "tech": -0.1253,
-      "funda": 0.1233,
+      "tech": 0.0722,
+      "funda": -0.0568,
       "wTech": 0.0,
       "prevTech": 0.4062,
       "prevFunda": -1.2715
     },
     {
       "name": "Bond Japan",
-      "tech": -1.0764,
-      "funda": 1.8274,
+      "tech": -0.7588,
+      "funda": 1.6317,
       "wTech": 0.0,
       "prevTech": -0.7222,
-      "prevFunda": 2.0295
+      "prevFunda": 1.7859
     },
     {
       "name": "Gold",
-      "tech": 1.7843,
-      "funda": -1.4853,
+      "tech": 1.7363,
+      "funda": -1.4627,
       "wTech": 100.0,
       "prevTech": 2.7791,
       "prevFunda": -2.3638
     },
     {
       "name": "Oil",
-      "tech": 3.4631,
-      "funda": -3.7349,
+      "tech": 3.2819,
+      "funda": -3.5865,
       "wTech": 100.0,
       "prevTech": 1.0966,
       "prevFunda": -0.9985
     },
     {
       "name": "Euro",
-      "tech": -2.001,
-      "funda": 1.7201,
+      "tech": -1.8939,
+      "funda": 1.5175,
       "wTech": 100.0,
       "prevTech": -1.1535,
       "prevFunda": 1.3366
     },
     {
       "name": "U.S. Dollar",
-      "tech": -0.5645,
-      "funda": 0.5023,
+      "tech": -0.589,
+      "funda": 0.5609,
       "wTech": 100.0,
       "prevTech": -1.145,
       "prevFunda": 1.1685
@@ -126,83 +126,125 @@
   "sectors": [
     {
       "name": "Financials",
-      "tech": -2.2471,
-      "funda": 1.5947,
+      "tech": -2.1791,
+      "funda": 1.7335,
       "wTech": 0.0,
       "prevTech": -2.1556,
       "prevFunda": 2.1417
     },
     {
       "name": "Cons. Disc.",
-      "tech": -1.0593,
-      "funda": 1.9542,
+      "tech": -0.879,
+      "funda": 2.0174,
       "wTech": 0.0,
       "prevTech": -0.8529,
       "prevFunda": 2.0618
     },
     {
       "name": "Industrials",
-      "tech": 0.9418,
-      "funda": 0.1657,
+      "tech": 1.0806,
+      "funda": 0.2404,
       "wTech": 100.0,
       "prevTech": 1.3062,
       "prevFunda": -1.7526
     },
     {
       "name": "Cons. Staples",
-      "tech": 0.7035,
-      "funda": -0.3528,
+      "tech": 0.7047,
+      "funda": -0.0526,
       "wTech": 0.0,
       "prevTech": 0.9002,
       "prevFunda": -1.3003
     },
     {
       "name": "Health Care",
-      "tech": 0.515,
-      "funda": -0.612,
+      "tech": 0.484,
+      "funda": -0.2864,
       "wTech": 0.0,
       "prevTech": 0.9664,
       "prevFunda": -0.9185
     },
     {
       "name": "Info Tech",
-      "tech": -0.1346,
-      "funda": 0.3297,
+      "tech": 0.0264,
+      "funda": 0.4743,
       "wTech": 100.0,
       "prevTech": -0.2792,
       "prevFunda": 1.0912
     },
     {
       "name": "Energy",
-      "tech": 2.5961,
-      "funda": -2.9309,
+      "tech": 2.677,
+      "funda": -2.8288,
       "wTech": 100.0,
       "prevTech": 2.6458,
       "prevFunda": -3.2629
     },
     {
       "name": "Materials",
-      "tech": 1.4367,
-      "funda": -1.2615,
+      "tech": 1.4872,
+      "funda": -1.0431,
       "wTech": 100.0,
       "prevTech": 1.8131,
       "prevFunda": -1.8513
     },
     {
       "name": "Telecom",
-      "tech": -1.6925,
-      "funda": 1.5869,
+      "tech": -1.6059,
+      "funda": 1.7862,
       "wTech": 0.0,
       "prevTech": -1.5357,
       "prevFunda": 1.9389
     },
     {
       "name": "Utilities",
-      "tech": 0.224,
-      "funda": -0.1779,
+      "tech": 0.2612,
+      "funda": 0.1587,
       "wTech": 100.0,
       "prevTech": -0.0489,
       "prevFunda": -0.1865
+    }
+  ],
+  "sub_assets": [
+    {
+      "name": "US Growth (QQQ)",
+      "tech": -0.3359,
+      "funda": 1.2917,
+      "wTech": 100.0,
+      "prevTech": -0.6188,
+      "prevFunda": 1.6778
+    },
+    {
+      "name": "US Value (VTV)",
+      "tech": 0.6557,
+      "funda": 0.3628,
+      "wTech": 100.0,
+      "prevTech": 0.8867,
+      "prevFunda": -0.9955
+    },
+    {
+      "name": "US Semis (SMH)",
+      "tech": 1.1605,
+      "funda": -0.9488,
+      "wTech": 100.0,
+      "prevTech": 1.0563,
+      "prevFunda": -0.7143
+    },
+    {
+      "name": "Intl Value (EFV)",
+      "tech": 1.1493,
+      "funda": -0.4674,
+      "wTech": 100.0,
+      "prevTech": 2.1833,
+      "prevFunda": -1.9394
+    },
+    {
+      "name": "EM Broad (EEM)",
+      "tech": 1.5698,
+      "funda": -0.7607,
+      "wTech": 100.0,
+      "prevTech": 2.42,
+      "prevFunda": -2.2747
     }
   ],
   "history": {
@@ -393,10 +435,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 0.492,
-        "funda": 0.337,
+        "tech": 0.629,
+        "funda": 0.439,
         "wTech": 0.0,
-        "composite": 0.337,
+        "composite": 0.439,
         "signal": "N"
       }
     ],
@@ -587,10 +629,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 0.048,
-        "funda": 0.167,
+        "tech": 0.266,
+        "funda": 0.158,
         "wTech": 100.0,
-        "composite": 0.048,
+        "composite": 0.266,
         "signal": "N"
       }
     ],
@@ -781,10 +823,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -0.672,
-        "funda": 1.765,
+        "tech": -0.528,
+        "funda": 1.881,
         "wTech": 100.0,
-        "composite": -0.672,
+        "composite": -0.528,
         "signal": "N"
       }
     ],
@@ -975,10 +1017,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 1.334,
-        "funda": -1.137,
+        "tech": 1.528,
+        "funda": -1.166,
         "wTech": 100.0,
-        "composite": 1.334,
+        "composite": 1.528,
         "signal": "OW"
       }
     ],
@@ -1169,10 +1211,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 1.325,
-        "funda": -0.731,
+        "tech": 1.627,
+        "funda": -0.836,
         "wTech": 100.0,
-        "composite": 1.325,
+        "composite": 1.627,
         "signal": "OW"
       }
     ],
@@ -1363,10 +1405,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 1.284,
-        "funda": -0.661,
+        "tech": 1.57,
+        "funda": -0.761,
         "wTech": 100.0,
-        "composite": 1.284,
+        "composite": 1.57,
         "signal": "OW"
       }
     ],
@@ -1557,10 +1599,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -1.332,
-        "funda": 2.16,
+        "tech": -1.127,
+        "funda": 1.904,
         "wTech": 0.0,
-        "composite": 2.16,
+        "composite": 1.904,
         "signal": "OW"
       }
     ],
@@ -1751,7 +1793,7 @@
       },
       {
         "date": "2026-03",
-        "tech": -0.769,
+        "tech": -0.509,
         "funda": 0.922,
         "wTech": 0.0,
         "composite": 0.922,
@@ -1945,10 +1987,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -0.125,
-        "funda": 0.123,
+        "tech": 0.072,
+        "funda": -0.057,
         "wTech": 0.0,
-        "composite": 0.123,
+        "composite": -0.057,
         "signal": "N"
       }
     ],
@@ -2035,10 +2077,10 @@
       },
       {
         "date": "2025-02",
-        "tech": 0.352,
+        "tech": 0.353,
         "funda": 2.029,
         "wTech": 100.0,
-        "composite": 0.352,
+        "composite": 0.353,
         "signal": "N"
       },
       {
@@ -2132,17 +2174,17 @@
       {
         "date": "2026-02",
         "tech": -0.722,
-        "funda": 2.03,
+        "funda": 1.786,
         "wTech": 0.0,
-        "composite": 2.03,
+        "composite": 1.786,
         "signal": "OW"
       },
       {
         "date": "2026-03",
-        "tech": -1.076,
-        "funda": 1.827,
+        "tech": -0.759,
+        "funda": 1.632,
         "wTech": 0.0,
-        "composite": 1.827,
+        "composite": 1.632,
         "signal": "OW"
       }
     ],
@@ -2333,10 +2375,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 1.784,
-        "funda": -1.485,
+        "tech": 1.736,
+        "funda": -1.463,
         "wTech": 100.0,
-        "composite": 1.784,
+        "composite": 1.736,
         "signal": "OW"
       }
     ],
@@ -2527,10 +2569,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 3.463,
-        "funda": -3.735,
+        "tech": 3.282,
+        "funda": -3.587,
         "wTech": 100.0,
-        "composite": 3.463,
+        "composite": 3.282,
         "signal": "OW"
       }
     ],
@@ -2721,10 +2763,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -2.001,
-        "funda": 1.72,
+        "tech": -1.894,
+        "funda": 1.517,
         "wTech": 100.0,
-        "composite": -2.001,
+        "composite": -1.894,
         "signal": "UW"
       }
     ],
@@ -2915,10 +2957,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -0.564,
-        "funda": 0.502,
+        "tech": -0.589,
+        "funda": 0.561,
         "wTech": 100.0,
-        "composite": -0.564,
+        "composite": -0.589,
         "signal": "N"
       }
     ],
@@ -3109,10 +3151,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -2.247,
-        "funda": 1.595,
+        "tech": -2.179,
+        "funda": 1.733,
         "wTech": 0.0,
-        "composite": 1.595,
+        "composite": 1.733,
         "signal": "OW"
       }
     ],
@@ -3303,10 +3345,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -1.059,
-        "funda": 1.954,
+        "tech": -0.879,
+        "funda": 2.017,
         "wTech": 0.0,
-        "composite": 1.954,
+        "composite": 2.017,
         "signal": "OW"
       }
     ],
@@ -3497,11 +3539,11 @@
       },
       {
         "date": "2026-03",
-        "tech": 0.942,
-        "funda": 0.166,
+        "tech": 1.081,
+        "funda": 0.24,
         "wTech": 100.0,
-        "composite": 0.942,
-        "signal": "N"
+        "composite": 1.081,
+        "signal": "OW"
       }
     ],
     "Cons. Staples": [
@@ -3691,10 +3733,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 0.703,
-        "funda": -0.353,
+        "tech": 0.705,
+        "funda": -0.053,
         "wTech": 0.0,
-        "composite": -0.353,
+        "composite": -0.053,
         "signal": "N"
       }
     ],
@@ -3885,10 +3927,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 0.515,
-        "funda": -0.612,
+        "tech": 0.484,
+        "funda": -0.286,
         "wTech": 0.0,
-        "composite": -0.612,
+        "composite": -0.286,
         "signal": "N"
       }
     ],
@@ -4079,10 +4121,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -0.135,
-        "funda": 0.33,
+        "tech": 0.026,
+        "funda": 0.474,
         "wTech": 100.0,
-        "composite": -0.135,
+        "composite": 0.026,
         "signal": "N"
       }
     ],
@@ -4273,10 +4315,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 2.596,
-        "funda": -2.931,
+        "tech": 2.677,
+        "funda": -2.829,
         "wTech": 100.0,
-        "composite": 2.596,
+        "composite": 2.677,
         "signal": "OW"
       }
     ],
@@ -4467,10 +4509,10 @@
       },
       {
         "date": "2026-03",
-        "tech": 1.437,
-        "funda": -1.262,
+        "tech": 1.487,
+        "funda": -1.043,
         "wTech": 100.0,
-        "composite": 1.437,
+        "composite": 1.487,
         "signal": "OW"
       }
     ],
@@ -4661,10 +4703,10 @@
       },
       {
         "date": "2026-03",
-        "tech": -1.693,
-        "funda": 1.587,
+        "tech": -1.606,
+        "funda": 1.786,
         "wTech": 0.0,
-        "composite": 1.587,
+        "composite": 1.786,
         "signal": "OW"
       }
     ],
@@ -4855,12 +4897,1421 @@
       },
       {
         "date": "2026-03",
+        "tech": 0.261,
+        "funda": 0.159,
+        "wTech": 100.0,
+        "composite": 0.261,
+        "signal": "N"
+      }
+    ],
+    "US Growth (QQQ)": [
+      {
+        "date": "2024-04",
+        "tech": 0.772,
+        "funda": -1.289,
+        "wTech": 100.0,
+        "composite": 0.772,
+        "signal": "N"
+      },
+      {
+        "date": "2024-05",
+        "tech": 0.578,
+        "funda": -1.152,
+        "wTech": 100.0,
+        "composite": 0.578,
+        "signal": "N"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.661,
+        "funda": -1.148,
+        "wTech": 100.0,
+        "composite": 0.661,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.446,
+        "funda": -1.1,
+        "wTech": 0.0,
+        "composite": -1.1,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.308,
+        "funda": -0.797,
+        "wTech": 0.0,
+        "composite": -0.797,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 0.422,
+        "funda": -0.892,
+        "wTech": 100.0,
+        "composite": 0.422,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": 0.366,
+        "funda": -1.428,
+        "wTech": 100.0,
+        "composite": 0.366,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.117,
+        "funda": -0.147,
+        "wTech": 100.0,
+        "composite": 0.117,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.125,
+        "funda": -0.502,
+        "wTech": 0.0,
+        "composite": -0.502,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": -0.345,
+        "funda": -0.175,
+        "wTech": 0.0,
+        "composite": -0.175,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -1.259,
+        "funda": -0.008,
+        "wTech": 0.0,
+        "composite": -0.008,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -2.572,
+        "funda": 1.426,
+        "wTech": 0.0,
+        "composite": 1.426,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-04",
+        "tech": -2.449,
+        "funda": 1.745,
+        "wTech": 0.0,
+        "composite": 1.745,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.797,
+        "funda": 1.619,
+        "wTech": 0.0,
+        "composite": 1.619,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.998,
+        "funda": 1.092,
+        "wTech": 0.0,
+        "composite": 1.092,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.294,
+        "funda": 0.988,
+        "wTech": 0.0,
+        "composite": 0.988,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.157,
+        "funda": 1.501,
+        "wTech": 0.0,
+        "composite": 1.501,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.222,
+        "funda": 0.666,
+        "wTech": 0.0,
+        "composite": 0.666,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.881,
+        "funda": -0.05,
+        "wTech": 100.0,
+        "composite": 0.881,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.447,
+        "funda": 1.288,
+        "wTech": 0.0,
+        "composite": 1.288,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.032,
+        "funda": 2.003,
+        "wTech": 0.0,
+        "composite": 2.003,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": -0.376,
+        "funda": 1.442,
+        "wTech": 0.0,
+        "composite": 1.442,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": -0.619,
+        "funda": 1.678,
+        "wTech": 0.0,
+        "composite": 1.678,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": -0.336,
+        "funda": 1.292,
+        "wTech": 100.0,
+        "composite": -0.336,
+        "signal": "N"
+      }
+    ],
+    "US Value (VTV)": [
+      {
+        "date": "2024-04",
+        "tech": 1.756,
+        "funda": -2.04,
+        "wTech": 100.0,
+        "composite": 1.756,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.778,
+        "funda": -1.977,
+        "wTech": 100.0,
+        "composite": 1.778,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.245,
+        "funda": -1.529,
+        "wTech": 100.0,
+        "composite": 1.245,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 1.177,
+        "funda": -1.965,
+        "wTech": 100.0,
+        "composite": 1.177,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.563,
+        "funda": -1.697,
+        "wTech": 100.0,
+        "composite": 1.563,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.842,
+        "funda": -1.597,
+        "wTech": 100.0,
+        "composite": 1.842,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.673,
+        "funda": -1.675,
+        "wTech": 100.0,
+        "composite": 1.673,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 1.427,
+        "funda": -1.023,
+        "wTech": 100.0,
+        "composite": 1.427,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-12",
+        "tech": 0.383,
+        "funda": -0.543,
+        "wTech": 100.0,
+        "composite": 0.383,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.21,
+        "funda": -0.69,
+        "wTech": 100.0,
+        "composite": 0.21,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": 0.129,
+        "funda": -0.896,
+        "wTech": 100.0,
+        "composite": 0.129,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.624,
+        "funda": -0.622,
+        "wTech": 0.0,
+        "composite": -0.622,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -1.095,
+        "funda": -0.075,
+        "wTech": 0.0,
+        "composite": -0.075,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.376,
+        "funda": 0.494,
+        "wTech": 0.0,
+        "composite": 0.494,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": -0.751,
+        "funda": 0.457,
+        "wTech": 0.0,
+        "composite": 0.457,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.753,
+        "funda": 0.686,
+        "wTech": 0.0,
+        "composite": 0.686,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.514,
+        "funda": 0.624,
+        "wTech": 0.0,
+        "composite": 0.624,
+        "signal": "N"
+      },
+      {
+        "date": "2025-09",
+        "tech": -0.157,
+        "funda": 0.526,
+        "wTech": 0.0,
+        "composite": 0.526,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": -0.138,
+        "funda": 1.204,
+        "wTech": 0.0,
+        "composite": 1.204,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": -0.452,
+        "funda": 1.309,
+        "wTech": 0.0,
+        "composite": 1.309,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.226,
+        "funda": 1.752,
+        "wTech": 100.0,
+        "composite": 0.226,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": 0.292,
+        "funda": 0.168,
+        "wTech": 100.0,
+        "composite": 0.292,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 0.887,
+        "funda": -0.996,
+        "wTech": 100.0,
+        "composite": 0.887,
+        "signal": "N"
+      },
+      {
+        "date": "2026-03",
+        "tech": 0.656,
+        "funda": 0.363,
+        "wTech": 100.0,
+        "composite": 0.656,
+        "signal": "N"
+      }
+    ],
+    "US Semis (SMH)": [
+      {
+        "date": "2024-04",
+        "tech": 1.388,
+        "funda": -1.47,
+        "wTech": 100.0,
+        "composite": 1.388,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.116,
+        "funda": -1.345,
+        "wTech": 100.0,
+        "composite": 1.116,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.215,
+        "funda": -1.221,
+        "wTech": 100.0,
+        "composite": 1.215,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.747,
+        "funda": -1.035,
+        "wTech": 100.0,
+        "composite": 0.747,
+        "signal": "N"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.409,
+        "funda": -0.627,
+        "wTech": 100.0,
+        "composite": 0.409,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 0.351,
+        "funda": -0.6,
+        "wTech": 100.0,
+        "composite": 0.351,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
         "tech": 0.224,
-        "funda": -0.178,
+        "funda": -1.128,
         "wTech": 100.0,
         "composite": 0.224,
         "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": -0.461,
+        "funda": 0.53,
+        "wTech": 0.0,
+        "composite": 0.53,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.999,
+        "funda": 0.269,
+        "wTech": 0.0,
+        "composite": 0.269,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": -1.41,
+        "funda": 0.763,
+        "wTech": 0.0,
+        "composite": 0.763,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -2.076,
+        "funda": 0.867,
+        "wTech": 0.0,
+        "composite": 0.867,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -2.433,
+        "funda": 1.449,
+        "wTech": 0.0,
+        "composite": 1.449,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-04",
+        "tech": -2.224,
+        "funda": 1.618,
+        "wTech": 0.0,
+        "composite": 1.618,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-05",
+        "tech": -1.833,
+        "funda": 1.597,
+        "wTech": 0.0,
+        "composite": 1.597,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-06",
+        "tech": -1.029,
+        "funda": 0.849,
+        "wTech": 0.0,
+        "composite": 0.849,
+        "signal": "N"
+      },
+      {
+        "date": "2025-07",
+        "tech": -0.348,
+        "funda": 0.775,
+        "wTech": 0.0,
+        "composite": 0.775,
+        "signal": "N"
+      },
+      {
+        "date": "2025-08",
+        "tech": -0.202,
+        "funda": 1.164,
+        "wTech": 0.0,
+        "composite": 1.164,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 0.223,
+        "funda": 0.373,
+        "wTech": 0.0,
+        "composite": 0.373,
+        "signal": "N"
+      },
+      {
+        "date": "2025-10",
+        "tech": 0.883,
+        "funda": -0.287,
+        "wTech": 0.0,
+        "composite": -0.287,
+        "signal": "N"
+      },
+      {
+        "date": "2025-11",
+        "tech": 0.761,
+        "funda": 0.543,
+        "wTech": 0.0,
+        "composite": 0.543,
+        "signal": "N"
+      },
+      {
+        "date": "2025-12",
+        "tech": 0.577,
+        "funda": 0.803,
+        "wTech": 0.0,
+        "composite": 0.803,
+        "signal": "N"
+      },
+      {
+        "date": "2026-01",
+        "tech": 0.86,
+        "funda": -0.394,
+        "wTech": 100.0,
+        "composite": 0.86,
+        "signal": "N"
+      },
+      {
+        "date": "2026-02",
+        "tech": 1.056,
+        "funda": -0.714,
+        "wTech": 100.0,
+        "composite": 1.056,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 1.16,
+        "funda": -0.949,
+        "wTech": 100.0,
+        "composite": 1.16,
+        "signal": "OW"
+      }
+    ],
+    "Intl Value (EFV)": [
+      {
+        "date": "2024-04",
+        "tech": 0.696,
+        "funda": -1.445,
+        "wTech": 0.0,
+        "composite": -1.445,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.067,
+        "funda": -1.474,
+        "wTech": 100.0,
+        "composite": 1.067,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 0.627,
+        "funda": -0.816,
+        "wTech": 100.0,
+        "composite": 0.627,
+        "signal": "N"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.393,
+        "funda": -1.357,
+        "wTech": 0.0,
+        "composite": -1.357,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 0.744,
+        "funda": -1.262,
+        "wTech": 100.0,
+        "composite": 0.744,
+        "signal": "N"
+      },
+      {
+        "date": "2024-09",
+        "tech": 0.953,
+        "funda": -1.446,
+        "wTech": 100.0,
+        "composite": 0.953,
+        "signal": "N"
+      },
+      {
+        "date": "2024-10",
+        "tech": 0.717,
+        "funda": -1.291,
+        "wTech": 100.0,
+        "composite": 0.717,
+        "signal": "N"
+      },
+      {
+        "date": "2024-11",
+        "tech": -1.026,
+        "funda": 1.048,
+        "wTech": 100.0,
+        "composite": -1.026,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-12",
+        "tech": -2.522,
+        "funda": 1.363,
+        "wTech": 0.0,
+        "composite": 1.363,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-01",
+        "tech": -1.78,
+        "funda": 0.467,
+        "wTech": 0.0,
+        "composite": 0.467,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.545,
+        "funda": -1.155,
+        "wTech": 100.0,
+        "composite": -0.545,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": 0.018,
+        "funda": -1.814,
+        "wTech": 0.0,
+        "composite": -1.814,
+        "signal": "UW"
+      },
+      {
+        "date": "2025-04",
+        "tech": 1.096,
+        "funda": -2.168,
+        "wTech": 100.0,
+        "composite": 1.096,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-05",
+        "tech": 1.327,
+        "funda": -1.689,
+        "wTech": 100.0,
+        "composite": 1.327,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-06",
+        "tech": 2.127,
+        "funda": -1.201,
+        "wTech": 100.0,
+        "composite": 2.127,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": 1.427,
+        "funda": -0.556,
+        "wTech": 100.0,
+        "composite": 1.427,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-08",
+        "tech": 1.564,
+        "funda": -1.081,
+        "wTech": 100.0,
+        "composite": 1.564,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 1.569,
+        "funda": -0.865,
+        "wTech": 100.0,
+        "composite": 1.569,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": 1.579,
+        "funda": -0.694,
+        "wTech": 100.0,
+        "composite": 1.579,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 1.563,
+        "funda": -0.527,
+        "wTech": 100.0,
+        "composite": 1.563,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 2.024,
+        "funda": -0.598,
+        "wTech": 100.0,
+        "composite": 2.024,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 2.027,
+        "funda": -1.483,
+        "wTech": 100.0,
+        "composite": 2.027,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": 2.183,
+        "funda": -1.939,
+        "wTech": 100.0,
+        "composite": 2.183,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 1.149,
+        "funda": -0.467,
+        "wTech": 100.0,
+        "composite": 1.149,
+        "signal": "OW"
+      }
+    ],
+    "EM Broad (EEM)": [
+      {
+        "date": "2024-04",
+        "tech": 1.21,
+        "funda": -1.813,
+        "wTech": 0.0,
+        "composite": -1.813,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-05",
+        "tech": 1.29,
+        "funda": -1.479,
+        "wTech": 100.0,
+        "composite": 1.29,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-06",
+        "tech": 1.217,
+        "funda": -1.362,
+        "wTech": 100.0,
+        "composite": 1.217,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-07",
+        "tech": 0.919,
+        "funda": -1.481,
+        "wTech": 0.0,
+        "composite": -1.481,
+        "signal": "UW"
+      },
+      {
+        "date": "2024-08",
+        "tech": 1.122,
+        "funda": -1.186,
+        "wTech": 100.0,
+        "composite": 1.122,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-09",
+        "tech": 1.592,
+        "funda": -1.58,
+        "wTech": 100.0,
+        "composite": 1.592,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-10",
+        "tech": 1.76,
+        "funda": -1.911,
+        "wTech": 100.0,
+        "composite": 1.76,
+        "signal": "OW"
+      },
+      {
+        "date": "2024-11",
+        "tech": 0.687,
+        "funda": -0.115,
+        "wTech": 100.0,
+        "composite": 0.687,
+        "signal": "N"
+      },
+      {
+        "date": "2024-12",
+        "tech": -0.277,
+        "funda": -0.336,
+        "wTech": 0.0,
+        "composite": -0.336,
+        "signal": "N"
+      },
+      {
+        "date": "2025-01",
+        "tech": 0.006,
+        "funda": -0.317,
+        "wTech": 100.0,
+        "composite": 0.006,
+        "signal": "N"
+      },
+      {
+        "date": "2025-02",
+        "tech": -0.137,
+        "funda": -0.841,
+        "wTech": 100.0,
+        "composite": -0.137,
+        "signal": "N"
+      },
+      {
+        "date": "2025-03",
+        "tech": -0.196,
+        "funda": -1.123,
+        "wTech": 100.0,
+        "composite": -0.196,
+        "signal": "N"
+      },
+      {
+        "date": "2025-04",
+        "tech": -0.141,
+        "funda": -1.034,
+        "wTech": 100.0,
+        "composite": -0.141,
+        "signal": "N"
+      },
+      {
+        "date": "2025-05",
+        "tech": 0.106,
+        "funda": -0.466,
+        "wTech": 100.0,
+        "composite": 0.106,
+        "signal": "N"
+      },
+      {
+        "date": "2025-06",
+        "tech": 1.295,
+        "funda": -1.149,
+        "wTech": 100.0,
+        "composite": 1.295,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-07",
+        "tech": 1.778,
+        "funda": -0.77,
+        "wTech": 100.0,
+        "composite": 1.778,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-08",
+        "tech": 1.796,
+        "funda": -0.558,
+        "wTech": 100.0,
+        "composite": 1.796,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-09",
+        "tech": 1.991,
+        "funda": -1.756,
+        "wTech": 100.0,
+        "composite": 1.991,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-10",
+        "tech": 2.47,
+        "funda": -2.222,
+        "wTech": 100.0,
+        "composite": 2.47,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-11",
+        "tech": 2.117,
+        "funda": -0.545,
+        "wTech": 100.0,
+        "composite": 2.117,
+        "signal": "OW"
+      },
+      {
+        "date": "2025-12",
+        "tech": 1.828,
+        "funda": 0.051,
+        "wTech": 100.0,
+        "composite": 1.828,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-01",
+        "tech": 2.091,
+        "funda": -1.808,
+        "wTech": 100.0,
+        "composite": 2.091,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-02",
+        "tech": 2.42,
+        "funda": -2.275,
+        "wTech": 100.0,
+        "composite": 2.42,
+        "signal": "OW"
+      },
+      {
+        "date": "2026-03",
+        "tech": 1.57,
+        "funda": -0.761,
+        "wTech": 100.0,
+        "composite": 1.57,
+        "signal": "OW"
       }
     ]
-  }
+  },
+  "smart_tilts": {
+    "Equity U.S.": 7,
+    "Equity Intl": 2,
+    "Equity EM": 5,
+    "Bond U.S.": 2,
+    "Bond Intl": 1,
+    "Gold": 2,
+    "Commodities": 1,
+    "REITs": 4
+  },
+  "current_signals": {
+    "Equity CH": {
+      "signal": "N",
+      "composite": 0.44,
+      "tech": 0.63,
+      "funda": 0.44,
+      "wTech": 0.0,
+      "changed": true,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 1,
+      "momentum": -0.81,
+      "smart_tilt": 0
+    },
+    "Equity EU ex CH": {
+      "signal": "N",
+      "composite": 0.27,
+      "tech": 0.27,
+      "funda": 0.16,
+      "wTech": 100.0,
+      "changed": true,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 1,
+      "momentum": -0.99,
+      "smart_tilt": 0
+    },
+    "Equity U.S.": {
+      "signal": "N",
+      "composite": -0.53,
+      "tech": -0.53,
+      "funda": 1.88,
+      "wTech": 100.0,
+      "changed": true,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 1,
+      "momentum": -2.28,
+      "smart_tilt": 7
+    },
+    "Equity Japan": {
+      "signal": "OW",
+      "composite": 1.53,
+      "tech": 1.53,
+      "funda": -1.17,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 7,
+      "momentum": -0.82,
+      "smart_tilt": 0
+    },
+    "Equity Asia-Pac": {
+      "signal": "OW",
+      "composite": 1.63,
+      "tech": 1.63,
+      "funda": -0.84,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 10,
+      "momentum": -0.71,
+      "smart_tilt": 0
+    },
+    "Equity EM": {
+      "signal": "OW",
+      "composite": 1.57,
+      "tech": 1.57,
+      "funda": -0.76,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 10,
+      "momentum": -0.85,
+      "smart_tilt": 5
+    },
+    "Bond CH": {
+      "signal": "OW",
+      "composite": 1.9,
+      "tech": -1.13,
+      "funda": 1.9,
+      "wTech": 0.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 4,
+      "momentum": 0.48,
+      "smart_tilt": 0
+    },
+    "Bond EU": {
+      "signal": "N",
+      "composite": 0.92,
+      "tech": -0.51,
+      "funda": 0.92,
+      "wTech": 0.0,
+      "changed": true,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 1,
+      "momentum": -0.08,
+      "smart_tilt": 0
+    },
+    "Bond U.S.": {
+      "signal": "N",
+      "composite": -0.06,
+      "tech": 0.07,
+      "funda": -0.06,
+      "wTech": 0.0,
+      "changed": false,
+      "previous": "N",
+      "date": "2026-03",
+      "streak": 14,
+      "momentum": -0.46,
+      "smart_tilt": 2
+    },
+    "Bond Japan": {
+      "signal": "OW",
+      "composite": 1.63,
+      "tech": -0.76,
+      "funda": 1.63,
+      "wTech": 0.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 9,
+      "momentum": -0.15,
+      "smart_tilt": 0
+    },
+    "Gold": {
+      "signal": "OW",
+      "composite": 1.74,
+      "tech": 1.74,
+      "funda": -1.46,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 7,
+      "momentum": -1.04,
+      "smart_tilt": 2
+    },
+    "Oil": {
+      "signal": "OW",
+      "composite": 3.28,
+      "tech": 3.28,
+      "funda": -3.59,
+      "wTech": 100.0,
+      "changed": true,
+      "previous": "N",
+      "date": "2026-03",
+      "streak": 1,
+      "momentum": 4.28,
+      "smart_tilt": 0
+    },
+    "Euro": {
+      "signal": "UW",
+      "composite": -1.89,
+      "tech": -1.89,
+      "funda": 1.52,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "UW",
+      "date": "2026-03",
+      "streak": 2,
+      "momentum": -0.74,
+      "smart_tilt": 0
+    },
+    "U.S. Dollar": {
+      "signal": "N",
+      "composite": -0.59,
+      "tech": -0.59,
+      "funda": 0.56,
+      "wTech": 100.0,
+      "changed": true,
+      "previous": "UW",
+      "date": "2026-03",
+      "streak": 1,
+      "momentum": 0.56,
+      "smart_tilt": 0
+    },
+    "Financials": {
+      "signal": "OW",
+      "composite": 1.73,
+      "tech": -2.18,
+      "funda": 1.73,
+      "wTech": 0.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 7,
+      "momentum": -0.41,
+      "smart_tilt": 0
+    },
+    "Cons. Disc.": {
+      "signal": "OW",
+      "composite": 2.02,
+      "tech": -0.88,
+      "funda": 2.02,
+      "wTech": 0.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 5,
+      "momentum": -0.04,
+      "smart_tilt": 0
+    },
+    "Industrials": {
+      "signal": "OW",
+      "composite": 1.08,
+      "tech": 1.08,
+      "funda": 0.24,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 2,
+      "momentum": -0.23,
+      "smart_tilt": 0
+    },
+    "Cons. Staples": {
+      "signal": "N",
+      "composite": -0.05,
+      "tech": 0.7,
+      "funda": -0.05,
+      "wTech": 0.0,
+      "changed": false,
+      "previous": "N",
+      "date": "2026-03",
+      "streak": 3,
+      "momentum": -0.95,
+      "smart_tilt": 0
+    },
+    "Health Care": {
+      "signal": "N",
+      "composite": -0.29,
+      "tech": 0.48,
+      "funda": -0.29,
+      "wTech": 0.0,
+      "changed": false,
+      "previous": "N",
+      "date": "2026-03",
+      "streak": 3,
+      "momentum": -1.25,
+      "smart_tilt": 0
+    },
+    "Info Tech": {
+      "signal": "N",
+      "composite": 0.03,
+      "tech": 0.03,
+      "funda": 0.47,
+      "wTech": 100.0,
+      "changed": true,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 1,
+      "momentum": -1.06,
+      "smart_tilt": 0
+    },
+    "Energy": {
+      "signal": "OW",
+      "composite": 2.68,
+      "tech": 2.68,
+      "funda": -2.83,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 3,
+      "momentum": 0.03,
+      "smart_tilt": 0
+    },
+    "Materials": {
+      "signal": "OW",
+      "composite": 1.49,
+      "tech": 1.49,
+      "funda": -1.04,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 2,
+      "momentum": -0.33,
+      "smart_tilt": 0
+    },
+    "Telecom": {
+      "signal": "OW",
+      "composite": 1.79,
+      "tech": -1.61,
+      "funda": 1.79,
+      "wTech": 0.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 6,
+      "momentum": -0.15,
+      "smart_tilt": 0
+    },
+    "Utilities": {
+      "signal": "N",
+      "composite": 0.26,
+      "tech": 0.26,
+      "funda": 0.16,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "N",
+      "date": "2026-03",
+      "streak": 2,
+      "momentum": 0.31,
+      "smart_tilt": 0
+    },
+    "US Growth (QQQ)": {
+      "signal": "N",
+      "composite": -0.34,
+      "tech": -0.34,
+      "funda": 1.29,
+      "wTech": 100.0,
+      "changed": true,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 1,
+      "momentum": -2.01,
+      "smart_tilt": 0
+    },
+    "US Value (VTV)": {
+      "signal": "N",
+      "composite": 0.66,
+      "tech": 0.66,
+      "funda": 0.36,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "N",
+      "date": "2026-03",
+      "streak": 4,
+      "momentum": -0.23,
+      "smart_tilt": 0
+    },
+    "US Semis (SMH)": {
+      "signal": "OW",
+      "composite": 1.16,
+      "tech": 1.16,
+      "funda": -0.95,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 2,
+      "momentum": 0.1,
+      "smart_tilt": 0
+    },
+    "Intl Value (EFV)": {
+      "signal": "OW",
+      "composite": 1.15,
+      "tech": 1.15,
+      "funda": -0.47,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 12,
+      "momentum": -1.03,
+      "smart_tilt": 0
+    },
+    "EM Broad (EEM)": {
+      "signal": "OW",
+      "composite": 1.57,
+      "tech": 1.57,
+      "funda": -0.76,
+      "wTech": 100.0,
+      "changed": false,
+      "previous": "OW",
+      "date": "2026-03",
+      "streak": 10,
+      "momentum": -0.85,
+      "smart_tilt": 0
+    }
+  },
+  "signal_changes": [
+    {
+      "asset": "Equity CH",
+      "from": "OW",
+      "to": "N",
+      "date": "2026-03"
+    },
+    {
+      "asset": "Equity EU ex CH",
+      "from": "OW",
+      "to": "N",
+      "date": "2026-03"
+    },
+    {
+      "asset": "Equity U.S.",
+      "from": "OW",
+      "to": "N",
+      "date": "2026-03"
+    },
+    {
+      "asset": "Bond EU",
+      "from": "OW",
+      "to": "N",
+      "date": "2026-03"
+    },
+    {
+      "asset": "Oil",
+      "from": "N",
+      "to": "OW",
+      "date": "2026-03"
+    },
+    {
+      "asset": "U.S. Dollar",
+      "from": "UW",
+      "to": "N",
+      "date": "2026-03"
+    },
+    {
+      "asset": "Info Tech",
+      "from": "OW",
+      "to": "N",
+      "date": "2026-03"
+    },
+    {
+      "asset": "US Growth (QQQ)",
+      "from": "OW",
+      "to": "N",
+      "date": "2026-03"
+    }
+  ]
 }

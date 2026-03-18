@@ -92,6 +92,15 @@ SECTOR_TICKERS = {
     "Utilities":        {"price": "XLU",  "type": "sector"},
 }
 
+# Sub-asset ETFs — independent signals for optimized portfolio construction
+SUB_ASSET_TICKERS = {
+    "US Growth (QQQ)":     {"price": "QQQ",  "type": "equity", "region": "US"},
+    "US Value (VTV)":      {"price": "VTV",  "type": "equity", "region": "US"},
+    "US Semis (SMH)":      {"price": "SMH",  "type": "equity", "region": "US"},
+    "Intl Value (EFV)":    {"price": "EFV",  "type": "equity", "region": "INTL"},
+    "EM Broad (EEM)":      {"price": "EEM",  "type": "equity", "region": "EM"},
+}
+
 # FRED series for fundamental indicators
 FRED_SERIES = {
     # US yields and spreads
@@ -413,7 +422,7 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
 
     # 1. Fetch data
     print("Step 1: Fetching price data from Yahoo Finance")
-    all_tickers = {**ASSET_TICKERS, **SECTOR_TICKERS}
+    all_tickers = {**ASSET_TICKERS, **SECTOR_TICKERS, **SUB_ASSET_TICKERS}
     fetch_years = max(6, (window / 12) + 4)  # need 6+ years for rolling fundamental indicators
     prices = fetch_yahoo_prices(all_tickers, years=fetch_years)
 
@@ -547,8 +556,11 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
     print(f"\n  --- {len(SECTOR_TICKERS)} U.S. Sectors ---")
     sector_results, sector_history, sector_current = process_universe(SECTOR_TICKERS, "Sectors")
 
+    print(f"\n  --- {len(SUB_ASSET_TICKERS)} Sub-Asset ETFs ---")
+    sub_results, sub_history, sub_current = process_universe(SUB_ASSET_TICKERS, "Sub-Assets")
+
     # Merge current signals
-    all_current_signals = {**asset_current, **sector_current}
+    all_current_signals = {**asset_current, **sector_current, **sub_current}
 
     # Detect signal changes (assets that flipped vs previous month)
     signal_changes = [
@@ -571,7 +583,8 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
         "thUW": -1.0,
         "assets": asset_results,
         "sectors": sector_results,
-        "history": {**asset_history, **sector_history},
+        "sub_assets": sub_results,
+        "history": {**asset_history, **sector_history, **sub_history},
         "smart_tilts": SMART_TILTS,
         "current_signals": all_current_signals,
         "signal_changes": signal_changes,
@@ -595,7 +608,7 @@ def run_pipeline(fred_key=None, window=24, output_path=None, asset_filter=None):
     print(f"   Open the TacSignal dashboard → Import JSON → select this file")
 
     # Summary
-    all_items = asset_results + sector_results
+    all_items = asset_results + sector_results + sub_results
     ow = sum(1 for r in all_items if (r['wTech']/100)*r['tech'] + (1-r['wTech']/100)*r['funda'] > 1)
     uw = sum(1 for r in all_items if (r['wTech']/100)*r['tech'] + (1-r['wTech']/100)*r['funda'] < -1)
     ne = len(all_items) - ow - uw
@@ -622,6 +635,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     fred_key = args.fred_key or os.environ.get("FRED_API_KEY")
+    # Auto-read .fred_key file if no key provided
+    if not fred_key:
+        fred_key_file = Path(__file__).parent / ".fred_key"
+        if fred_key_file.exists():
+            fred_key = fred_key_file.read_text().strip()
+            print(f"  (Using FRED key from {fred_key_file})")
     asset_filter = [a.strip() for a in args.assets.split(",")] if args.assets else None
 
     try:
